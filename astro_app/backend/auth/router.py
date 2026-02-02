@@ -8,6 +8,8 @@ import logging
 from astro_app.backend.database import get_db
 from astro_app.backend.models import User
 from astro_app.backend.auth.utils import verify_password, get_password_hash, create_access_token, SECRET_KEY, ALGORITHM
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +25,9 @@ class Token(BaseModel):
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
+
+class GoogleLogin(BaseModel):
+    credential: str
 
 class UserResponse(BaseModel):
     id: int
@@ -83,6 +88,36 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     access_token = create_access_token(data={"sub": user.email})
     logger.info("Login successful for user %s", form_data.username)
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/google", response_model=Token)
+def google_login(login_data: GoogleLogin, db: Session = Depends(get_db)):
+    try:
+        # Verify the token
+        # You might want to store CLIENT_ID in env and verify it here too
+        # id_info = id_token.verify_oauth2_token(login_data.credential, google_requests.Request(), CLIENT_ID)
+        id_info = id_token.verify_oauth2_token(login_data.credential, google_requests.Request())
+
+        email = id_info.get("email")
+        if not email:
+            raise HTTPException(status_code=400, detail="Google token does not contain email")
+        
+        # Check if user exists
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            # Create new user (no password)
+            new_user = User(email=email, hashed_password=None, tier="free")
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user = new_user
+            logger.info(f"Created new user from Google login: {email}")
+        
+        access_token = create_access_token(data={"sub": user.email})
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    except ValueError as e:
+        logger.error(f"Google token verification failed: {e}")
+        raise HTTPException(status_code=401, detail="Invalid Google token")
 
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user)):

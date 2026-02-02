@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 gunicorn
+google-auth
 pyswisseph
 pytz
 pydantic

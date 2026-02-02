@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Lock, Mail } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -14,13 +15,13 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-     console.log('Login submit clicked');
-     if (!email || !password) {
-       setError('Please enter both email and password');
-       return;
-     }
-     setError('');
-     setIsSubmitting(true);
+    console.log('Login submit clicked');
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    setError('');
+    setIsSubmitting(true);
     try {
       console.log('Sending login request', { email });
       const params = new URLSearchParams();
@@ -55,6 +56,21 @@ const Login = () => {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      console.log('Google login success', credentialResponse);
+      const response = await api.post('auth/google', {
+        credential: credentialResponse.credential
+      });
+      console.log('Backend verified google login', response.data);
+      login(response.data.access_token);
+      navigate('/');
+    } catch (err) {
+      console.error('Google login failed at backend', err);
+      setError('Google login failed. Please try again.');
     }
   };
 
@@ -112,6 +128,26 @@ const Login = () => {
             </button>
           </div>
         </form>
+
+        <div className="mt-4">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300"></span>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => {
+                console.log('Login Failed');
+                setError('Google login failed');
+              }}
+            />
+          </div>
+        </div>
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account? <Link to="/register" className="text-indigo-600 hover:text-indigo-800">Register</Link>
         </p>

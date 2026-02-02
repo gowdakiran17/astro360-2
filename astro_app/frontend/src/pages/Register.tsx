@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { Lock, Mail } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +19,20 @@ const Register = () => {
       navigate('/login');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Registration failed');
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      console.log('Google signup success', credentialResponse);
+      const response = await api.post('auth/google', {
+        credential: credentialResponse.credential
+      });
+      login(response.data.access_token);
+      navigate('/');
+    } catch (err) {
+      console.error('Google signup failed at backend', err);
+      setError('Google sign up failed. Please try again.');
     }
   };
 
@@ -72,6 +89,27 @@ const Register = () => {
             </button>
           </div>
         </form>
+
+        <div className="mt-4">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300"></span>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => {
+                console.log('Login Failed');
+                setError('Google login failed');
+              }}
+              text="signup_with"
+            />
+          </div>
+        </div>
         <p className="mt-4 text-center text-sm text-gray-600">
           Already have an account? <Link to="/login" className="text-indigo-600 hover:text-indigo-800">Login</Link>
         </p>
