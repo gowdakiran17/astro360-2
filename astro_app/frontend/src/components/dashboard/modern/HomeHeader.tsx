@@ -5,9 +5,10 @@ interface HomeHeaderProps {
   userName: string;
   location?: string;
   date?: string;
+  showActions?: boolean;
 }
 
-const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi, IN" }) => {
+const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi, IN", showActions = true }) => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -16,40 +17,43 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi
   };
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-6 w-full">
-      <div>
-        <div className="flex items-center gap-3 mb-3">
-          <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-            <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">{getGreeting()}</p>
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-14 gap-8 w-full relative z-10">
+      <div className="w-full">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="px-4 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-full shadow-lg backdrop-blur-md">
+            <p className="text-xs font-black text-white uppercase tracking-[0.3em]">{getGreeting()}</p>
           </div>
-          <div className="h-[1px] w-12 bg-emerald-500/20" />
+          <div className="h-[1px] flex-1 md:w-32 md:flex-none bg-gradient-to-r from-yellow-500/40 to-transparent" />
         </div>
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
-          Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-indigo-400 to-purple-400">{userName}</span>
+        <h1 className="text-4xl md:text-8xl font-black text-white mb-3 tracking-tighter uppercase leading-[0.95]">
+          Hello, <span className="text-transparent bg-clip-text bg-gradient-to-br from-yellow-200 via-white to-orange-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.4)]">{userName}</span>
         </h1>
-        <div className="flex items-center text-slate-500 text-sm gap-5">
-          <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_theme(colors.emerald.500)]"></span>
-            <span className="font-medium tracking-wide">Cosmic Alignment Active</span>
+        <div className="flex flex-wrap items-center gap-4 md:gap-8 mt-6">
+          <span className="flex items-center gap-3 px-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)]"></span>
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-emerald-400/90 whitespace-nowrap">Celestial Alignment Active</span>
           </span>
           {location && (
-            <span className="flex items-center gap-2 text-xs bg-white/5 border border-white/10 px-4 py-1.5 rounded-full backdrop-blur-md text-slate-300 font-bold shadow-2xl">
-              <MapPin className="w-3.5 h-3.5 text-emerald-400" /> {location}
+            <span className="flex items-center gap-3 bg-white/[0.05] border border-white/[0.1] px-5 py-2.5 rounded-full backdrop-blur-3xl text-white shadow-2xl group/loc hover:bg-white/[0.08] transition-all duration-500 font-bold">
+              <MapPin className="w-3.5 h-3.5 text-yellow-500 group-hover/loc:scale-110 transition-transform" />
+              <span className="text-xs font-black uppercase tracking-[0.1em]">{location}</span>
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <button className="flex items-center gap-2 px-6 py-3 bg-slate-900/60 border border-white/10 rounded-2xl text-xs font-black text-slate-300 hover:bg-slate-800/80 hover:text-white transition-all backdrop-blur-xl uppercase tracking-widest">
-          <Download className="w-4 h-4 text-emerald-400" />
-          Export
-        </button>
-        <button className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-black transition-all shadow-xl shadow-emerald-500/20 border border-emerald-400/30 active:scale-95 uppercase tracking-widest">
-          <Share2 className="w-4 h-4" />
-          Share
-        </button>
-      </div>
+      {showActions && (
+        <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
+          <button className="flex-1 md:flex-none flex items-center justify-center gap-3 px-6 md:px-8 py-4 bg-white/[0.05] border border-white/[0.1] rounded-[1.5rem] text-xs font-black text-white hover:bg-white/[0.1] hover:text-white transition-all duration-500 backdrop-blur-3xl uppercase tracking-[0.2em] group/act">
+            <Download className="w-4 h-4 text-yellow-500 group-hover/act:-translate-y-1 transition-transform" />
+            <span className="whitespace-nowrap">Export</span>
+          </button>
+          <button className="flex-1 md:flex-none flex items-center justify-center gap-3 px-6 md:px-8 py-4 bg-gradient-to-br from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500 text-black rounded-[1.5rem] text-sm font-black transition-all duration-500 shadow-2xl shadow-yellow-500/20 border border-white/20 active:scale-95 uppercase tracking-[0.2em] group/act-s">
+            <Share2 className="w-4 h-4 group-hover/act-s:rotate-12 transition-transform" />
+            <span className="whitespace-nowrap">Universal Share</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

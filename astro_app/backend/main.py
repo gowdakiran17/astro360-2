@@ -4,6 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+import importlib.metadata
+
+# Compatibility for Python < 3.10
+if not hasattr(importlib.metadata, 'packages_distributions'):
+    try:
+        import importlib_metadata
+        importlib.metadata.packages_distributions = importlib_metadata.packages_distributions
+    except ImportError:
+        pass
 
 # Load env from the backend directory
 env_path = Path(__file__).resolve().parent / ".env"

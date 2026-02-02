@@ -36,7 +36,7 @@ const Login = () => {
       console.log('Login successful', response.data);
       login(response.data.access_token);
       console.log('Token stored, navigating to home');
-      navigate('/');
+      navigate('/home');
     } catch (err: any) {
       console.error('Login error details:', err);
       if (err.response) {
@@ -67,7 +67,7 @@ const Login = () => {
       });
       console.log('Backend verified google login', response.data);
       login(response.data.access_token);
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       console.error('Google login failed at backend', err);
       setError('Google login failed. Please try again.');

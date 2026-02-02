@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, LogOut, LayoutGrid, AlertTriangle, Moon, Menu } from 'lucide-react';
-import { useChartSettings } from '../../context/ChartContext';
-import ProfileSelector from './ProfileSelector';
+import { User, LogOut, Home, Star, Sparkles, Zap, ChevronLeft } from 'lucide-react';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,11 +12,10 @@ interface MainLayoutProps {
   theme?: 'default' | 'cosmic';
 }
 
-const MainLayout = ({ children, title, breadcrumbs = ['Home', 'Charts'], showHeader = true, disableContentPadding = false, theme = 'default' }: MainLayoutProps) => {
-  const { logout } = useAuth();
-  const { chartStyle, toggleChartStyle } = useChartSettings();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const MainLayout = ({ children, title, showHeader = true, disableContentPadding = false }: MainLayoutProps) => {
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Update document title
   useEffect(() => {
@@ -27,115 +24,126 @@ const MainLayout = ({ children, title, breadcrumbs = ['Home', 'Charts'], showHea
     }
   }, [title]);
 
-  // Close mobile menu on route change or screen resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const bgClass = 'bg-[#050816]';
+  const headerClass = 'bg-transparent text-white border-b border-white/5 backdrop-blur-md';
 
-  const bgClass = theme === 'cosmic'
-    ? "bg-[#0B0F19] text-white"
-    : "bg-slate-900 text-slate-100 cosmic-gradient";
-
-  const headerClass = theme === 'cosmic'
-    ? "bg-[#0B0F19]/80 backdrop-blur-md border-b border-white/10 text-white"
-    : "bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white";
+  const isHubPage = location.pathname === '/home';
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${bgClass}`}>
-      <Sidebar
-        isCollapsed={isSidebarCollapsed}
-        toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        isMobileOpen={isMobileMenuOpen}
-        closeMobile={() => setIsMobileMenuOpen(false)}
-      />
+    <div className={`min-h-screen transition-colors duration-300 ${bgClass} selection:bg-amber-500/30`}>
+      <div className="flex flex-col min-h-screen transition-all duration-300 relative overflow-hidden">
+        {/* Sky Background Overlays */}
+        <div className="fixed inset-0 pointer-events-none opacity-40">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-900/20 blur-[100px] rounded-full" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-900/10 blur-[100px] rounded-full" />
+        </div>
 
-      <div className={`${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'} ml-0 flex flex-col min-h-screen transition-all duration-300`}>
-        {/* Top Header Group - Sticky */}
-        <div className="sticky top-0 z-20">
+        <div className="sticky top-0 z-30">
           {showHeader && (
             <>
-              {/* Primary Navigation Bar */}
-              <header className={`h-16 flex items-center justify-between px-4 md:px-8 transition-colors duration-300 ${headerClass}`}>
-                <div className="flex items-center text-sm text-slate-500 dark:text-slate-400">
-                  <button
-                    className="mr-4 md:hidden text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                    onClick={() => setIsMobileMenuOpen(true)}
-                  >
-                    <Menu className="w-6 h-6" />
-                  </button>
-                  <span className="font-medium text-slate-900 dark:text-white">Astro360</span>
-                  <div className="hidden md:flex items-center">
-                    {breadcrumbs.map((crumb, index) => (
-                      <div key={`${crumb}-${index}`} className="flex items-center">
-                        <span className="mx-2 text-slate-300 dark:text-slate-600">/</span>
-                        <span className={index === breadcrumbs.length - 1 ? "font-medium text-slate-900 dark:text-white" : ""}>
-                          {crumb}
-                        </span>
-                      </div>
-                    ))}
+              <header className={`h-16 md:h-20 flex items-center justify-between px-6 md:px-12 transition-colors duration-300 ${headerClass}`} >
+                <div className="flex items-center gap-4">
+                  {!isHubPage && (
+                    <button
+                      onClick={() => navigate('/home')}
+                      className="p-2 -ml-2 text-white/40 hover:text-amber-500 transition-colors group"
+                      title="Back to Hub"
+                    >
+                      <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+                    </button>
+                  )}
+                  <div className="flex flex-col cursor-pointer" onClick={() => navigate('/home')}>
+                    <span className="text-xs font-black tracking-[0.4em] text-amber-500 uppercase leading-none mb-1">Astro</span>
+                    <div className="text-2xl font-black tracking-tighter text-white uppercase leading-none">
+                      360
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <ProfileSelector />
-                  <div className="h-6 w-px bg-slate-700 mx-2"></div>
-                  <button
-                    onClick={toggleChartStyle}
-                    className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-full transition-all"
-                    title={`Switch to ${chartStyle === 'NORTH_INDIAN' ? 'South' : 'North'} Indian Chart`}
-                  >
-                    <LayoutGrid className="w-5 h-5" />
-                  </button>
-                  {/* ThemeToggle removed */}
-                  <div className="flex items-center text-slate-300 font-medium text-sm">
-                    <span className="mr-1">EN</span>
+                <div className="flex items-center gap-4 md:gap-8">
+                  <div className="hidden md:flex items-center gap-1.5 px-4 py-1.5 bg-white/5 rounded-full border border-white/10 text-[10px] font-black tracking-widest uppercase text-amber-500/80">
+                    <Sparkles className="w-3 h-3" />
+                    Premium Oracle
                   </div>
-                  <div className="h-8 w-8 bg-indigo-600 rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-indigo-500 transition-colors shadow-lg">
-                    <User className="w-4 h-4" />
+
+                  <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-[#050816] text-sm font-black shadow-lg shadow-amber-500/20 border border-amber-400/50">
+                    {user?.email?.charAt(0).toUpperCase() || 'S'}
                   </div>
-                  <button onClick={logout} className="text-slate-400 hover:text-red-500 transition-colors" title="Logout">
+                  <button onClick={() => logout()} className="p-2 text-white/60 hover:text-amber-500 transition-colors">
                     <LogOut className="w-5 h-5" />
                   </button>
                 </div>
               </header>
 
-              {/* Secondary Status Bar - "Peak Period Indicator" */}
-              <div className="h-10 bg-indigo-600 dark:bg-indigo-900 text-white flex items-center justify-between px-8 shadow-md relative z-10 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-900 dark:to-purple-900 opacity-50"></div>
-                <div className="relative z-10 flex items-center gap-6 text-xs font-medium tracking-wide">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-                    <span>Major Transit: Saturn in Pisces</span>
-                  </div>
-                  <div className="hidden md:flex items-center gap-2 text-indigo-100">
-                    <div className="w-1 h-1 bg-white/50 rounded-full"></div>
-                    <span>Peak Energy Window</span>
-                  </div>
-                </div>
-                <div className="relative z-10 flex items-center gap-4 text-xs">
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/10 rounded-full border border-white/20">
-                    <Moon className="w-3 h-3 text-indigo-200" />
-                    <span>Sade Sati: Check Status</span>
-                  </div>
-                </div>
-              </div>
+              {/* Celestial Accent Line */}
+              {!isHubPage && (
+                <div className="h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+              )}
             </>
           )}
         </div>
 
-        {/* Main Content */}
-        <main className={`flex-1 ${disableContentPadding ? '' : 'p-8'} text-slate-900 dark:text-slate-100`}>
+        <main className={`flex-1 relative z-10 ${disableContentPadding ? '' : 'p-6 md:p-12'} text-white pb-32`} >
           {children}
         </main>
 
-        {/* Footer */}
-        {/* <Footer /> */}
+        {/* Celestial Bottom Navigation Bar - Mobile First */}
+        <nav className="md:hidden fixed bottom-6 left-6 right-6 h-16 bg-[#0A0D1E]/80 backdrop-blur-2xl border border-white/10 rounded-[2rem] flex items-center justify-around px-6 z-50 shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+          <button
+            id="nav-hub"
+            onClick={() => navigate('/home')}
+            className={`flex flex-col items-center gap-1 relative group transition-all duration-300 ${location.pathname === '/home' ? 'text-amber-500' : 'text-white/40'}`}
+          >
+            {location.pathname === '/home' && (
+              <div className="absolute -top-1 w-1 h-1 bg-amber-500 rounded-full shadow-[0_0_10px_#F59E0B]" />
+            )}
+            <Home className={`w-5 h-5 transition-transform duration-300 ${location.pathname === '/home' ? 'scale-110 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]' : ''}`} />
+            <span className="text-[9px] font-black uppercase tracking-tighter">Sky</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (window.location.pathname !== '/home') {
+                navigate('/home');
+                setTimeout(() => {
+                  document.getElementById('charts-section')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              } else {
+                document.getElementById('charts-section')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className={`flex flex-col items-center gap-1 relative transition-all duration-300 ${location.pathname === '/my-charts' ? 'text-amber-500' : 'text-white/40'}`}
+          >
+            <Star className={`w-5 h-5 transition-transform duration-300 ${location.pathname === '/my-charts' ? 'scale-110 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]' : ''}`} />
+            <span className="text-[9px] font-black uppercase tracking-tighter">Stars</span>
+          </button>
+
+          <div className="relative -top-8 px-2">
+            <button
+              onClick={() => navigate('/ai-astrologer')}
+              className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 text-[#050816] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.3)] border-4 border-[#0A0D1E] transition-all active:scale-90 group"
+            >
+              <Sparkles className="w-7 h-7 group-hover:rotate-12 transition-transform duration-500" />
+            </button>
+          </div>
+
+          <button
+            id="nav-kp"
+            onClick={() => navigate('/kp/dashboard')}
+            className={`flex flex-col items-center gap-1 relative transition-all duration-300 ${location.pathname.startsWith('/kp') ? 'text-amber-500' : 'text-white/40'}`}
+          >
+            <Zap className={`w-5 h-5 transition-transform duration-300 ${location.pathname.startsWith('/kp') ? 'scale-110 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]' : ''}`} />
+            <span className="text-[9px] font-black uppercase tracking-tighter">Nadi</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/account/profile')}
+            className={`flex flex-col items-center gap-1 relative transition-all duration-300 ${location.pathname === '/account/profile' ? 'text-amber-500' : 'text-white/40'}`}
+          >
+            <User className={`w-5 h-5 transition-transform duration-300 ${location.pathname === '/account/profile' ? 'scale-110 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]' : ''}`} />
+            <span className="text-[9px] font-black uppercase tracking-tighter">Soul</span>
+          </button>
+        </nav>
       </div>
     </div>
   );

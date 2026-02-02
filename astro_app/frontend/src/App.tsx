@@ -10,11 +10,10 @@ import MainLayout from './components/layout/MainLayout';
 import LoadingSpinner from './components/LoadingSpinner';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import MatchMaking from './pages/MatchMaking';
+import Hub from './pages/Hub';
+import MainDashboard from './pages/MainDashboard';
+import AstrologyHome from './pages/AstrologyHome';
 import MyCharts from './pages/MyCharts';
-import HomeDashboard from './pages/HomeDashboard';
-import PeriodAnalysisPage from './pages/PeriodAnalysisPage';
 import LifePredictorPage from './pages/LifePredictorPage';
 import ChartRectification from './pages/ChartRectification';
 import EventsCalibration from './pages/EventsCalibration';
@@ -49,6 +48,9 @@ const Numerology = lazy(() => import('./pages/Numerology'));
 const SadeSati = lazy(() => import('./pages/SadeSati'));
 const BlueprintDashboard = lazy(() => import('./pages/BlueprintDashboard'));
 const ReportDashboard = lazy(() => import('./pages/ReportDashboard')); // Premium Reports
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const MatchMaking = lazy(() => import('./pages/MatchMaking'));
+const PeriodAnalysisPage = lazy(() => import('./pages/PeriodAnalysisPage'));
 const PersonalVastu = lazy(() => import('./pages/PersonalVastu')); // New Feature
 
 // KP Astrology Pages
@@ -64,7 +66,7 @@ const KPThreeLayerScript = lazy(() => import('./pages/kp/KPThreeLayerScript'));
 const KPAccurateTiming = lazy(() => import('./pages/kp/KPAccurateTiming'));
 const NakshatraNadiDashboard = lazy(() => import('./pages/kp/NakshatraNadiDashboard'));
 
-const AIChatPage = lazy(() => import('./pages/AIChatPage'));
+const VedaAI = lazy(() => import('./pages/VedaAI'));
 
 // Loading Fallback
 const PageLoader = () => (
@@ -104,26 +106,38 @@ function App() {
                 <Route path="/" element={<Navigate to="/home" replace />} />
 
                 <Route path="/home" element={
-                  <MainLayout title="Vedic Dashboard" breadcrumbs={['Home']} showHeader={true} disableContentPadding={true}>
-                    <HomeDashboard />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <Hub />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/astrology-home" element={
+                  <ProtectedRoute>
+                    <AstrologyHome />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/dashboard/main" element={
+                  <ProtectedRoute>
+                    <MainDashboard />
+                  </ProtectedRoute>
                 } />
 
                 <Route path="/ai-astrologer" element={
                   <MainLayout title="VedaAI Chat" breadcrumbs={['Dashboard', 'VedaAI']} showHeader={true} disableContentPadding={true}>
-                    <AIChatPage />
+                    <VedaAI />
                   </MainLayout>
                 } />
 
                 <Route path="/ai-guru" element={
                   <MainLayout title="AI Guru Teacher" breadcrumbs={['Dashboard', 'Learning Gateway']} showHeader={true} disableContentPadding={true}>
-                    <AIChatPage />
+                    <VedaAI />
                   </MainLayout>
                 } />
 
                 <Route path="/ai-horary" element={
                   <MainLayout title="Horary Prasna" breadcrumbs={['Dashboard', 'Event Prediction']} showHeader={true} disableContentPadding={true}>
-                    <AIChatPage />
+                    <VedaAI />
                   </MainLayout>
                 } />
 
@@ -303,7 +317,7 @@ function App() {
                 } />
 
                 {/* Fallbacks */}
-                <Route path="/tools/*" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
+                <Route path="/tools/*" element={<ProtectedRoute><MainDashboard /></ProtectedRoute>} />
                 <Route path="/calculations/*" element={<ProtectedRoute><MyCharts /></ProtectedRoute>} />
                 <Route path="/global/*" element={<ProtectedRoute><MyCharts /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/home" replace />} />

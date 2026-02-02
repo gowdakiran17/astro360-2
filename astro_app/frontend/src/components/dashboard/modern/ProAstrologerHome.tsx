@@ -10,7 +10,7 @@ import PlanetaryStatus from './PlanetaryStatus';
 import CosmicConsultation from './CosmicConsultation';
 // PersonalizedRemedies moved to dedicated hub
 import {
-  Sun, ArrowRight, RefreshCw
+  Sun, ArrowRight, RefreshCw, Star, Sparkles
 } from 'lucide-react';
 import CosmicHero from './CosmicHero';
 import HomeHeader from './HomeHeader';
@@ -175,74 +175,139 @@ const ProAstrologerHome = () => {
   // const currentDasha = getCurrentDasha();
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-slate-100">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+    <div className="min-h-screen w-full bg-[#050816] bg-gradient-to-b from-[#2D1B69] via-[#1E3A8A] to-[#050816] text-slate-100 relative overflow-hidden font-sans">
+      {/* Mystical Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[80%] h-[80%] bg-indigo-900/10 blur-[150px] rounded-full animate-pulse-slow opacity-30" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] bg-purple-900/10 blur-[150px] rounded-full animate-pulse-slow opacity-30" style={{ animationDelay: '3s' }} />
+
+        {/* Decorative Celestial Patterns */}
+        <div className="absolute top-1/4 right-[5%] opacity-[0.05] rotate-12 scale-150">
+          <Star className="w-96 h-96 text-yellow-500" />
+        </div>
+        <div className="absolute bottom-1/4 left-[10%] opacity-[0.03] -rotate-12 scale-125">
+          <Sparkles className="w-[30rem] h-[30rem] text-orange-500" />
+        </div>
+      </div>
+
+      {/* Star Field Background */}
+      <div className="fixed inset-0 pointer-events-none z-[1]">
+        {Array.from({ length: 100 }, (_, i) => (
+          <div
+            key={i}
+            className="absolute w-0.5 h-0.5 bg-yellow-400 rounded-full animate-twinkle opacity-30"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 4}s`
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-12 py-8 md:py-16 space-y-12 md:space-y-24">
 
         {/* Premium Header & Hero */}
-        <div className="flex flex-col gap-6">
-          <HomeHeader userName={currentProfile?.name || 'Cosmic Soul'} location={currentProfile?.location} />
+        <div className="space-y-8 md:space-y-16">
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-black tracking-[0.4em] text-yellow-400 uppercase mb-2 md:mb-4 opacity-80 pl-1">Unified Celestial Intelligence</span>
+            <HomeHeader userName={currentProfile?.name || 'Cosmic Soul'} location={currentProfile?.location} showActions={true} />
+          </div>
           <CosmicHero chartData={chartData} panchangData={periodOverview?.daily_analysis?.panchang} />
         </div>
 
-        {/* Remedies section moved to dedicated hub /dashboard/remedies */}
-
         {/* 3. Main Dashboard Grid */}
-        {/* Refresh Data Toggle */}
-        <div className="flex justify-end -mt-2">
-          <button
-            onClick={() => fetchData(currentProfile, selectedDate)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900/60 backdrop-blur-md rounded-xl border border-white/10 text-xs font-bold text-slate-300 hover:bg-slate-800/80 transition-all shadow-xl"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-indigo-400 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh Cosmic Data
-          </button>
-        </div>
-
-        {/* Birth Chart Overview Card */}
-        {!chartData && !isLoading && (
-          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl border border-amber-500/20 p-8 text-center">
-            <Sun className="w-12 h-12 text-amber-400/50 mx-auto mb-4" />
-            <p className="text-slate-300 font-medium">Birth chart data unavailable</p>
-            <p className="text-slate-500 text-sm mt-2">Please try refreshing or check your birth details</p>
+        <div className="space-y-12 md:space-y-20">
+          {/* Refresh Data Toggle */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white/[0.04] border border-white/[0.05] p-6 md:p-8 rounded-[2.5rem] backdrop-blur-3xl shadow-2xl">
+            <div className="flex items-center gap-4">
+              <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-[0_0_15px_rgba(251,191,36,0.8)] animate-pulse" />
+              <p className="text-[10px] font-black text-slate-100 uppercase tracking-[0.2em]">System Status: <span className="text-yellow-400">Synchronized</span></p>
+            </div>
             <button
               onClick={() => fetchData(currentProfile, selectedDate)}
-              className="mt-4 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-lg text-amber-200 text-sm hover:bg-amber-500/30 transition-colors"
+              className="group/refresh w-full md:w-auto flex items-center justify-center gap-4 px-10 py-5 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black rounded-2xl border border-white/20 text-[10px] font-black transition-all duration-500 uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(251,191,36,0.3)] active:scale-95"
             >
-              Retry
+              <RefreshCw className={`w-4 h-4 transition-transform duration-700 ${isLoading ? 'animate-spin' : 'group-hover/refresh:rotate-180'}`} />
+              <span>Calibrate Astral Feed</span>
             </button>
           </div>
-        )}
-        {/* Planetary Status - Standardized Design */}
-        {chartData && (
-          <PlanetaryStatus chartData={chartData} />
-        )}
 
-        {/* Quick Reference Data - South Indian Chart, Moon Nakshatra, Chart Details */}
-        {chartData && (
-          <QuickReferenceData
-            chartData={chartData}
-            panchangData={{
-              ...(panchangData || chartData.panchang || {}),
-              place: currentProfile?.location
-            }}
-          />
-        )}
+          {!chartData && !isLoading && (
+            <div className="bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-white/[0.05] p-20 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.05] to-transparent" />
+              <Sun className="w-20 h-20 text-indigo-400/30 mx-auto mb-8 animate-pulse" />
+              <p className="text-2xl font-black text-white uppercase tracking-tight mb-4">Astral Connection Lost</p>
+              <p className="text-slate-200 font-bold mb-10 max-w-md mx-auto">The celestial currents are unreachable. Re-sync your resonance to restore the feed.</p>
+              <button
+                onClick={() => fetchData(currentProfile, selectedDate)}
+                className="px-10 py-5 bg-indigo-600 hover:bg-indigo-500 rounded-[2rem] text-sm font-black text-white transition-all shadow-2xl shadow-indigo-500/20 uppercase tracking-widest"
+              >
+                Reconnect to Universe
+              </button>
+            </div>
+          )}
 
-        {/* Nakshatra Intelligence Center */}
-        {chartData && (
-          <NakshatraIntelligenceCenter chartData={chartData} />
-        )}
+          {chartData && (
+            <div className="grid grid-cols-1 gap-16 md:gap-32">
+              <section className="space-y-8 md:space-y-12">
+                <div className="flex items-center gap-6 px-2">
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+                  <h2 className="text-[10px] font-black text-yellow-400/90 uppercase tracking-[0.5em] text-center whitespace-nowrap">Planetary Resonance</h2>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+                </div>
+                <div className="px-1">
+                  <PlanetaryStatus chartData={chartData} />
+                </div>
+              </section>
 
-        {/* Cosmic Consultation - Unified Advanced Analysis */}
-        {chartData && (
-          <CosmicConsultation
-            chartData={chartData}
-            dashaData={dashaData}
-            periodOverview={periodOverview}
-            aiPredictions={aiPredictions}
-          />
-        )}
+              <section className="space-y-8 md:space-y-12">
+                <div className="flex items-center gap-6 px-2">
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+                  <h2 className="text-[10px] font-black text-yellow-400/90 uppercase tracking-[0.5em] text-center whitespace-nowrap">Structural Analysis</h2>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+                </div>
+                <div className="px-1">
+                  <QuickReferenceData
+                    chartData={chartData}
+                    panchangData={{
+                      ...(panchangData || chartData.panchang || {}),
+                      place: currentProfile?.location
+                    }}
+                  />
+                </div>
+              </section>
 
+              <section className="space-y-8 md:space-y-12">
+                <div className="flex items-center gap-6 px-2">
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+                  <h2 className="text-[10px] font-black text-yellow-400/90 uppercase tracking-[0.5em] text-center whitespace-nowrap">Nakshatra Intelligence</h2>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+                </div>
+                <div className="px-1">
+                  <NakshatraIntelligenceCenter chartData={chartData} />
+                </div>
+              </section>
+
+              <section className="space-y-8 md:space-y-12">
+                <div className="flex items-center gap-6 px-2">
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+                  <h2 className="text-[10px] font-black text-yellow-400/90 uppercase tracking-[0.5em] text-center whitespace-nowrap">Unified Consultation</h2>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+                </div>
+                <div className="px-1">
+                  <CosmicConsultation
+                    chartData={chartData}
+                    dashaData={dashaData}
+                    periodOverview={periodOverview}
+                    aiPredictions={aiPredictions}
+                  />
+                </div>
+              </section>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

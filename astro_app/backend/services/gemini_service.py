@@ -15,8 +15,8 @@ class GeminiService:
             raise ValueError("GEMINI_API_KEY is missing")
         
         genai.configure(api_key=GEMINI_API_KEY)
-        # Using the latest Gemini model
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        # Using Gemini 2.0 Flash (latest stable model)
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
 
     def generate_chat_response(self, user_query: str, system_prompt: str, context_data: str = "") -> str:
         """

@@ -29,7 +29,7 @@ const Register = () => {
         credential: credentialResponse.credential
       });
       login(response.data.access_token);
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       console.error('Google signup failed at backend', err);
       setError('Google sign up failed. Please try again.');
