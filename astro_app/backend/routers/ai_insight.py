@@ -31,106 +31,49 @@ class AIChatResponse(BaseModel):
 @router.post("/chat", response_model=AIChatResponse)
 async def ai_chat(request: AIChatRequest):
     """
-    Unified endpoint for VedAstro AI features.
+    Unified endpoint for AI features using Google Gemini.
     """
     try:
-        # 1. Handle Natal/Horary Session Initialization
-        if not request.session_id and request.context in ["natal", "horary"]:
-            if request.chart_data:
-                name = request.chart_data.get("name", "User")
-                date = request.chart_data.get("date")
-                time = request.chart_data.get("time")
-                location = request.chart_data.get("location", "Unknown")
-                lat = request.chart_data.get("latitude", 0.0)
-                lon = request.chart_data.get("longitude", 0.0)
-                tz = request.chart_data.get("timezone", "+05:30")
-                
-                # Format date/time with timezone for VedAstro
-                # VedAstro expects "HH:mm DD/MM/YYYY +HH:mm"
-                formatted_time = f"{time} {date} {tz}"
-                
-                chat_type = "Horary" if request.context == "horary" else "Horoscope"
-                
-                init_result = VedAstroClient.submit_birth_data(
-                    user_id=request.user_id,
-                    name=name,
-                    formatted_time=formatted_time,
-                    location=location,
-                    longitude=lon,
-                    latitude=lat,
-                    chat_type=chat_type
-                )
-                
-                if init_result.get("Status") == "Pass":
-                    payload = init_result.get("Payload", {})
-                    # If user_query is empty, just return the initialization response
-                    if not request.user_query or request.user_query.strip() == "":
-                        return AIChatResponse(
-                            answer=payload.get("Text", "Chart analyzed."),
-                            status="Pass",
-                            session_id=payload.get("SessionId"),
-                            html_answer=payload.get("TextHtml") or payload.get("Html", ""),
-                            follow_up_questions=payload.get("FollowUpQuestions", [])
-                        )
-                    # Otherwise, use the new session_id for the actual question
-                    request.session_id = payload.get("SessionId")
-            else:
-                if request.context == "natal":
-                    return AIChatResponse(answer="Please select a chart first.", status="Fail")
-
-        # 2. Call appropriate VedAstro Endpoint
-        if request.context == "guru":
-            result = VedAstroClient.ask_ai_teacher(
-                user_id=request.user_id,
-                question=request.user_query,
-                book_code=request.book_code,
-                session_id=request.session_id
-            )
-        else:
-            # Natal or Horary (VedAstro handles Horary context in chat_type)
-            chat_type = "Horary" if request.context == "horary" else "Horoscope"
-            result = VedAstroClient.ask_ai_chat(
-                user_id=request.user_id,
-                question=request.user_query,
-                chat_type=chat_type,
-                session_id=request.session_id
-            )
-
-        if result.get("Status") == "Pass":
-            payload = result.get("Payload", {})
-            # Payloads can sometimes be strings or objects depending on specific API calls
-            if isinstance(payload, str):
-                formatted = format_vedastro_response(payload)
-                return AIChatResponse(
-                    answer=formatted['text'],
-                    status="Pass",
-                    html_answer=formatted['html'],
-                    follow_up_questions=formatted['follow_up_questions']
-                )
+        from astro_app.backend.services.gemini_service import GeminiService
+        
+        gemini_service = GeminiService()
+        system_prompt = GeminiService.get_astrologer_persona()
+        
+        # Format Context from Chart Data
+        context_str = f"Context: {request.context}\n"
+        if request.chart_data:
+            name = request.chart_data.get("name", "User")
+            date = request.chart_data.get("date")
+            time = request.chart_data.get("time")
+            location = request.chart_data.get("location", "Unknown")
+            tz = request.chart_data.get("timezone", "+05:30")
             
-            answer = payload.get("Text", "No response from AI")
-            html_answer = payload.get("Html") or payload.get("TextHtml", "")
-            session_id = payload.get("SessionId")
+            context_str += f"Birth Data: Name: {name}, Date: {date}, Time: {time}, Location: {location}, Timezone: {tz}\n"
+            context_str += f"Chart Details: {str(request.chart_data)}\n"
+        
+        if request.book_code:
+            context_str += f"Reference Book: {request.book_code}\n"
             
-            # Apply VedAstro-style formatting if HTML is not already provided
-            if not html_answer and answer:
-                formatter = AIResponseFormatter()
-                html_answer = formatter.format_for_html(answer)
-            
-            # Extract follow-up questions if not provided
-            follow_up = payload.get("FollowUpQuestions", [])
-            if not follow_up and answer:
-                follow_up = AIResponseFormatter.extract_follow_up_questions(answer)
-            
-            return AIChatResponse(
-                answer=answer, 
-                status="Pass", 
-                session_id=session_id,
-                html_answer=html_answer,
-                follow_up_questions=follow_up
-            )
-        else:
-            return AIChatResponse(answer=result.get("Payload", "Error from VedAstro"), status="Fail")
+        # Generate Response
+        answer = gemini_service.generate_chat_response(
+            user_query=request.user_query,
+            system_prompt=system_prompt,
+            context_data=context_str
+        )
+        
+        # Extract Follow-up Questions (Simple heuristic or just return empty for now)
+        follow_up_questions = [] 
+        
+        # Simple HTML formatting if Gemini returns markdown (it usually does)
+        html_answer = answer.replace("\n", "<br>")
+        
+        return AIChatResponse(
+            answer=answer,
+            status="Pass",
+            session_id=request.session_id or "gemini-session",
+            html_answer=html_answer,
+            follow_up_questions=follow_up_questions
+        )
 
     except Exception as e:
         logger.error(f"AI Chat Error: {str(e)}")
@@ -139,9 +82,9 @@ async def ai_chat(request: AIChatRequest):
 @router.post("/horary-suggestions")
 async def get_horary_suggestions(query: str):
     """
-    Proxy to VedAstro Horary Suggestions
+    Mock suggestions for now, or use Gemini to generate them.
     """
-    return VedAstroClient.get_horary_suggestions(query)
+    return {"Status": "Pass", "Payload": ["Will I get the job?", "When will I get married?", "Is this a good time to invest?"]}
 
 
 class DailyInsightRequest(BaseModel):
