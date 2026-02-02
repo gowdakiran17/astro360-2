@@ -1,0 +1,86 @@
+import { Sun } from 'lucide-react';
+
+interface PanchangValue {
+  name: string;
+  [key: string]: any;
+}
+
+interface PanchangData {
+  tithi: string | PanchangValue;
+  nakshatra: string | PanchangValue;
+  yoga: string | PanchangValue;
+  karana: string | PanchangValue;
+  day_of_week: string | PanchangValue;
+  sunrise: string;
+  sunset: string;
+  panchaka?: {
+    type: string;
+    status: string;
+    description: string;
+  };
+}
+
+const PanchangDisplay = ({ data }: { data: PanchangData | null }) => {
+  if (!data) return null;
+
+  const getVal = (val: any) => {
+    if (!val) return '-';
+    if (typeof val === 'string') return val;
+    return val.name || '-';
+  };
+
+  return (
+    <div className="bg-white shadow-md rounded-lg overflow-hidden mt-6">
+      <div className="bg-orange-500 px-6 py-4 flex items-center">
+        <Sun className="h-6 w-6 text-white mr-2" />
+        <h3 className="text-xl font-bold text-white">Vedic Panchang</h3>
+      </div>
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center justify-between border-b pb-2">
+              <span className="text-gray-600 font-medium">Day</span>
+              <span className="text-gray-900 font-bold">{getVal(data.day_of_week)}</span>
+            </div>
+            <div className="flex items-center justify-between border-b pb-2">
+              <span className="text-gray-600 font-medium">Tithi (Lunar Day)</span>
+              <span className="text-gray-900 font-bold">{getVal(data.tithi)}</span>
+            </div>
+            <div className="flex items-center justify-between border-b pb-2">
+              <span className="text-gray-600 font-medium">Nakshatra</span>
+              <span className="text-gray-900 font-bold">{getVal(data.nakshatra)}</span>
+            </div>
+            {data.panchaka && (
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-gray-600 font-medium">Panchaka</span>
+                <div className="text-right">
+                  <span className={`font-bold block ${data.panchaka.status === "Good" ? "text-green-600" : "text-red-500"}`}>
+                    {data.panchaka.type}
+                  </span>
+                  <span className="text-xs text-gray-500">{data.panchaka.description}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center justify-between border-b pb-2">
+              <span className="text-gray-600 font-medium">Yoga</span>
+              <span className="text-gray-900 font-bold">{getVal(data.yoga)}</span>
+            </div>
+            <div className="flex items-center justify-between border-b pb-2">
+              <span className="text-gray-600 font-medium">Karana</span>
+              <span className="text-gray-900 font-bold">{getVal(data.karana)}</span>
+            </div>
+            <div className="flex items-center justify-between border-b pb-2">
+              <span className="text-gray-600 font-medium">Sunrise / Sunset</span>
+              <span className="text-gray-900 text-sm">{data.sunrise} / {data.sunset}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PanchangDisplay;

@@ -1,0 +1,101 @@
+INFO:     Will watch for changes in these directories: ['/Users/kirangowda/Desktop/astro360']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [4705] using WatchFiles
+/Users/kirangowda/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+ASTROLOGY_API_IO_KEY not found. External astrology API disabled.
+/Users/kirangowda/Library/Python/3.9/lib/python/site-packages/google/api_core/_python_version_support.py:237: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/Users/kirangowda/Desktop/astro360/astro_app/backend/routers/ai_insight.py:34: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+INFO:     Started server process [4748]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+An error occurred: module 'importlib.metadata' has no attribute 'packages_distributions'
+INFO:     127.0.0.1:52983 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:astro_app.backend.auth.router:Login attempt for user test2@user.com
+INFO:astro_app.backend.auth.router:Login successful for user test2@user.com
+INFO:     127.0.0.1:53053 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53058 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53069 - "POST /chart/panchang HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53071 - "POST /chart/panchang HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53073 - "POST /chart/ashtakvarga HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:53075 - "POST /chart/period/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53079 - "POST /chart/birth HTTP/1.1" 200 OK
+DEBUG: Fetching charts for user 18
+DEBUG: Found 2 charts
+INFO:     127.0.0.1:53078 - "GET /charts/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53086 - "POST /chart/dasha HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53125 - "POST /chart/birth HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53126 - "POST /chart/birth HTTP/1.1" 200 OK
+INFO:astro_app.backend.routers.ai_insight:✅ Transits calculated successfully
+INFO:astro_app.backend.routers.ai_insight:Engine Decision: CAREER | Confidence: 0.325
+INFO:     127.0.0.1:53167 - "POST /ai/generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53287 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53410 - "POST /chart/birth HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53412 - "POST /chart/birth HTTP/1.1" 200 OK
+INFO:astro_app.backend.routers.ai_insight:✅ Transits calculated successfully
+INFO:astro_app.backend.routers.ai_insight:Engine Decision: CAREER | Confidence: 0.325
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1769495014.734564 1327938 fork_posix.cc:71] Other threads are currently calling into gRPC, skipping fork() handlers
+I0000 00:00:1769495014.749184 1327938 fork_posix.cc:71] Other threads are currently calling into gRPC, skipping fork() handlers
+INFO:openai._base_client:Retrying request to /chat/completions in 0.376086 seconds
+INFO:openai._base_client:Retrying request to /chat/completions in 0.918183 seconds
+INFO:     127.0.0.1:53498 - "POST /ai/generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53558 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53962 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54229 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54501 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54765 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55040 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55295 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55563 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55815 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56085 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56344 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56606 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56862 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56929 - "POST /chart/birth HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56940 - "POST /chart/birth HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57127 - "POST /chart/transits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57174 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57176 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57178 - "POST /chart/panchang HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57183 - "POST /chart/panchang HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57184 - "POST /chart/birth HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57186 - "POST /chart/ashtakvarga HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:57189 - "POST /chart/period/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57190 - "POST /chart/panchang HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57193 - "POST /chart/panchang HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57196 - "POST /chart/birth HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57199 - "POST /chart/ashtakvarga HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:57202 - "POST /chart/period/overview HTTP/1.1" 200 OK
+DEBUG: Fetching charts for user 18
+DEBUG: Found 2 charts
+INFO:     127.0.0.1:57208 - "POST /chart/dasha HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57211 - "POST /chart/dasha HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57205 - "GET /charts/ HTTP/1.1" 200 OK
+DEBUG: Fetching charts for user 18
+DEBUG: Found 2 charts
+INFO:     127.0.0.1:57214 - "GET /charts/ HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [4748]
+INFO:     Stopping reloader process [4705]
