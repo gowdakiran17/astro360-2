@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Sparkles, Bot, ChevronDown, ChevronUp, Loader2, BrainCircuit } from 'lucide-react';
+import { Sparkles, Bot, Loader2, BrainCircuit } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import { useChart } from '../../context/ChartContext';

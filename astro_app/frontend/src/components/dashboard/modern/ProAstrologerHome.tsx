@@ -120,35 +120,7 @@ const ProAstrologerHome = () => {
     fetchData(currentProfile, selectedDate);
   }, [user, currentProfile, selectedDate, fetchData]);
 
-  const getCurrentDasha = () => {
-    if (!dashaData?.dashas) return null;
-    const now = new Date();
-    for (const maha of dashaData.dashas) {
-      const mahaStart = new Date(maha.start_date);
-      const mahaEnd = new Date(maha.end_date);
-      if (now >= mahaStart && now <= mahaEnd) {
-        for (const antar of maha.antardashas || []) {
-          const antarStart = new Date(antar.start_date);
-          const antarEnd = new Date(antar.end_date);
-          if (now >= antarStart && now <= antarEnd) {
-            return {
-              maha: maha.planet || maha.lord,
-              antar: antar.planet || antar.lord,
-              mahaEnd,
-              antarEnd
-            };
-          }
-        }
-        return {
-          maha: maha.planet || maha.lord,
-          antar: null,
-          mahaEnd,
-          antarEnd: null
-        };
-      }
-    }
-    return null;
-  };
+
 
   /* 
   const getDashaInterpretation = (maha: string, _antar?: string | null) => {

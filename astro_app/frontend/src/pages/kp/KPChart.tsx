@@ -58,10 +58,7 @@ const KPChart: React.FC = () => {
     if (!data) return null;
 
     // Transform data for the charts
-    const zodiacOrder = [
-        "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-        "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
-    ];
+
 
     const getHouse = (longitude: number, ascLongitude: number) => {
         let house = Math.floor((longitude - ascLongitude + 360) % 360 / 30) + 1;

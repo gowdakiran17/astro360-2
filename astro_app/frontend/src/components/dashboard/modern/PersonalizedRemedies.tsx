@@ -454,11 +454,7 @@ const PLANETARY_COLORS: Record<string, string> = {
     'Ketu': 'Multi-color'
 };
 
-const HORA_MAP: Record<string, string> = {
-    'Sun': 'Sun', 'Moon': 'Moon', 'Mars': 'Mars', 'Mercury': 'Mercury',
-    'Jupiter': 'Jupiter', 'Venus': 'Venus', 'Saturn': 'Saturn',
-    'Rahu': 'Saturn', 'Ketu': 'Mars'
-};
+
 
 const KRS_SHIVAYA_MANTRAS: Record<string, string> = {
     'Sun': 'Om Namah Shivaya Namo Suryaya',
@@ -568,11 +564,9 @@ const ActivationRemedyCard: React.FC<{
     planetColor: string,
     nakshatraAnimal: string,
     secondPlanetName?: string, // For Love (Venus)
-    secondPlanetAnimal?: string,
     location: string,
-    stepInstruction: string,
     mantra?: string // Added Mantra prop
-}> = ({ type, planetName, planetColor, nakshatraAnimal, secondPlanetName, secondPlanetAnimal, location, stepInstruction, mantra }) => {
+}> = ({ type, planetName, planetColor, nakshatraAnimal, secondPlanetName, location, mantra }) => {
     const [isStarted, setIsStarted] = useState(false);
     const [progress, setProgress] = useState(1); // Day 1-10
     const [showReminder, setShowReminder] = useState(false);
@@ -1119,7 +1113,6 @@ const PersonalizedRemedies: React.FC<PersonalizedRemediesProps> = ({ chartData, 
                                                     planetColor={careerColor.replace('bg-', '').replace('-500', '')}
                                                     nakshatraAnimal={careerAnimal}
                                                     location="Southwest area of your home or office"
-                                                    stepInstruction=""
                                                     mantra={careerMantra}
                                                 />
 
@@ -1236,9 +1229,7 @@ const PersonalizedRemedies: React.FC<PersonalizedRemediesProps> = ({ chartData, 
                                                     secondPlanetName="Venus"
                                                     planetColor={loveColor.replace('bg-', '').replace('-500', '')} // Simplify color class to name
                                                     nakshatraAnimal={loveAnimal}
-                                                    secondPlanetAnimal={YONI_ANIMALS[VenusPlan?.nakshatra || 'Bharani'] || "Elephant"}
                                                     location="North side of your home or bedroom"
-                                                    stepInstruction=""
                                                     mantra={loveMantra}
                                                 />
 
