@@ -11,7 +11,7 @@ class AstrologyApiIoService:
     Provides high-precision Vedic astrology calculations including Shodasha Varga (D1-D60).
     """
     
-    BASE_URL = "https://astrology-api.io/api/v1" # Hypothetical base URL based on standard practices
+    BASE_URL = "https://api.astrology-api.io/api/v3"
     
     def __init__(self):
         self.api_key = os.getenv("ASTROLOGY_API_IO_KEY")
@@ -95,6 +95,10 @@ class AstrologyApiIoService:
         except Exception as e:
             logger.error(f"Error calling astrology-api.io for panchang: {e}")
             return None
+
+    # ... (skipping other methods to focus on the update area if possible, but replace_file_content works on contiguous blocks. 
+    # I will replace the top section to update BASE_URL and the bottom section for get_market_insights. 
+    # Actually, I can use multi_replace for this to be cleaner.)
 
     async def get_shadbala(self, birth_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
@@ -301,6 +305,36 @@ class AstrologyApiIoService:
                 return response.json()
         except Exception as e:
             logger.error(f"Error calling astrology-api.io for period analysis: {e}")
+            return None
+
+    async def get_market_insights(self, date_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Fetches premium market insights from astrology-api.io/p/insights-market.
+        """
+        if not self.enabled:
+            return None
+            
+        payload = {
+            "day": int(date_details['date'].split('/')[0]),
+            "month": int(date_details['date'].split('/')[1]),
+            "year": int(date_details['date'].split('/')[2]),
+            "lat": date_details['latitude'],
+            "lon": date_details['longitude'],
+            "tzone": self._parse_timezone(date_details['timezone'])
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.BASE_URL}/insights/financial/market-timing", 
+                    json=payload,
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    timeout=10.0
+                )
+                response.raise_for_status()
+                return response.json()
+        except Exception as e:
+            logger.error(f"Error calling astrology-api.io for market insights: {e}")
             return None
 
 # Singleton instance

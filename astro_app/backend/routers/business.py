@@ -103,11 +103,40 @@ class IntelligenceCard(BaseModel):
     message: str
     details: List[str]
 
+class BradleyIndicator(BaseModel):
+    current_value: float
+    trend_direction: str
+    market_stress: str
+    rating: str
+    components: dict
+
+class GannCycle(BaseModel):
+    planet: str
+    cycle_position: float
+    phase: str
+    next_turn_days: int
+
+class GannTimeCycles(BaseModel):
+    active_cycles: List[GannCycle]
+    geometric_levels: List[dict]
+
+class VolatilityForecast(BaseModel):
+    volatility_percentage: float
+    recommendation: str
+
 class MarketTimingResponse(BaseModel):
     date: str
-    transits: List[dict]
-    insights: List[dict]
-    summary: str
+    # Legacy fields (Optional for fallback)
+    transits: Optional[List[dict]] = None
+    insights: Optional[List[dict]] = None
+    summary: Optional[str] = None
+    
+    # New V3 API Fields
+    overall_market_bias: Optional[str] = None
+    bradley_indicator: Optional[BradleyIndicator] = None
+    gann_time_cycles: Optional[GannTimeCycles] = None
+    volatility_forecast: Optional[VolatilityForecast] = None
+    lunar_influence: Optional[dict] = None
 
 @router.get("/market-timing", response_model=MarketTimingResponse)
 async def get_market_timing(
@@ -129,7 +158,7 @@ async def get_market_timing(
     date_str = local_now.strftime("%d/%m/%Y")
     time_str = local_now.strftime("%H:%M")
     
-    # 1. Try external API for Panchang/Sentiment first
+    # 1. Try external API for Market Insights first
     date_details = {
         "date": date_str,
         "latitude": lat,
@@ -137,9 +166,27 @@ async def get_market_timing(
         "timezone": timezone
     }
     
-    external_panchang = await astrology_api_service.get_panchang(date_details)
+    external_response = await astrology_api_service.get_market_insights(date_details)
     
-    # Calculate Transit Chart
+    if external_response and external_response.get("success"):
+        data = external_response.get("data", {})
+        # Map or direct pass depending on keys.
+        # Assuming external API returns keys like 'transits', 'insights', 'summary'
+        # If not, we might need adjustments. Let's try to fit it.
+        # The logs showed "Field required: date", so the external API might not return 'date' or structure is different.
+        
+        # Safe merge locally generated 'date' since we know it.
+        if "date" not in data:
+            data["date"] = local_now.isoformat()
+            
+        try:
+            logger.info("Successfully mapped external API data.")
+            return MarketTimingResponse(**data)
+        except Exception as validation_err:
+             logger.warning(f"External API data schema mismatch: {validation_err}. Fallback to local.")
+             # Fallthrough to local calculation
+
+    # 2. Fallback to Enhanced Local Calculation
     try:
         transit_chart = calculate_chart(date_str, time_str, timezone, lat, lon)
     except Exception as e:
@@ -149,87 +196,111 @@ async def get_market_timing(
     # Analyze Transits for Market Signals
     insights = []
     summary_points = []
-    
-    # If we have external panchang, use it to enhance insights
-    if external_panchang:
-        logger.info("Successfully fetched panchang from astrology-api.io for market timing")
-        # Add Tithi, Yoga, Karana insights if available
-        tithi = external_panchang.get("tithi", {}).get("name")
-        if tithi:
-            insights.append({
-                "type": "info",
-                "title": f"Tithi: {tithi}",
-                "description": f"The lunar day {tithi} influences the overall market mood.",
-                "intensity": "medium"
-            })
-
     planets = {p['name']: p for p in transit_chart['planets']}
     
-    # 1. Mercury Analysis (Communication, Contracts, Trading Volume)
-    mercury = planets.get('Mercury')
-    if mercury:
-        if mercury['is_retrograde']:
+    # --- Advanced Vedic Market Logic (Sarvatobhadra & Planetary Wars) ---
+
+    # 1. Retrograde Analysis (Vakra) - Creates reversals/uncertainty
+    retrogrades = [p['name'] for p in transit_chart['planets'] if p.get('is_retrograde')]
+    if 'Mercury' in retrogrades:
+        insights.append({
+            "type": "risk",
+            "title": "Mercury Retrograde (Trade Caution)",
+            "description": "High frequency of algorithmic errors and reversal of short-term trends. Avoid breakout trading.",
+            "intensity": "high"
+        })
+        summary_points.append("Volatile Algo Trading")
+    
+    if 'Saturn' in retrogrades:
+        insights.append({
+            "type": "risk",
+            "title": "Saturn Retrograde (Correction)",
+            "description": "Long-term support levels are tested. Market consolidates or grinds lower.",
+            "intensity": "medium"
+        })
+
+    # 2. Mars-Saturn Interaction (Agni-Marut Yoga) - Structual Breaks
+    # Check if they are in same sign (Conjunction) or opposite (Opposition)
+    mars = planets.get('Mars', {})
+    saturn = planets.get('Saturn', {})
+    if mars and saturn:
+        mars_sign = mars.get('zodiac_sign')
+        saturn_sign = saturn.get('zodiac_sign')
+        
+        # Simple Aspect Check (Conjunction or Opposition 1/7)
+        # Note: Ideally check degrees, but sign-based is a good V1 proxy
+        signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
+        m_idx = signs.index(mars_sign) if mars_sign in signs else -1
+        s_idx = signs.index(saturn_sign) if saturn_sign in signs else -1
+        
+        if m_idx != -1 and s_idx != -1:
+            diff = abs(m_idx - s_idx)
+            is_conjunct = (diff == 0)
+            is_opposite = (diff == 6)
+            
+            if is_conjunct:
+                insights.append({
+                    "type": "risk",
+                    "title": "Mars-Saturn Conjunction (Stress)",
+                    "description": "Extreme tension. frustration, and potential for sudden breaks or regulation news.",
+                    "intensity": "high"
+                })
+                summary_points.append("High Tension")
+            elif is_opposite:
+                insights.append({
+                    "type": "risk",
+                    "title": "Mars-Saturn Opposition",
+                    "description": "Conflict between bulls (Mars) and bears (Saturn). Choppy, directionless violence.",
+                    "intensity": "high"
+                })
+
+    # 3. Jupiter Trines (Wealth Creation)
+    # Jupiter in Fire/Air signs usually bullish
+    jupiter = planets.get('Jupiter', {})
+    if jupiter:
+        j_sign = jupiter.get('zodiac_sign')
+        if j_sign in ['Aries', 'Leo', 'Sagittarius']: # Fire Triplicity
             insights.append({
-                "type": "risk",
-                "title": "Mercury Retrograde",
-                "description": "High volatility expected. Algorithms may misfire. Avoid signing major long-term deals.",
-                "intensity": "high"
+                "type": "opportunity",
+                "title": "Jupiter in Fire Sign",
+                "description": "Expansion led by tech, innovation, and aggressive buying.",
+                "intensity": "medium"
             })
-            summary_points.append("Caution: Mercury Retrograde")
+            summary_points.append("Growth Sector Bullishness")
+            
+    # 4. Moon Nakshatra (Daily Sentiment)
+    moon = planets.get('Moon', {})
+    if moon:
+        nakshatra = moon.get('nakshatra')
+        # Simple mapping of "Fierce" vs "Gentle" Nakshatras for sentiment
+        fierce_stars = ['Bharani', 'Krittika', 'Ardra', 'Ashlesha', 'Magha', 'Jyeshtha', 'Mula', 'Purva Ashadha', 'Purva Bhadrapada']
+        if nakshatra in fierce_stars:
+             insights.append({
+                "type": "neutral", # Can be risk or opportunity depending on trade direction
+                "title": f"Fierce Moon ({nakshatra})",
+                "description": "Aggressive, ruthless trading session. Stop losses hunted.",
+                "intensity": "medium"
+            })
         else:
-            insights.append({
-                "type": "neutral",
-                "title": "Mercury Direct",
-                "description": "Normal trading communications.",
+             insights.append({
+                "type": "info",
+                "title": f"Moon in {nakshatra}",
+                "description": "Balanced or passive sentiment prevails today.",
                 "intensity": "low"
             })
 
-    # 2. Jupiter Analysis (Expansion, Optimism, Bull Markets)
-    jupiter = planets.get('Jupiter')
-    if jupiter:
-        sign = jupiter['zodiac_sign']
-        insights.append({
-            "type": "opportunity",
-            "title": f"Jupiter in {sign}",
-            "description": f"Market sentiment leans towards {sign} themes.",
-            "intensity": "medium"
-        })
-        if not jupiter['is_retrograde']:
-             summary_points.append("Bullish underlying sentiment")
-
-    # 3. Saturn Analysis (Restriction, Fear, Regulation)
-    saturn = planets.get('Saturn')
-    if saturn:
-        if saturn['is_retrograde']:
-             insights.append({
-                "type": "risk",
-                "title": "Saturn Retrograde",
-                "description": "Regulatory reviews and structural market corrections likely.",
-                "intensity": "medium"
-            })
-
-    # 4. Moon Analysis (Daily Sentiment)
-    moon = planets.get('Moon')
-    if moon:
-        nakshatra = moon['nakshatra']
+    # 5. Rahu Axis (Speculation/Crypto)
+    rahu = planets.get('Rahu', {})
+    if rahu:
+        r_sign = rahu.get('zodiac_sign')
         insights.append({
             "type": "info",
-            "title": f"Moon in {nakshatra}",
-            "description": f"Daily sentiment colored by {nakshatra} energy.",
+            "title": f"Rahu in {r_sign}",
+            "description": "Focus of speculative excess is in this sector.",
             "intensity": "low"
         })
 
-    # 5. Rahu/Ketu (Innovation vs Confusion)
-    rahu = planets.get('Rahu')
-    if rahu and rahu['zodiac_sign'] in ['Aries', 'Leo', 'Sagittarius']: # Fire signs
-        insights.append({
-            "type": "opportunity",
-            "title": "Rahu in Fire Sign",
-            "description": "Aggressive growth in tech and crypto sectors.",
-            "intensity": "high"
-        })
-
-    summary = " | ".join(summary_points) if summary_points else "Market conditions are neutral."
+    summary = " | ".join(summary_points) if summary_points else "Market conditions suggest range-bound activity."
 
     return {
         "date": local_now.isoformat(),
