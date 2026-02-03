@@ -106,7 +106,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
 
                 {/* Main App Routes */}
-                <Route path="/" element={<Navigate to="/home" replace />} />
+                <Route path="/" element={<Navigate to="/login" replace />} />
 
                 <Route path="/home" element={
                   <ProtectedRoute>
