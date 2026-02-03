@@ -41,14 +41,14 @@ def calculate_upagrahas(jd: float, lat: float, lon: float, t_offset: float):
     # Simple sunrise/sunset approximation or use swe.rise_trans
     # For speed and precision, we use swe.rise_trans
     
-    # Calculate for the day of JD
-    # We need to know if it's day or night birth
+    # swe.rise_trans(jd, body, rsmi, geopos, atpress, attemp, eph_flag)
+    geopos = (lon, lat, 0)
+    flags = swe.FLG_SWIEPH
     
-    # swe.rise_trans(jd, body, lon, lat, alt, press, temp, calc_flag, eph_flag)
-    res = swe.rise_trans(jd, swe.SUN, lon, lat, 0, 0, 0, swe.CALC_RISE | swe.BIT_DISC_CENTER, swe.FLG_SWIEPH)
+    res = swe.rise_trans(jd, swe.SUN, swe.CALC_RISE | swe.BIT_DISC_CENTER, geopos, 0, 0, flags)
     sunrise_utc = res[1][0]
     
-    res = swe.rise_trans(jd, swe.SUN, lon, lat, 0, 0, 0, swe.CALC_SET | swe.BIT_DISC_CENTER, swe.FLG_SWIEPH)
+    res = swe.rise_trans(jd, swe.SUN, swe.CALC_SET | swe.BIT_DISC_CENTER, geopos, 0, 0, flags)
     sunset_utc = res[1][0]
     
     # Determine birth time in UTC
@@ -58,14 +58,14 @@ def calculate_upagrahas(jd: float, lat: float, lon: float, t_offset: float):
     
     if not is_day and birth_utc < sunrise_utc:
         # Birth before sunrise, use previous sunset
-        res_prev = swe.rise_trans(jd - 1, swe.SUN, lon, lat, 0, 0, 0, swe.CALC_SET | swe.BIT_DISC_CENTER, swe.FLG_SWIEPH)
+        res_prev = swe.rise_trans(jd - 1, swe.SUN, swe.CALC_SET | swe.BIT_DISC_CENTER, geopos, 0, 0, flags)
         sunset_utc = res_prev[1][0]
         # Current sunrise stays the same
         period_start = sunset_utc
         period_end = sunrise_utc
     elif not is_day and birth_utc > sunset_utc:
         # Birth after sunset, use next sunrise
-        res_next = swe.rise_trans(jd + 1, swe.SUN, lon, lat, 0, 0, 0, swe.CALC_RISE | swe.BIT_DISC_CENTER, swe.FLG_SWIEPH)
+        res_next = swe.rise_trans(jd + 1, swe.SUN, swe.CALC_RISE | swe.BIT_DISC_CENTER, geopos, 0, 0, flags)
         sunrise_next_utc = res_next[1][0]
         period_start = sunset_utc
         period_end = sunrise_next_utc

@@ -3,8 +3,9 @@ KP Service - Main Orchestrator
 Coordinates all KP modules to provide complete KP analysis.
 """
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime
+from .extended_features import ExtendedFeatures
 from astro_app.backend.astrology.chart import calculate_chart
 from .kp_core import (
     calculate_kp_planet_details,
@@ -18,7 +19,9 @@ from .kp_dasha import (
 )
 from .kp_scoring import (
     calculate_all_period_scores,
-    get_antardasha_quality
+    calculate_all_period_scores,
+    get_antardasha_quality,
+    calculate_aspect_strengths
 )
 from .kp_predictions import (
     analyze_planet_potential,
@@ -35,12 +38,14 @@ class KPService:
     @staticmethod
     def _calculate_raw_kp_data(birth_details: Dict) -> Dict:
         """Internal method to get raw KP data for subsequent analysis."""
+        # KP Ayanamsha = 5 (swe.SIDM_KRISHNAMURTI)
         base_chart = calculate_chart(
             birth_details["date"],
             birth_details["time"],
             birth_details["timezone"],
             birth_details["latitude"],
-            birth_details["longitude"]
+            birth_details["longitude"],
+            ayanamsa_mode=5
         )
         
         ascendant_longitude = base_chart["ascendant"]["longitude"]
@@ -107,10 +112,23 @@ class KPService:
                     formatted_significators["planets"][p_name] = []
                 formatted_significators["planets"][p_name].append(h_num)
         
+        # Calculate aspect strengths
+        aspect_strengths = calculate_aspect_strengths(raw_significators)
+
+        # Calculate aspects, strengths, and extended details
+        aspects = ExtendedFeatures.calculate_aspects(data["planets"], data["house_cusps"])
+        strengths = ExtendedFeatures.calculate_strengths(data["planets"], data["house_cusps"])
+        extended_planets = ExtendedFeatures.get_extended_planet_details(data["planets"])
+        lucky_points = ExtendedFeatures.calculate_lucky_points(data["ascendant"]["zodiac_sign"])
+
         return {
-            "planets": data["planets"],
+            "planets": extended_planets, # Use extended planet data
             "house_cusps": data["house_cusps"],
             "significators": formatted_significators,
+            "aspect_strengths": aspect_strengths,
+            "extended_aspects": aspects,
+            "graha_bhava_strength": strengths,
+            "lucky_points": lucky_points,
             "ascendant": {
                 "longitude": data["ascendant"]["longitude"],
                 "sign": data["ascendant"]["zodiac_sign"]
@@ -130,12 +148,14 @@ class KPService:
             Dasha timeline with Mahadasha and Antardasha
         """
         # Get Moon longitude from base chart
+        # KP Ayanamsha = 5 (swe.SIDM_KRISHNAMURTI)
         base_chart = calculate_chart(
             birth_details["date"],
             birth_details["time"],
             birth_details["timezone"],
             birth_details["latitude"],
-            birth_details["longitude"]
+            birth_details["longitude"],
+            ayanamsa_mode=5
         )
         
         moon_longitude = None

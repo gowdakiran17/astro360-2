@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import MainLayout from '../components/layout/MainLayout';
 import { MENU_ITEMS } from '../data/navigation';
-import { Plus, Search, MapPin, Edit2, Trash2, Star, Sparkles, BrainCircuit, ShieldCheck, Activity } from 'lucide-react';
+import { Plus, Search, MapPin, Edit2, Trash2, Star, ShieldCheck, Activity } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useChartSettings } from '../context/ChartContext';
 import HomeHeader from '../components/dashboard/modern/HomeHeader';
@@ -252,26 +252,7 @@ const Hub = () => {
                                     />
                                 </div>
 
-                                {/* Cosmic Wisdom Panel */}
-                                <motion.div
-                                    whileHover={{ y: -5, backgroundColor: 'rgba(255,255,255,0.08)' }}
-                                    className="hidden xl:flex items-center gap-6 p-7 rounded-[3rem] bg-white/[0.04] border border-white/[0.08] backdrop-blur-3xl max-w-sm group/wisdom transition-all duration-700 shadow-2xl relative overflow-hidden"
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent pointer-events-none" />
-                                    <div className="w-14 h-14 flex-shrink-0 bg-gradient-to-tr from-amber-500/20 to-orange-500/10 rounded-2xl flex items-center justify-center border border-amber-500/30 group-hover/wisdom:scale-110 transition-transform duration-700 relative overflow-hidden">
-                                        <Sparkles className="w-7 h-7 text-amber-500" />
-                                        <div className="absolute inset-0 bg-amber-400/10 animate-pulse" />
-                                    </div>
-                                    <div className="flex flex-col gap-2 relative z-10">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/90 flex items-center gap-2">
-                                            <BrainCircuit className="w-3 h-3" />
-                                            Daily Oracle
-                                        </span>
-                                        <p className="text-sm text-white/60 font-bold italic leading-relaxed tracking-tight group-hover/wisdom:text-white/90 transition-colors">
-                                            "The stars are not just lights in the sky, they are the echoes of your infinite potential."
-                                        </p>
-                                    </div>
-                                </motion.div>
+
                             </motion.div>
 
                             {/* Main Navigation Modules */}

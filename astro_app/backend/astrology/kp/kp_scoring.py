@@ -144,3 +144,114 @@ def get_antardasha_quality(
         "mahadasha_houses": md_score["total_signified_houses"],
         "antardasha_houses": ad_score["total_signified_houses"]
     }
+
+
+def calculate_aspect_strengths(
+    significators: Dict[int, Dict[str, List[str]]]
+) -> Dict[str, Dict[str, int]]:
+    """
+    Calculate strength of planets on various aspects (Intelligence, Efficiency, etc.)
+    using weighted significator levels.
+    
+    Weights:
+    - Level 1 (Star Lord): 15 points
+    - Level 2 (Sign Lord): 10 points
+    - Level 3 (Aspect/In): 5 points
+    - Level 4 (Sub Lord connection): 2 points
+    
+    Args:
+        significators: Significators dict (house_num -> {level_1: [], level_2: [], ...})
+        
+    Returns:
+        Dict mapping planet name to aspect scores
+    """
+    planets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"]
+    
+    # Define aspect rules (Positive Houses vs Negative Houses)
+    aspect_rules = {
+        "Intelligence": {
+            "positive": [5, 4, 9, 2],
+            "negative": [6, 8, 12],
+            "karakas": ["Mercury", "Jupiter"]
+        },
+        "Efficiency": {
+            "positive": [3, 6, 10, 11],
+            "negative": [8, 12],
+            "karakas": ["Mars", "Saturn"]
+        },
+        "Love/Family": {
+            "positive": [2, 4, 5, 7, 11],
+            "negative": [6, 8, 10, 12],
+            "karakas": ["Venus", "Moon"]
+        },
+        "Health": {
+            "positive": [1, 5, 9, 11], 
+            "negative": [6, 8, 12],    
+            "karakas": ["Sun"]
+        },
+        "Social Life": {
+            "positive": [3, 7, 11],
+            "negative": [6, 8, 12],
+            "karakas": ["Mercury", "Venus"]
+        },
+        "Career": {
+            "positive": [2, 6, 10, 11],
+            "negative": [5, 8, 12],
+            "karakas": ["Sun", "Saturn"]
+        },
+        "Finance": {
+            "positive": [2, 6, 10, 11, 5, 9],
+            "negative": [8, 12],
+            "karakas": ["Jupiter", "Venus"]
+        }
+    }
+    
+    result = {}
+    
+    for planet in planets:
+        planet_scores = {}
+        
+        for aspect, rules in aspect_rules.items():
+            score = 0
+            
+            # Calculate score based on weighted signification of houses
+            
+            # 1. Positive Houses contribution
+            for h in rules["positive"]:
+                # Check signification strength of this planet for house h
+                sig_data = significators.get(h, {})
+                
+                # We interpret levels as additive or max? Usually max level wins or additive.
+                # Let's use additive for richness.
+                if planet in sig_data.get("level_1", []): score += 15
+                if planet in sig_data.get("level_2", []): score += 10
+                if planet in sig_data.get("level_3", []): score += 5
+                if planet in sig_data.get("level_4", []): score += 2
+                
+            # 2. Negative Houses deduction
+            for h in rules["negative"]:
+                sig_data = significators.get(h, {})
+                
+                deduction = 0
+                if planet in sig_data.get("level_1", []): deduction += 12 # Penalize strongly
+                if planet in sig_data.get("level_2", []): deduction += 8
+                if planet in sig_data.get("level_3", []): deduction += 4
+                if planet in sig_data.get("level_4", []): deduction += 2
+                
+                score -= deduction
+
+            # 3. Karaka Bonus
+            if planet in rules["karakas"]:
+                score += 15
+                
+            # Normalize/Clamp
+            # Typical max score could be roughly 100
+            # Let's NOT clamp strictly to allow ranges like -30 to 110, but soften extremes
+            if score > 100: score = 100
+            if score < -50: score = -50
+            
+            planet_scores[aspect] = int(score)
+            
+        result[planet] = planet_scores
+        
+    return result

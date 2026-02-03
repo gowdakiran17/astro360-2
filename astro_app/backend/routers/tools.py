@@ -284,11 +284,11 @@ def analyze_gem_suitability(planet: str, chart_data: dict, shadbala_data: dict) 
     3. Functional Nature (Benefic/Malefic)
     """
     
-    # 1. Find Planet's House
+    # 1. Find Planet's House (using KP Bhav Chalit for precision)
     planet_house = None
     for p in chart_data.get("planets", []):
         if p["name"] == planet:
-            planet_house = p["house"]
+            planet_house = p.get("kp_house", p["house"])
             break
             
     # 2. Find Planet's Strength
@@ -308,7 +308,7 @@ def analyze_gem_suitability(planet: str, chart_data: dict, shadbala_data: dict) 
     # House Logic
     if planet_house in [6, 8, 12]:
         suitability = "Avoid"
-        reasons.append(f"Placed in {planet_house}th house (Dusthana) - Can amplify negativity.")
+        reasons.append(f"Placed in {planet_house}th house (Dusthana) in Bhav Chalit - Can amplify negativity.")
     
     # Strength Logic
     if percentage < 90:

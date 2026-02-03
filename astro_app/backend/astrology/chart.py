@@ -12,7 +12,7 @@ ZODIAC_LORDS = {
     "Sagittarius": "Jupiter", "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
 }
 
-def calculate_chart(date_str: str, time_str: str, timezone_str: str, latitude: float, longitude: float):
+def calculate_chart(date_str: str, time_str: str, timezone_str: str, latitude: float, longitude: float, ayanamsa_mode: int = swe.SIDM_LAHIRI):
     """
     Calculates the astrological chart using pyswisseph (Swiss Ephemeris).
     Returns structured JSON with Ascendant, Planets, and Houses.
@@ -45,8 +45,8 @@ def calculate_chart(date_str: str, time_str: str, timezone_str: str, latitude: f
     # 3. Calculate Julian Day (UT)
     jd_ut = swe.julday(year, month, day, decimal_hour_utc)
     
-    # 4. Set Sidereal Mode (Lahiri Ayanamsa)
-    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+    # 4. Set Sidereal Mode (Default: Lahiri, can be overridden for KP)
+    swe.set_sid_mode(ayanamsa_mode, 0, 0)
     
     # 5. Calculate Planets
     # Swisseph fallback logic is the primary reliable method now due to VedAstro rate limits
@@ -182,16 +182,31 @@ def calculate_chart(date_str: str, time_str: str, timezone_str: str, latitude: f
         houses_data.append(h_obj)
         houses_dict[str(house_num)] = h_obj
 
+    def get_house_from_cusps(lon, cusps):
+        """Find house number based on planet longitude and house cusps"""
+        for i in range(12):
+            c1 = cusps[i]
+            c2 = cusps[(i + 1) % 12]
+            if c1 < c2:
+                if c1 <= lon < c2: return i + 1
+            else: # Wrap around 360
+                if lon >= c1 or lon < c2: return i + 1
+        return 0
+
+    placidus_cusps = [normalize_degree(c - ayanamsa) for c in res_houses[0]]
+
     # Assign Houses to Planets
     for p in planets_data:
         p_lon = p["longitude"]
-        p_sign_index = int(p_lon / 30)
         
+        # 1. Whole Sign (Natal/Rashi)
+        p_sign_index = int(p_lon / 30)
         diff = p_sign_index - asc_sign_index
         if diff < 0: diff += 12
-        house_num = diff + 1
+        p["house"] = diff + 1
         
-        p["house"] = house_num
+        # 2. Bhav Chalit (KP)
+        p["kp_house"] = get_house_from_cusps(p_lon, placidus_cusps)
         
     # 8. Sudarshana Chakra Calculations
     # Wheel 1: Lagna-based houses (already done)

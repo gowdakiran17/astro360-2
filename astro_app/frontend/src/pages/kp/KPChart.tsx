@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import KPAspectStrengthTable from '../../components/kp/KPAspectStrengthTable';
+import KPAspectsTable from '../../components/kp/KPAspectsTable';
+import KPStrengthTable from '../../components/kp/KPStrengthTable';
+import KPPlanetaryDetails from '../../components/kp/KPPlanetaryDetails';
+import KPLuckyPoints from '../../components/kp/KPLuckyPoints';
 import api from '../../services/api';
 import { useChart } from '../../context/ChartContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -14,7 +19,7 @@ const KPChart: React.FC = () => {
     const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [chartStyle, setChartStyle] = useState<'NORTH_INDIAN' | 'SOUTH_INDIAN'>('NORTH_INDIAN');
+    const [chartStyle, setChartStyle] = useState<'NORTH_INDIAN' | 'SOUTH_INDIAN'>('SOUTH_INDIAN');
 
     const fetchData = useCallback(async () => {
         if (!currentProfile) return;
@@ -104,12 +109,13 @@ const KPChart: React.FC = () => {
     };
 
     const renderChart = (chartData: any, title: string) => (
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl">
-            <h3 className="text-lg font-serif text-white mb-6 border-b border-white/10 pb-4 flex items-center gap-2">
+        <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-colors" />
+            <h3 className="text-lg font-serif text-white mb-6 border-b border-white/10 pb-4 flex items-center gap-2 relative z-10">
                 <Star className="w-4 h-4 text-amber-400" />
                 {title}
             </h3>
-            <div className="aspect-square w-full max-w-[400px] mx-auto">
+            <div className="aspect-square w-full max-w-[400px] mx-auto relative z-10">
                 {chartStyle === 'NORTH_INDIAN' ? (
                     <NorthIndianChart data={chartData} />
                 ) : (
@@ -120,26 +126,13 @@ const KPChart: React.FC = () => {
     );
 
     return (
-        <div className="p-6 space-y-8 animate-in fade-in duration-500">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-16 py-8 space-y-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/5 p-6 rounded-2xl border border-white/10">
-                <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">KP Birth Chart</h1>
-                    <p className="text-slate-400">Complete analysis of planets and house cusps using the Krishnamurti Padhdhati system.</p>
-                </div>
-                <div className="flex bg-black/30 p-1 rounded-xl border border-white/10">
-                    <button
-                        onClick={() => setChartStyle('NORTH_INDIAN')}
-                        className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${chartStyle === 'NORTH_INDIAN' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
-                    >
-                        North Indian
-                    </button>
-                    <button
-                        onClick={() => setChartStyle('SOUTH_INDIAN')}
-                        className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${chartStyle === 'SOUTH_INDIAN' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
-                    >
-                        South Indian
-                    </button>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/[0.03] p-8 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 opacity-80" />
+                <div className="relative z-10">
+                    <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">KP Birth Chart</h1>
+                    <p className="text-white/60">Complete analysis of planets and house cusps using the Krishnamurti Padhdhati system.</p>
                 </div>
             </div>
 
@@ -169,7 +162,27 @@ const KPChart: React.FC = () => {
                     <KPHouseTable houses={data.house_cusps} />
                 </section>
 
-                {/* Significators */}
+                {/* Aspects Strength Matrix */}
+                <div>
+                    <KPAspectStrengthTable data={data?.aspect_strengths} />
+                </div>
+
+                {/* Detailed Functionality Sections */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    {/* Left Column */}
+                    <div className="space-y-8">
+                        <KPAspectsTable data={data?.extended_aspects} />
+                        <KPPlanetaryDetails planets={data?.planets} houses={data?.house_cusps} />
+                    </div>
+
+                    {/* Right Column */}
+                    <div className="space-y-8">
+                        <KPStrengthTable data={data?.graha_bhava_strength} />
+                        <KPLuckyPoints data={data?.lucky_points} />
+                    </div>
+                </div>
+
+                {/* Significators Tables */}
                 <section>
                     <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                         <TableIcon className="w-5 h-5 text-amber-400" />
