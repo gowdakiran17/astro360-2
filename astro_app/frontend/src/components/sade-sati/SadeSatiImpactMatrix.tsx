@@ -1,4 +1,4 @@
-import { LucideIcon, TrendingUp, AlertTriangle, Minus } from 'lucide-react';
+import { LucideIcon, TrendingUp, AlertTriangle } from 'lucide-react';
 
 interface Impact {
     id: string;

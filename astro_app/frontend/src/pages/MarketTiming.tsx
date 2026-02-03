@@ -3,13 +3,10 @@ import MainLayout from '../components/layout/MainLayout';
 import { businessService } from '../services/business';
 import { useChartSettings } from '../context/ChartContext';
 import {
-  TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Info, Calendar,
-  Activity, Zap, Download, Shield, Clock, BarChart3, PieChart,
-  Moon, Sun, Wind, ChevronRight, Bell, Target, Layers
+  TrendingUp, TrendingDown, AlertTriangle, Info, Calendar,
+  Activity, Zap, Shield, Clock, PieChart,
+  Moon, Sun, Target, Layers
 } from 'lucide-react';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts';
 
 // --- Interfaces matching the new Backend & Design ---
 

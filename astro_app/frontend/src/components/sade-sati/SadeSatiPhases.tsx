@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Shield, Clock } from 'lucide-react';
+import { Shield, Clock } from 'lucide-react';
 
 interface Phase {
     id: 'rising' | 'peak' | 'setting';
@@ -66,8 +66,8 @@ const SadeSatiPhases: React.FC<SadeSatiPhasesProps> = ({ phases }) => {
                                     <div
                                         key={i}
                                         className={`h-1.5 rounded-full flex-1 transition-all ${i < phase.intensity
-                                                ? isCurrent ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]' : 'bg-slate-500'
-                                                : 'bg-white/5'
+                                            ? isCurrent ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]' : 'bg-slate-500'
+                                            : 'bg-white/5'
                                             }`}
                                     />
                                 ))}
@@ -88,8 +88,8 @@ const SadeSatiPhases: React.FC<SadeSatiPhasesProps> = ({ phases }) => {
 
                             {/* Key Advice */}
                             <div className={`mt-auto p-5 rounded-2xl text-sm leading-relaxed ${isCurrent
-                                    ? 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-100'
-                                    : 'bg-white/[0.03] border border-white/5 text-slate-400'
+                                ? 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-100'
+                                : 'bg-white/[0.03] border border-white/5 text-slate-400'
                                 }`}>
                                 <div className={`flex items-center gap-2 mb-2 font-black uppercase tracking-wider text-[10px] ${isCurrent ? 'text-indigo-300' : 'text-slate-500'}`}>
                                     <Shield className="w-3.5 h-3.5" /> Cosmic Advice

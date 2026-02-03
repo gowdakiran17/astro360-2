@@ -8,7 +8,7 @@ import {
     ShieldAlert, Sparkles,
     ChevronRight, CheckCircle2,
     XCircle, Activity, Info, Heart,
-    Users, Briefcase, RefreshCw, ShieldCheck
+    Users, Briefcase, RefreshCw
 } from 'lucide-react';
 
 import UniversalChart from '../components/charts/UniversalChart';
@@ -295,8 +295,8 @@ const ChartCompatibility = () => {
                             <div className="h-6 bg-slate-950/50 rounded-full overflow-hidden flex p-1.5 border border-white/5">
                                 <div
                                     className={`h-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(255,255,255,0.1)] ${mode === 'relationship'
-                                            ? getScoreColor(matchData.total_score).split(' ')[0]
-                                            : (matchData.total_score > 75 ? 'bg-emerald-500' : matchData.total_score > 50 ? 'bg-amber-500' : 'bg-rose-500')
+                                        ? getScoreColor(matchData.total_score).split(' ')[0]
+                                        : (matchData.total_score > 75 ? 'bg-emerald-500' : matchData.total_score > 50 ? 'bg-amber-500' : 'bg-rose-500')
                                         }`}
                                     style={{ width: `${(matchData.total_score / (matchData.maximum_score || 36)) * 100}%` }}
                                 />

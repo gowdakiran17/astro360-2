@@ -20,7 +20,7 @@ import {
 
 // New Components
 import SadeSatiHero from '../components/sade-sati/SadeSatiHero';
-import SadeSatiFocus from '../components/sade-sati/SadeSatiFocus';
+// import SadeSatiFocus from '../components/sade-sati/SadeSatiFocus';
 import SadeSatiPhases from '../components/sade-sati/SadeSatiPhases';
 import SadeSatiImpactMatrix from '../components/sade-sati/SadeSatiImpactMatrix';
 import SadeSatiRemedies from '../components/sade-sati/SadeSatiRemedies';

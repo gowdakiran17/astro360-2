@@ -1,8 +1,8 @@
 import MainLayout from '../components/layout/MainLayout';
 import DashboardHeader from '../components/layout/DashboardHeader';
-import { 
-  Sparkles, Moon, Sun, Star, Heart, 
-  Calendar, User, Settings 
+import {
+  Sparkles, Moon, Sun, Star, Heart,
+  Calendar, User, Settings
 } from 'lucide-react';
 
 const StyleGuide = () => {
@@ -10,14 +10,14 @@ const StyleGuide = () => {
     <MainLayout title="Design System" breadcrumbs={['System', 'Style Guide']} showHeader={false}>
       <DashboardHeader activeTab="style-guide" />
       <div className="w-full space-y-16 pb-20 mt-10 px-8">
-        
+
         {/* Introduction */}
         <div className="text-center space-y-4 py-10">
           <h1 className="text-4xl md:text-5xl font-display font-bold text-slate-900">
-            Astro360 Design System
+            Bhava360 Design System
           </h1>
           <p className="text-xl text-slate-500 max-w-2xl mx-auto">
-            A comprehensive guide to the visual language, components, and patterns used throughout the Astro360 application.
+            A comprehensive guide to the visual language, components, and patterns used throughout the Bhava360 application.
           </p>
         </div>
 
@@ -29,7 +29,7 @@ const StyleGuide = () => {
               Typography
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="space-y-6">
               <div className="space-y-2">
@@ -43,11 +43,11 @@ const StyleGuide = () => {
               <div className="space-y-2">
                 <p className="text-sm text-slate-400 uppercase tracking-wider font-bold">Body Text</p>
                 <p className="text-lg text-slate-600">
-                  Large body text (18px). Used for lead paragraphs and important content sections. 
+                  Large body text (18px). Used for lead paragraphs and important content sections.
                   The celestial sphere is an imaginary sphere of arbitrarily large radius.
                 </p>
                 <p className="text-base text-slate-600">
-                  Base body text (16px). The default size for standard reading content. 
+                  Base body text (16px). The default size for standard reading content.
                   Astrology is a range of divinatory practices, recognized as pseudoscientific.
                 </p>
                 <p className="text-sm text-slate-500">
@@ -177,10 +177,10 @@ const StyleGuide = () => {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label htmlFor="demo-input" className="text-sm font-bold text-slate-700">Input Field</label>
-                    <input 
+                    <input
                       id="demo-input"
-                      type="text" 
-                      placeholder="Enter your name" 
+                      type="text"
+                      placeholder="Enter your name"
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
                     />
                   </div>
@@ -239,7 +239,7 @@ const StyleGuide = () => {
               Iconography
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {[Sparkles, Moon, Sun, Star, Heart, Calendar, User, Settings].map((Icon, idx) => (
               <div key={idx} className="flex flex-col items-center justify-center p-6 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
@@ -309,7 +309,7 @@ const StyleGuide = () => {
                 from-amber-400 to-orange-500
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Glass Effect</h3>
               <div className="h-32 rounded-xl bg-slate-900 flex items-center justify-center relative overflow-hidden">
@@ -319,7 +319,7 @@ const StyleGuide = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Inner Glow</h3>
               <div className="h-32 rounded-xl bg-slate-900 shadow-[inset_0_0_20px_rgba(99,102,241,0.5)] flex items-center justify-center text-indigo-300 font-medium">

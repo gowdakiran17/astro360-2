@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Moon, Sun, ArrowRight, Star } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface TransitHeroProps {
     transits: any[]; // Ideally strict type, using any for flexibility during rebuild
@@ -42,7 +41,7 @@ const TransitHero: React.FC<TransitHeroProps> = ({ transits }) => {
             Mercury: 'from-emerald-400 to-teal-600',
             Venus: 'from-pink-400 to-rose-400',
         };
-        return colors[highlight.name] || 'from-blue-500 to-indigo-600';
+        return colors[planet] || 'from-blue-500 to-indigo-600';
     };
 
     return (

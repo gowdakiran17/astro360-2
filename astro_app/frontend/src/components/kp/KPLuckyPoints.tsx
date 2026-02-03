@@ -8,12 +8,6 @@ interface KPLuckyPointsProps {
 const KPLuckyPoints: React.FC<KPLuckyPointsProps> = ({ data }) => {
     if (!data) return null;
 
-    const items = [
-        { label: "Lucky Days", key: "favorable_day" }, // Mapping backend key to screenshot label if needed
-        { label: "Lucky Planets", key: "lucky_planets_mock" }, // Backend didn't send exact list, need to check Key names
-        // Actually extended_kp.py sends: life_stone, lucky_stone, punya_stone, favorable_deity, favorable_metal, favorable_color, favorable_day, favorable_direction
-        // I will map them as best as possible or generic
-    ];
 
     // Manual mapping based on what I implemented in backend
     const rows = [

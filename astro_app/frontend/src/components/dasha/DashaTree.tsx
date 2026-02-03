@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, Circle, ArrowRight } from 'lucide-react';
+import { ChevronDown, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface DashaLevel {
@@ -18,7 +18,7 @@ interface DashaTreeProps {
     dashas: DashaLevel[];
 }
 
-const DashaNode = ({ item, level = 0, isLast = false }: { item: DashaLevel, level?: number, isLast?: boolean }) => {
+const DashaNode = ({ item, level = 0 }: { item: DashaLevel, level?: number }) => {
     const [isOpen, setIsOpen] = useState(item.is_current); // Auto-open current
     const hasChildren = (item.antardashas && item.antardashas.length > 0) || (item.pratyantardashas && item.pratyantardashas.length > 0);
 
@@ -81,7 +81,7 @@ const DashaNode = ({ item, level = 0, isLast = false }: { item: DashaLevel, leve
                         className={`pl-4 md:pl-8 border-l-2 ${levelColors[level] || 'border-l-slate-700'} border-opacity-30 ml-4`}
                     >
                         {children?.map((child, idx) => (
-                            <DashaNode key={idx} item={child} level={level + 1} isLast={idx === children.length - 1} />
+                            <DashaNode key={idx} item={child} level={level + 1} />
                         ))}
                     </motion.div>
                 )}

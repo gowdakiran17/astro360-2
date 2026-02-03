@@ -1,4 +1,3 @@
-import React from 'react';
 import PlaceholderIntelligence from './PlaceholderIntelligence';
 
 const TeamDynamics = () => {

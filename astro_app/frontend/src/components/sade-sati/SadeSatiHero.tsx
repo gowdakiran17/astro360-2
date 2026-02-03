@@ -1,4 +1,4 @@
-import { Share2, Clock, Calendar, AlertCircle } from 'lucide-react';
+import { Share2, Clock, Calendar } from 'lucide-react';
 
 interface SadeSatiHeroProps {
     status: 'active' | 'completed';
@@ -9,7 +9,7 @@ interface SadeSatiHeroProps {
     daysRemaining: number;
 }
 
-const SadeSatiHero = ({ status, phase, startDate, endDate, progress, daysRemaining }: SadeSatiHeroProps) => {
+const SadeSatiHero = ({ status, phase, startDate, progress, daysRemaining }: SadeSatiHeroProps) => {
     // Phase Configuration
     const phases = {
         rising: {

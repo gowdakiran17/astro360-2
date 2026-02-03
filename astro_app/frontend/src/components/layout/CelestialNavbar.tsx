@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Home, Star, Sparkles, Zap, User,
+    Home, Sparkles, Zap, User,
     Bell, LayoutGrid, LogOut, BrainCircuit,
     ShieldCheck, HelpCircle, ChevronRight,
     Crown
@@ -48,7 +48,7 @@ const CelestialNavbar = () => {
         return location.pathname.startsWith(path);
     };
 
-    const userEmail = user?.email || 'Astro Soul';
+    const userEmail = user?.email || 'Bhava Soul';
     const userInitial = userEmail.charAt(0).toUpperCase();
     const userName = userEmail.split('@')[0];
 

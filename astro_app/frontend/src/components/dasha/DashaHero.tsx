@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Calendar, ChevronRight, Star } from 'lucide-react';
+import { Clock, Calendar, ChevronRight } from 'lucide-react';
 
 interface DashaHeroProps {
     currentMahadasha: string;

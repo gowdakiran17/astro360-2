@@ -160,7 +160,7 @@ const ProAstrologerHome = () => {
               <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
                 <Sun className="w-10 h-10 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-white mb-3">Astro360</h2>
+              <h2 className="text-3xl font-bold text-white mb-3">Bhava360</h2>
               <p className="text-lg text-amber-200/80">Professional Vedic Astrology Predictions</p>
               <p className="text-slate-400 mt-2">Unlock detailed insights into your destiny based on ancient Vedic wisdom</p>
             </div>
@@ -253,16 +253,6 @@ const ProAstrologerHome = () => {
             </div>
             <div className="px-1">
               <DailyHoroscopes
-                chartData={{
-                  name: currentProfile?.name,
-                  date: currentProfile?.date,
-                  time: currentProfile?.time,
-                  location: currentProfile?.location,
-                  timezone: currentProfile?.timezone,
-                  latitude: currentProfile?.latitude,
-                  longitude: currentProfile?.longitude
-                }}
-                dashaData={dashaData}
                 dailyHoroscopeData={dailyHoroscopeData}
                 onRefresh={() => fetchData(currentProfile, selectedDate)}
               />

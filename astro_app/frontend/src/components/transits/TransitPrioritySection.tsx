@@ -12,7 +12,7 @@ interface TransitPrioritySectionProps {
     loading: boolean;
 }
 
-const TransitPrioritySection: React.FC<TransitPrioritySectionProps> = ({ priorities, actions, transits, loading }) => {
+const TransitPrioritySection: React.FC<TransitPrioritySectionProps> = ({ priorities, actions, loading }) => {
 
     // Helper to find transit details by ID/Name if priority list has IDs
     // For MVP we assume priorities is just a list of names/strings provided by AI

@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Calendar, ChevronRight, Clock } from 'lucide-react';
+import { ChevronRight, Clock } from 'lucide-react';
 
 interface TimelineEvent {
     date: string;
@@ -47,7 +46,7 @@ const TransitTimeline: React.FC<TransitTimelineProps> = ({ story, events, loadin
                     <div key={index} className="relative pl-8 group">
                         {/* Dot */}
                         <div className={`absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-4 border-[#030014] ${event.impact === 'High' ? 'bg-red-500' :
-                                event.impact === 'Medium' ? 'bg-amber-500' : 'bg-blue-500'
+                            event.impact === 'Medium' ? 'bg-amber-500' : 'bg-blue-500'
                             }`} />
 
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-8">

@@ -5,7 +5,7 @@ import KPStrengthTable from '../../components/kp/KPStrengthTable';
 import KPPlanetaryDetails from '../../components/kp/KPPlanetaryDetails';
 import KPLuckyPoints from '../../components/kp/KPLuckyPoints';
 import api from '../../services/api';
-import { useChart } from '../../context/ChartContext';
+import { useChartSettings } from '../../context/ChartContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import KPPlanetTable from '../../components/kp/KPPlanetTable';
 import KPHouseTable from '../../components/kp/KPHouseTable';
@@ -15,11 +15,11 @@ import SouthIndianChart from '../../components/charts/SouthIndianChart';
 import { LayoutGrid, Info, Table as TableIcon, Star } from 'lucide-react';
 
 const KPChart: React.FC = () => {
-    const { currentProfile } = useChart();
+    const { currentProfile } = useChartSettings();
     const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [chartStyle, setChartStyle] = useState<'NORTH_INDIAN' | 'SOUTH_INDIAN'>('SOUTH_INDIAN');
+    const [chartStyle] = useState<'NORTH_INDIAN' | 'SOUTH_INDIAN'>('SOUTH_INDIAN');
 
     const fetchData = useCallback(async () => {
         if (!currentProfile) return;

@@ -9,7 +9,7 @@ interface DashaInsightCardProps {
 const DashaInsightCard: React.FC<DashaInsightCardProps> = ({ mahadasha, antardasha }) => {
 
     // Simple mock logic for insights - ideally this comes from backend or a robust mapping
-    const getInsight = (m: string, a: string) => {
+    const getInsight = (m: string) => {
         if (m === 'Saturn') return "A period of discipline, hard work, and karmic restructuring. Expect slow but steady progress.";
         if (m === 'Jupiter') return "A time for expansion, learning, and spiritual growth. Good for wealth and education.";
         if (m === 'Mercury') return "Excellent for business, communication, and learning new skills. Intellectual growth is favored.";
@@ -41,7 +41,7 @@ const DashaInsightCard: React.FC<DashaInsightCardProps> = ({ mahadasha, antardas
                 <div>
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Primary Influence ({mahadasha})</h4>
                     <p className="text-slate-200 leading-relaxed font-medium">
-                        {getInsight(mahadasha, antardasha)}
+                        {getInsight(mahadasha)}
                     </p>
                 </div>
 

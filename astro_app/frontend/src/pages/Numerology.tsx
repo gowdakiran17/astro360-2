@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import { LayoutGrid, Sparkles, Grid, Heart, Shield, Zap, Star, Brain, Briefcase, Activity, Edit3, Calculator, User, Hash, Eye, Phone, Home, CreditCard, Calendar } from 'lucide-react';
 import api from '../services/api';
-import AIReportButton from '../components/ai/AIReportButton';
 import { useChartSettings } from '../context/ChartContext';
-import jsPDF from 'jspdf';
 
 interface NumerologyNumber {
     number: number;
@@ -96,6 +93,7 @@ interface NumerologyResponse {
     advanced?: AdvancedData;
 }
 
+/*
 interface BlueprintMeta {
     full_name: string;
     dob: string;
@@ -108,15 +106,18 @@ interface BlueprintSectionSummary {
     title: string;
     estimated_pages: number;
 }
+*/
 
+/*
 interface NumerologyBlueprint {
     meta: BlueprintMeta;
     sections: BlueprintSectionSummary[];
 }
+*/
 
 const Numerology = () => {
     const { currentProfile } = useChartSettings();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     // Form State
     const [fullName, setFullName] = useState('');
@@ -127,9 +128,11 @@ const Numerology = () => {
     const [data, setData] = useState<NumerologyResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    /*
     const [blueprintLoading, setBlueprintLoading] = useState(false);
     const [blueprintError, setBlueprintError] = useState<string | null>(null);
     const [blueprint, setBlueprint] = useState<NumerologyBlueprint | null>(null);
+    */
 
     // Update form when chart changes
     useEffect(() => {
@@ -166,14 +169,6 @@ const Numerology = () => {
             const response = await api.post('tools/numerology', payload);
             setData(response.data);
 
-            // Auto-generate blueprint if core numbers are successful
-            if (response.data) {
-                // We use a timeout to let the state update and UI render first if needed, 
-                // but since we have the data, we can just call the API directly or use the helper.
-                // However, generateBlueprint uses the state 'fullName' and 'dob' which are already set.
-                // We'll call it directly.
-                generateBlueprint();
-            }
         } catch (err: any) {
             console.error("Failed to calculate numerology", err);
             const msg = err.response?.data?.detail || "Failed to calculate. Please check inputs and try again.";
@@ -183,42 +178,45 @@ const Numerology = () => {
         }
     };
 
-    const generateBlueprint = async () => {
-        if (!fullName || !dob) {
-            setBlueprintError("Please calculate your core numbers first.");
-            return;
-        }
-        setBlueprintLoading(true);
-        setBlueprintError(null);
-        try {
-            const payload = {
-                date: dob,
-                full_name: fullName
-            };
-            const response = await api.post('tools/numerology/blueprint', payload);
-            const bp = response.data as NumerologyBlueprint;
-            setBlueprint(bp);
-        } catch (err: any) {
-            console.error("Failed to generate blueprint", err);
-            const msg = err.response?.data?.detail || "Failed to generate blueprint. Please try again.";
-            setBlueprintError(msg);
-        } finally {
-            setBlueprintLoading(false);
-        }
-    };
+    /*
+                const generateBlueprint = async () => {
+                    if (!fullName || !dob) {
+                        setBlueprintError("Please calculate your core numbers first.");
+                        return;
+                    }
+                    setBlueprintLoading(true);
+                    setBlueprintError(null);
+                    try {
+                        const payload = {
+                            date: dob,
+                            full_name: fullName
+                        };
+                        const response = await api.post('tools/numerology/blueprint', payload);
+                        const bp = response.data as NumerologyBlueprint;
+                        setBlueprint(bp);
+                    } catch (err: any) {
+                        console.error("Failed to generate blueprint", err);
+                        const msg = err.response?.data?.detail || "Failed to generate blueprint. Please try again.";
+                        setBlueprintError(msg);
+                    } finally {
+                        setBlueprintLoading(false);
+                    }
+                };
+                */
 
+    /*
     const downloadBlueprintPdf = () => {
         if (!blueprint) return;
         const doc = new jsPDF({
             unit: 'pt',
             format: 'a4'
         });
-
+ 
         let y = 60;
         doc.setFontSize(18);
         doc.text('Personalized Numerology Blueprint', 40, y);
         y += 30;
-
+ 
         doc.setFontSize(12);
         doc.text(`Name: ${blueprint.meta.full_name}`, 40, y);
         y += 18;
@@ -226,11 +224,11 @@ const Numerology = () => {
         y += 18;
         doc.text(`Estimated Depth: ${blueprint.meta.estimated_pages}+ pages`, 40, y);
         y += 30;
-
+ 
         doc.setFontSize(14);
         doc.text('Report Structure Overview', 40, y);
         y += 24;
-
+ 
         doc.setFontSize(11);
         blueprint.sections.forEach((section, index) => {
             const line = `${index + 1}. ${section.title} (${section.estimated_pages} pages)`;
@@ -241,17 +239,17 @@ const Numerology = () => {
             doc.text(line, 50, y);
             y += 18;
         });
-
+ 
         doc.save('numerology_blueprint_preview.pdf');
     };
-
+ 
     const openBlueprintDashboard = () => {
         if (!blueprint) return;
-
+ 
         // Persist for refresh handling
         localStorage.setItem('numerology_fullName', fullName);
         localStorage.setItem('numerology_dob', dob);
-
+ 
         navigate('/tools/numerology/blueprint', {
             state: {
                 fullName,
@@ -259,6 +257,7 @@ const Numerology = () => {
             }
         });
     };
+    */
 
     // Helper for Number Card
     const NumberCard = ({
