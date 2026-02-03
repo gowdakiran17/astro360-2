@@ -237,7 +237,7 @@ class DailyHoroscopeEngine:
             # Generate CTA buttons
             cta_buttons = [
                 {"label": "🎯 Set Alert", "action": "alert", "time": timing},
-                {"label": "💬 Ask AI", "action": "chat", "context": life_area}
+                {"label": "💬 Ask AI", "action": "ask_ai", "context": life_area}
             ]
             
             return OptimalAction(
@@ -366,11 +366,19 @@ RULES:
                 moon_sign = planet["zodiac_sign"]
                 break
         
-        # Get birth nakshatra
-        birth_nakshatra = "Ashwini"  # Placeholder - should extract from chart
+        # Get birth nakshatra and mantra
+        birth_nakshatra = "Ashwini"
+        birth_mantra = "Om Ashwini Kumaraya Namah"
+        
         for planet in birth_chart.get("planets", []):
             if planet["name"] == "Moon":
                 birth_nakshatra = planet.get("nakshatra", "Ashwini")
+                # Find mantra in NAKSHATRAS list
+                from astro_app.backend.astrology.nakshatra_intelligence import NAKSHATRAS
+                for nak in NAKSHATRAS:
+                    if nak["name"].lower() == birth_nakshatra.lower():
+                        birth_mantra = nak.get("mantra", "Om Shanti")
+                        break
                 break
         
         horoscope_cards = []
@@ -426,7 +434,7 @@ RULES:
         return DailyHoroscopeResponse(
             date=current_time.strftime("%A, %B %d, %Y"),
             overall_theme=overall_theme,
-            power_mantra="Om Shanti",
+            power_mantra=birth_mantra,
             primary_focus="Growth",
             harmonic_color="Gold",
             optimal_direction="East",
