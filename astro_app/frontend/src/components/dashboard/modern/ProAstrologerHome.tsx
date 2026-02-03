@@ -8,6 +8,7 @@ import QuickReferenceData from './QuickReferenceData';
 import NakshatraIntelligenceCenter from './NakshatraIntelligenceCenter';
 import PlanetaryStatus from './PlanetaryStatus';
 import CosmicConsultation from './CosmicConsultation';
+import DailyHoroscopes from './DailyHoroscopes';
 // PersonalizedRemedies moved to dedicated hub
 import {
   Sun, ArrowRight, RefreshCw, Star, Sparkles
@@ -175,27 +176,28 @@ const ProAstrologerHome = () => {
   // const currentDasha = getCurrentDasha();
 
   return (
-    <div className="min-h-screen w-full bg-[#050816] bg-gradient-to-b from-[#2D1B69] via-[#1E3A8A] to-[#050816] text-slate-100 relative overflow-hidden font-sans">
+    <div className="min-h-screen w-full bg-[#030014] bg-gradient-to-b from-[#0B0122] via-[#050816] to-[#030014] text-slate-100 relative overflow-hidden font-sans">
       {/* Mystical Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[80%] h-[80%] bg-indigo-900/10 blur-[150px] rounded-full animate-pulse-slow opacity-30" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] bg-purple-900/10 blur-[150px] rounded-full animate-pulse-slow opacity-30" style={{ animationDelay: '3s' }} />
+        <div className="absolute top-[-10%] left-[-10%] w-[80%] h-[80%] bg-indigo-500/5 blur-[120px] rounded-full animate-pulse-slow opacity-20" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] bg-blue-600/5 blur-[120px] rounded-full animate-pulse-slow opacity-20" style={{ animationDelay: '3s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.03)_0%,transparent_70%)]" />
 
         {/* Decorative Celestial Patterns */}
-        <div className="absolute top-1/4 right-[5%] opacity-[0.05] rotate-12 scale-150">
+        <div className="absolute top-1/4 right-[5%] opacity-[0.03] rotate-12 scale-150">
           <Star className="w-96 h-96 text-yellow-500" />
         </div>
-        <div className="absolute bottom-1/4 left-[10%] opacity-[0.03] -rotate-12 scale-125">
+        <div className="absolute bottom-1/4 left-[10%] opacity-[0.02] -rotate-12 scale-125">
           <Sparkles className="w-[30rem] h-[30rem] text-orange-500" />
         </div>
       </div>
 
       {/* Star Field Background */}
       <div className="fixed inset-0 pointer-events-none z-[1]">
-        {Array.from({ length: 100 }, (_, i) => (
+        {Array.from({ length: 150 }, (_, i) => (
           <div
             key={i}
-            className="absolute w-0.5 h-0.5 bg-yellow-400 rounded-full animate-twinkle opacity-30"
+            className="absolute w-0.5 h-0.5 bg-white rounded-full animate-twinkle opacity-20"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -206,7 +208,7 @@ const ProAstrologerHome = () => {
         ))}
       </div>
 
-      <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-12 py-8 md:py-16 space-y-12 md:space-y-24">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-16 py-12 md:py-24 space-y-20 md:space-y-40">
 
         {/* Premium Header & Hero */}
         <div className="space-y-8 md:space-y-16">
@@ -216,6 +218,31 @@ const ProAstrologerHome = () => {
           </div>
           <CosmicHero chartData={chartData} panchangData={periodOverview?.daily_analysis?.panchang} />
         </div>
+
+        {/* Daily Horoscopes Section */}
+        {chartData && (
+          <section className="space-y-8 md:space-y-12">
+            <div className="flex items-center gap-6 px-2">
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+              <h2 className="text-[10px] font-black text-amber-400/90 uppercase tracking-[0.5em] text-center whitespace-nowrap">Daily Cosmic Insights</h2>
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+            </div>
+            <div className="px-1">
+              <DailyHoroscopes
+                chartData={{
+                  name: currentProfile?.name,
+                  date: currentProfile?.date,
+                  time: currentProfile?.time,
+                  location: currentProfile?.location,
+                  timezone: currentProfile?.timezone,
+                  latitude: currentProfile?.latitude,
+                  longitude: currentProfile?.longitude
+                }}
+                dashaData={dashaData}
+              />
+            </div>
+          </section>
+        )}
 
         {/* 3. Main Dashboard Grid */}
         <div className="space-y-12 md:space-y-20">
