@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
 from datetime import datetime, timedelta, timezone
 import pytz
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 import time
 
@@ -19,6 +19,7 @@ from ..astrology.gann_engine import (
 )
 from ..astrology.performance_engine import PerformanceEngine, get_performance_engine
 from ..astrology.asset_engine import get_asset_intelligence, ASSET_DNA
+from ..astrology.crypto_timing_engine import get_crypto_timing_analysis
 from ..services.live_data import LiveDataService
 from ..database import get_db
 from ..models import MarketSignal, User
@@ -103,6 +104,35 @@ class IntelligenceCard(BaseModel):
     message: str
     details: List[str]
 
+# New Models for Comprehensive Dashboard
+class CosmicWeather(BaseModel):
+    moon_phase: str
+    moon_sign: str
+    moon_house: str
+    void_of_course: bool
+    planetary_hour: Dict[str, Any]
+    retrogrades: List[str]
+    aspects: List[Dict[str, Any]]
+
+class PersonalInsights(BaseModel):
+    dash_period: str
+    trading_bias: str
+    favorable_sectors: List[str]
+    challenging_periods: List[str]
+    favorable_windows: Optional[List[Dict[str, str]]] = None # For hourly windows
+
+class MarketIndicator(BaseModel):
+    volatility_score: float
+    trend: str
+    confidence: str
+    trading_bias: str
+
+class UpcomingEvent(BaseModel):
+    date: str
+    event: str
+    impact: str
+    recommendation: str
+
 class BradleyIndicator(BaseModel):
     current_value: float
     trend_direction: str
@@ -126,39 +156,47 @@ class VolatilityForecast(BaseModel):
 
 class MarketTimingResponse(BaseModel):
     date: str
-    # Legacy fields (Optional for fallback)
+    # Legacy / Fallback
     transits: Optional[List[dict]] = None
     insights: Optional[List[dict]] = None
     summary: Optional[str] = None
     
-    # New V3 API Fields
-    overall_market_bias: Optional[str] = None
+    # V3 / Comprehensive Dashboard Fields
+    cosmic_weather: Optional[CosmicWeather] = None
+    market_indicators: Optional[MarketIndicator] = None # Maps to volatility_forecast/overall_bias
+    personal_insights: Optional[PersonalInsights] = None
+    upcoming_events: Optional[List[UpcomingEvent]] = None
+    sector_rotation: Optional[Dict[str, List[str]]] = None # Strong, Neutral, Weak
+    
+    # Keeping raw V3 fields for backward compatibility/debugging if needed
     bradley_indicator: Optional[BradleyIndicator] = None
     gann_time_cycles: Optional[GannTimeCycles] = None
     volatility_forecast: Optional[VolatilityForecast] = None
-    lunar_influence: Optional[dict] = None
 
 @router.get("/market-timing", response_model=MarketTimingResponse)
 async def get_market_timing(
-    lat: float = 40.7128, # Default to New York
+    lat: float = 40.7128, # Market Location (default NY)
     lon: float = -74.0060,
-    timezone: str = "-05:00"
+    timezone: str = "-05:00",
+    # Optional Personal Birth Details
+    birth_date: Optional[str] = None, # DD/MM/YYYY
+    birth_time: Optional[str] = None, # HH:MM
+    birth_lat: Optional[float] = None,
+    birth_lon: Optional[float] = None,
+    birth_timezone: Optional[str] = None
 ):
     """
-    Get market timing intelligence based on current planetary transits.
-    Defaults to New York coordinates for 'Market' time.
-    Uses external API for high-precision panchang data if available.
+    Get comprehensive market timing intelligence.
+    If birth details are provided, returns personalized trading insights.
     """
     
-    # Get current time in the requested timezone
+    # Get current time in local market time
     offset_hours = parse_timezone(timezone)
     utc_now = datetime.now(pytz.utc)
     local_now = utc_now + timedelta(hours=offset_hours)
     
     date_str = local_now.strftime("%d/%m/%Y")
-    time_str = local_now.strftime("%H:%M")
     
-    # 1. Try external API for Market Insights first
     date_details = {
         "date": date_str,
         "latitude": lat,
@@ -166,32 +204,165 @@ async def get_market_timing(
         "timezone": timezone
     }
     
-    external_response = await astrology_api_service.get_market_insights(date_details)
+    birth_details = None
+    if birth_date and birth_time:
+        birth_details = {
+            "date": birth_date,
+            "time": birth_time,
+            "latitude": birth_lat or lat,
+            "longitude": birth_lon or lon,
+            "timezone": birth_timezone or timezone
+        }
+
+
+    # DISABLED: External API call (testing local engine)
+    # external_response = await astrology_api_service.get_market_insights(date_details, birth_details)
+    external_response = None  # Force local engine
     
     if external_response and external_response.get("success"):
         data = external_response.get("data", {})
-        # Map or direct pass depending on keys.
-        # Assuming external API returns keys like 'transits', 'insights', 'summary'
-        # If not, we might need adjustments. Let's try to fit it.
-        # The logs showed "Field required: date", so the external API might not return 'date' or structure is different.
         
-        # Safe merge locally generated 'date' since we know it.
+        # Safe merge locally generated 'date'
         if "date" not in data:
             data["date"] = local_now.isoformat()
             
+        # MAP API Response to new Frontend Structure
+        # The API returns 'lunar_influence', 'volatility_forecast' etc.
+        # We need to construct 'cosmic_weather', 'market_indicators' etc.
+        
+        # 1. Cosmic Weather Construction
+        lunar = data.get("lunar_influence", {})
+        # Mock/Derive missing fields if API doesn't send exact structure yet
+        cosmic_weather = {
+            "moon_phase": lunar.get("phase_influence", {}).get("trend", "Waxing"), # Fallback
+            "moon_sign": "Leo", # Placeholder or extract from transits if available
+            "moon_house": "5th",
+            "void_of_course": False,
+            "planetary_hour": {"planet": "Jupiter", "quality": "favorable"}, # Mock dynamic calculation
+            "retrogrades": [],
+            "aspects": []
+        }
+        
+        # 2. Market Indicators
+        vol = data.get("volatility_forecast", {})
+        market_indicators = {
+            "volatility_score": vol.get("volatility_percentage", 50),
+            "trend": data.get("bradley_indicator", {}).get("trend_direction", "neutral"),
+            "confidence": "high",
+            "trading_bias": vol.get("recommendation", "neutral")
+        }
+        
+        # 3. Personal Insights (If birth data sent)
+        personal_section = None
+        if birth_details:
+             # If API returns personal correlates, map them. 
+             # For now, we mock/pass through what we expect or what local logic might add.
+             personal_section = {
+                 "dash_period": "Jupiter/Saturn", 
+                 "trading_bias": "Growth",
+                 "favorable_sectors": ["Tech", "Finance"],
+                 "challenging_periods": []
+             }
+        
+        # Inject mapped data back into 'data' dict for Pydantic
+        data["cosmic_weather"] = cosmic_weather
+        data["market_indicators"] = market_indicators
+        data["personal_insights"] = personal_section
+        data["sector_rotation"] = {
+            "STRONG": ["Technology", "Finance"],
+            "NEUTRAL": ["Real Estate"],
+            "WEAKENING": ["Energy"]
+        }
+        
         try:
-            logger.info("Successfully mapped external API data.")
+            logger.info("Successfully mapped external API data to Dashboard schema.")
             return MarketTimingResponse(**data)
         except Exception as validation_err:
              logger.warning(f"External API data schema mismatch: {validation_err}. Fallback to local.")
              # Fallthrough to local calculation
 
-    # 2. Fallback to Enhanced Local Calculation
+    # 2. Use Local Market Timing Engine (Primary Method)
+    logger.info("Using local market timing engine for analysis")
+    
+    from ..astrology.market_timing_engine import get_comprehensive_market_analysis
+    
+    time_str = local_now.strftime("%H:%M")
+    
+    local_response = get_comprehensive_market_analysis(
+        date_str=date_str,
+        time_str=time_str,
+        timezone=timezone,
+        lat=lat,
+        lon=lon,
+        birth_details=birth_details
+    )
+    
+    if local_response and local_response.get("success"):
+        data = local_response.get("data", {})
+        
+        # Map local engine output to dashboard structure
+        lunar = data.get("lunar_influence", {})
+        vol = data.get("volatility_forecast", {})
+        bradley = data.get("bradley_indicator", {})
+        sectors = data.get("sector_rotation", {})
+        
+        # Build cosmic weather from lunar + transits
+        cosmic_weather = {
+            "moon_phase": lunar.get("phase", "Waxing"),
+            "moon_sign": lunar.get("zodiac_sign", "Unknown"),
+            "moon_house": "Unknown",  # Would need house calculation
+            "void_of_course": False,  # Would need aspect calculation
+            "planetary_hour": {"planet": "Sun", "quality": "favorable"},
+            "retrogrades": [],  # Extract from transits
+            "aspects": []  # Extract from Bradley components
+        }
+        
+        # Market indicators from volatility + Bradley
+        market_indicators = {
+            "volatility_score": vol.get("volatility_percentage", 50),
+            "trend": bradley.get("trend_direction", "neutral"),
+            "confidence": "high" if bradley.get("components", {}).get("aspect_count", 0) > 5 else "medium",
+            "trading_bias": bradley.get("rating", "neutral")
+        }
+        
+        # Personal insights if birth data provided
+        personal_section = None
+        if birth_details:
+            personal_data = data.get("personal_insights", {})
+            personal_section = {
+                "dash_period": personal_data.get("dasha_period", "Unknown"),
+                "trading_bias": personal_data.get("trading_bias", "Neutral"),
+                "favorable_sectors": personal_data.get("favorable_sectors", []),
+                "challenging_periods": personal_data.get("challenging_periods", [])
+            }
+        
+        # Upcoming events (mock for now - would need ephemeris)
+        upcoming_events = [
+            {"date": "Feb 15", "event": "Mercury Station", "impact": "Communication delays", "recommendation": "Avoid new contracts"},
+            {"date": "Feb 22", "event": "Sun enters Pisces", "impact": "Speculative peak", "recommendation": "Take profits"}
+        ]
+        
+        # Inject all mapped data
+        data["cosmic_weather"] = cosmic_weather
+        data["market_indicators"] = market_indicators
+        data["personal_insights"] = personal_section
+        data["sector_rotation"] = sectors
+        data["upcoming_events"] = upcoming_events
+        
+        try:
+            logger.info("Successfully generated local market analysis")
+            return MarketTimingResponse(**data)
+        except Exception as validation_err:
+            logger.error(f"Local data validation error: {validation_err}")
+            raise HTTPException(status_code=500, detail="Failed to generate market analysis")
+    
+    # 3. Final fallback - basic transit analysis
     try:
         transit_chart = calculate_chart(date_str, time_str, timezone, lat, lon)
     except Exception as e:
         logger.error(f"Error calculating transit chart: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
     
     # Analyze Transits for Market Signals
     insights = []
@@ -905,3 +1076,156 @@ async def gann_ai_chat(request: GannAIChatRequest):
                   f"Your personal alignment is {gann_ctx['personal'].get('status', 'Neutral')}. "
                   f"(Note: AI API key missing, providing mock insight)."
     }
+
+
+# ============================================================================
+# CRYPTO TIMING INTELLIGENCE
+# ============================================================================
+
+class PlanetaryInfluence(BaseModel):
+    planet: str
+    status: str
+    effect: str
+    strength: float
+    signal: str
+
+class TimingWindow(BaseModel):
+    type: str  # entry, exit, avoid
+    start_date: str
+    end_date: str
+    reason: str
+    strength: int
+
+class ActionGuidance(BaseModel):
+    strategy: str
+    position_size: str
+    stop_loss: str
+    take_profit: str
+
+class WhaleActivity(BaseModel):
+    detected: bool
+    type: str
+
+class CryptoAIAnalysis(BaseModel):
+    daily_core: str
+    deep_dive: str
+    caution_note: Optional[str] = None
+
+class CryptoTimingResponse(BaseModel):
+    crypto_symbol: str
+    timing_horizon: str
+    overall_signal: str  # buy, hold, avoid
+    confidence_score: float
+    planetary_influences: List[PlanetaryInfluence]
+    entry_windows: List[TimingWindow]
+    exit_windows: List[TimingWindow]
+    risk_periods: List[TimingWindow]
+    action_guidance: ActionGuidance
+    whale_activity: WhaleActivity
+    patterns: Optional[List[dict]] = None
+    personal_guidance: Optional[List[dict]] = None
+    ai_analysis: Optional[CryptoAIAnalysis] = None
+    dasha_context: Optional[dict] = None
+
+
+@router.post("/crypto-timing", response_model=CryptoTimingResponse)
+async def get_crypto_timing(
+    crypto_symbol: str,
+    timing_horizon: str = "swing",  # intraday, swing, long_term
+    # Optional location (defaults to current time at NY)
+    lat: float = 40.7128,
+    lon: float = -74.0060,
+    timezone: str = "-05:00",
+    # Optional birth details for personalization
+    birth_date: Optional[str] = None,
+    birth_time: Optional[str] = None,
+    birth_lat: Optional[float] = None,
+    birth_lon: Optional[float] = None,
+    birth_timezone: Optional[str] = None
+):
+    """
+    Get comprehensive crypto timing intelligence.
+    Analyzes planetary influences specific to cryptocurrency markets.
+    """
+    from ..services.crypto_ai_service import crypto_ai_service
+    
+    # Get current time
+    offset_hours = parse_timezone(timezone)
+    utc_now = datetime.now(pytz.utc)
+    local_now = utc_now + timedelta(hours=offset_hours)
+    
+    date_str = local_now.strftime("%d/%m/%Y")
+    time_str = local_now.strftime("%H:%M")
+    
+    # Prepare birth details context for personalization
+    birth_details_context = None
+    if birth_date and birth_time:
+        # Calculate full birth chart and dasha for personalization
+        from ..astrology.chart import calculate_chart
+        from ..astrology.dasha import calculate_vimshottari_dasha
+        
+        try:
+            # Standardize date format for birth chart/dasha calculation
+            # birth_date is YYYY-MM-DD (standard HTML5 date)
+            b_date = birth_date
+            if "-" in birth_date:
+                # YYYY-MM-DD to DD/MM/YYYY
+                parts = birth_date.split('-')
+                b_date = f"{parts[2]}/{parts[1]}/{parts[0]}"
+            
+            birth_chart = calculate_chart(
+                date_str=b_date,
+                time_str=birth_time,
+                timezone_str=birth_timezone or timezone,
+                latitude=birth_lat or lat,
+                longitude=birth_lon or lon
+            )
+            
+            dasha_data = await calculate_vimshottari_dasha(
+                date_str=b_date,
+                time_str=birth_time,
+                timezone_str=birth_timezone or timezone,
+                latitude=birth_lat or lat,
+                longitude=birth_lon or lon
+            )
+            
+            birth_details_context = birth_chart
+            # Ensure summary is present, fallback to empty dict if not
+            birth_details_context['summary'] = dasha_data.get('summary', {}) if dasha_data else {}
+        except Exception as e:
+            logger.error(f"Error calculating birth context for crypto personalization: {e}")
+    
+    # Try external API first (if enabled)
+    # external_response = await astrology_api_service.get_crypto_timing(...)
+    # For now, skip external API and use local engine
+    
+    # Use local crypto timing engine
+    logger.info(f"Generating crypto timing for {crypto_symbol} using local engine")
+    
+    local_response = get_crypto_timing_analysis(
+        crypto_symbol=crypto_symbol,
+        timing_horizon=timing_horizon,
+        date_str=date_str,
+        time_str=time_str,
+        timezone=timezone,
+        lat=lat,
+        lon=lon,
+        birth_details=birth_details_context
+    )
+    
+    if local_response and local_response.get("success"):
+        data = local_response.get("data", {})
+        
+        try:
+            logger.info(f"Successfully generated crypto timing for {crypto_symbol}")
+            
+            # Add AI Analysis
+            ai_insight = await crypto_ai_service.generate_crypto_insight(data)
+            data["ai_analysis"] = ai_insight
+            
+            return CryptoTimingResponse(**data)
+        except Exception as validation_err:
+            logger.error(f"Crypto timing validation error: {validation_err}")
+            raise HTTPException(status_code=500, detail="Failed to generate crypto timing")
+    
+    raise HTTPException(status_code=500, detail="Crypto timing analysis failed")

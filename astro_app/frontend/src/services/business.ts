@@ -38,9 +38,19 @@ interface GannAIRequest {
 }
 
 export const businessService = {
-  getMarketTiming: async (location?: LocationParams) => {
-    const config = location ? { params: location } : {};
-    const response = await api.get('business/market-timing', config);
+  getMarketTiming: async (location?: LocationParams, birthDetails?: { date: string; time: string; lat?: number; lon?: number; timezone?: string }) => {
+    const params: Record<string, unknown> = {};
+    if (location) {
+      Object.assign(params, location);
+    }
+    if (birthDetails) {
+      params.birth_date = birthDetails.date;
+      params.birth_time = birthDetails.time;
+      params.birth_lat = birthDetails.lat;
+      params.birth_lon = birthDetails.lon;
+      params.birth_timezone = birthDetails.timezone;
+    }
+    const response = await api.get('business/market-timing', { params });
     return response.data;
   },
   getCryptoSignals: async () => {
@@ -61,7 +71,7 @@ export const businessService = {
     if (location) {
       Object.assign(params, location);
     }
-    
+
     const response = await api.get('business/live-feed', { params });
     return response.data;
   },
@@ -82,9 +92,9 @@ export const businessService = {
     return response.data;
   },
   getGannIntelligence: async (
-    location?: LocationParams, 
-    price?: number, 
-    asset?: string, 
+    location?: LocationParams,
+    price?: number,
+    asset?: string,
     marketType: string = 'Crypto',
     birthDetails?: { date: string, time: string, timezone?: string, lat?: number, lon?: number },
     asOfDate?: string
@@ -105,13 +115,13 @@ export const businessService = {
     }
 
     if (birthDetails) {
-        params.birth_date = birthDetails.date;
-        params.birth_time = birthDetails.time;
-        if (birthDetails.timezone) params.birth_timezone = birthDetails.timezone;
-        if (birthDetails.lat) params.birth_lat = birthDetails.lat;
-        if (birthDetails.lon) params.birth_lon = birthDetails.lon;
+      params.birth_date = birthDetails.date;
+      params.birth_time = birthDetails.time;
+      if (birthDetails.timezone) params.birth_timezone = birthDetails.timezone;
+      if (birthDetails.lat) params.birth_lat = birthDetails.lat;
+      if (birthDetails.lon) params.birth_lon = birthDetails.lon;
     }
-    
+
     const response = await api.get('business/gann-intelligence', { params });
     return response.data;
   },

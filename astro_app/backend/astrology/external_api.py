@@ -307,9 +307,10 @@ class AstrologyApiIoService:
             logger.error(f"Error calling astrology-api.io for period analysis: {e}")
             return None
 
-    async def get_market_insights(self, date_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def get_market_insights(self, date_details: Dict[str, Any], birth_details: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
         """
-        Fetches premium market insights from astrology-api.io/p/insights-market.
+        Fetches premium market insights from astrology-api.io.
+        Includes birth details if provided for personalized trading signals.
         """
         if not self.enabled:
             return None
@@ -322,14 +323,35 @@ class AstrologyApiIoService:
             "lon": date_details['longitude'],
             "tzone": self._parse_timezone(date_details['timezone'])
         }
+
+        # enhance with user birth data for personalized market timing
+        if birth_details:
+             # Assuming birth_details comes in standard format: date (DD/MM/YYYY), time (HH:MM), lat, lon, timezone
+             try:
+                 b_day, b_month, b_year = map(int, birth_details['date'].split('/'))
+                 b_hour, b_min = map(int, birth_details['time'].split(':'))
+                 
+                 payload["user_birth_data"] = {
+                     "day": b_day,
+                     "month": b_month,
+                     "year": b_year,
+                     "hour": b_hour,
+                     "min": b_min,
+                     "lat": birth_details['latitude'],
+                     "lon": birth_details['longitude'],
+                     "tzone": self._parse_timezone(birth_details['timezone'])
+                 }
+             except Exception as e:
+                 logger.warning(f"Could not parse birth details for market API: {e}")
         
         try:
-            async with httpx.AsyncClient() as client:
+            # Short timeout to prevent UI blocking
+            async with httpx.AsyncClient(transport=httpx.AsyncHTTPTransport(retries=1)) as client:
                 response = await client.post(
                     f"{self.BASE_URL}/insights/financial/market-timing", 
                     json=payload,
                     headers={"Authorization": f"Bearer {self.api_key}"},
-                    timeout=10.0
+                    timeout=5.0 
                 )
                 response.raise_for_status()
                 return response.json()

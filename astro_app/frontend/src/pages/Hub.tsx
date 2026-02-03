@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import MainLayout from '../components/layout/MainLayout';
 import { MENU_ITEMS } from '../data/navigation';
 import { Plus, Search, MapPin, Edit2, Trash2, Star, Sparkles, BrainCircuit, ShieldCheck, Activity } from 'lucide-react';
@@ -286,10 +286,13 @@ const Hub = () => {
                                         className="space-y-12"
                                     >
                                         <div className="flex items-center gap-8 group/title">
-                                            <h2 className="text-xs font-black text-amber-500/80 tracking-[0.6em] uppercase whitespace-nowrap group-hover/title:text-amber-500 transition-colors duration-500">
-                                                {section.section}
-                                            </h2>
-                                            <div className="h-px w-full bg-gradient-to-r from-amber-500/30 via-white/5 to-transparent" />
+                                            <div className="flex flex-col">
+                                                <h2 className="text-xl font-black text-amber-500 tracking-[0.2em] uppercase whitespace-nowrap group-hover/title:text-amber-400 transition-colors duration-500 shadow-amber-500/20 drop-shadow-sm">
+                                                    {section.section}
+                                                </h2>
+                                                <div className="h-1 w-12 bg-gradient-to-r from-amber-500 to-transparent mt-2 rounded-full" />
+                                            </div>
+                                            <div className="h-px w-full bg-gradient-to-r from-white/10 to-transparent mt-2" />
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
@@ -302,27 +305,27 @@ const Hub = () => {
                                                     <Link
                                                         key={itemIdx}
                                                         to={item.to}
-                                                        className={`group relative flex flex-col p-6 lg:p-8 bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2.5rem] hover:bg-white/[0.04] hover:border-amber-500/40 transition-all duration-300 shadow-xl overflow-hidden hover:-translate-y-1 ${spanClass}`}
+                                                        className={`group relative flex flex-col p-6 lg:p-10 bg-[#0A0E1F]/80 backdrop-blur-2xl border border-white/10 rounded-[2rem] hover:bg-[#0F1429] hover:border-amber-500/50 transition-all duration-300 shadow-2xl hover:shadow-[0_20px_40px_rgba(245,158,11,0.1)] overflow-hidden hover:-translate-y-2 ${spanClass}`}
                                                     >
                                                         {/* Background Glow */}
-                                                        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-[80px] rounded-full group-hover:bg-amber-500/10 transition-all" />
+                                                        <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 blur-[100px] rounded-full group-hover:bg-amber-500/10 transition-all" />
 
                                                         {/* Refraction Overlay */}
-                                                        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
 
                                                         <div className="relative z-10 flex flex-col h-full gap-6 lg:gap-8">
                                                             {/* Header */}
                                                             <div className="flex items-start justify-between">
                                                                 <div className="flex items-center gap-5">
-                                                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-slate-950 to-slate-900 border border-white/10 flex items-center justify-center relative shadow-inner group-hover:border-amber-500/40 transition-all duration-700">
-                                                                        <item.icon className="w-7 h-7 text-amber-500 group-hover:scale-110 transition-transform duration-700" />
+                                                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-slate-900 to-black border border-white/10 flex items-center justify-center relative shadow-lg group-hover:border-amber-500/50 transition-all duration-700">
+                                                                        <item.icon className="w-8 h-8 text-amber-500 group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
                                                                     </div>
-                                                                    <div className="space-y-1">
-                                                                        <h3 className="text-lg font-black text-white group-hover:text-amber-400 transition-colors uppercase tracking-tight leading-none">
+                                                                    <div className="space-y-1.5">
+                                                                        <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors tracking-tight leading-none font-sans">
                                                                             {item.label}
                                                                         </h3>
                                                                         {item.badge && (
-                                                                            <span className="inline-block text-[9px] px-3 py-1 rounded-full font-black uppercase bg-amber-500 text-[#050816] shadow-lg tracking-widest leading-none">
+                                                                            <span className={`inline-block text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg tracking-widest leading-none ${item.badge === 'NEW' ? 'bg-amber-500 text-black' : 'bg-white/10 text-white border border-white/20'}`}>
                                                                                 {item.badge}
                                                                             </span>
                                                                         )}
@@ -331,39 +334,39 @@ const Hub = () => {
                                                             </div>
 
                                                             {/* Content Body */}
-                                                            <div className="space-y-4 flex-grow">
+                                                            <div className="space-y-5 flex-grow">
                                                                 {item.purpose ? (
                                                                     // Rich Content Layout (Intelligence Cards)
                                                                     <>
-                                                                        <div className="space-y-1.5">
-                                                                            <p className="text-[10px] font-black text-amber-500/60 uppercase tracking-[0.2em] flex items-center gap-2">
-                                                                                <Activity className="w-3 h-3" />
+                                                                        <div className="space-y-2">
+                                                                            <p className="text-[11px] font-black text-amber-500/80 uppercase tracking-widest flex items-center gap-2">
+                                                                                <Activity className="w-3.5 h-3.5" />
                                                                                 Purpose
                                                                             </p>
-                                                                            <p className="text-sm text-white/70 font-medium leading-relaxed">
+                                                                            <p className="text-base text-white/90 font-medium leading-relaxed">
                                                                                 {item.purpose}
                                                                             </p>
                                                                         </div>
 
-                                                                        <div className="grid grid-cols-2 gap-6 pt-2">
+                                                                        <div className="grid grid-cols-2 gap-6 pt-2 border-t border-white/5 mt-2">
                                                                             <div className="space-y-3">
-                                                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Uses</p>
+                                                                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Uses</p>
                                                                                 <div className="space-y-2">
                                                                                     {item.uses?.map((use: string, i: number) => (
                                                                                         <div key={i} className="flex items-center gap-2">
-                                                                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500/40" />
-                                                                                            <span className="text-[11px] text-white/50 font-bold tracking-tight">{use}</span>
+                                                                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                                                                            <span className="text-xs text-slate-300 font-semibold tracking-wide">{use}</span>
                                                                                         </div>
                                                                                     ))}
                                                                                 </div>
                                                                             </div>
                                                                             <div className="space-y-3">
-                                                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Output</p>
+                                                                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Output</p>
                                                                                 <div className="space-y-2">
                                                                                     {item.output?.map((out: string, i: number) => (
                                                                                         <div key={i} className="flex items-center gap-2">
-                                                                                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500/60" />
-                                                                                            <span className="text-[11px] text-white/50 font-bold tracking-tight">{out}</span>
+                                                                                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                                                                                            <span className="text-xs text-emerald-100/80 font-semibold tracking-wide">{out}</span>
                                                                                         </div>
                                                                                     ))}
                                                                                 </div>
@@ -372,11 +375,11 @@ const Hub = () => {
                                                                     </>
                                                                 ) : (
                                                                     // Standard Content Layout
-                                                                    <div className="space-y-2">
-                                                                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -translate-y-2 group-hover:translate-y-0">
+                                                                    <div className="space-y-3">
+                                                                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -translate-y-2 group-hover:translate-y-0">
                                                                             Overview
                                                                         </p>
-                                                                        <p className="text-sm text-white/60 font-medium leading-relaxed group-hover:text-white/80 transition-colors">
+                                                                        <p className="text-lg text-white/80 font-medium leading-relaxed group-hover:text-white transition-colors">
                                                                             {item.description}
                                                                         </p>
                                                                     </div>
@@ -384,7 +387,7 @@ const Hub = () => {
                                                             </div>
 
                                                             {/* Action Button Footer */}
-                                                            <div className="w-full py-4 bg-white/[0.04] border border-white/10 group-hover:bg-amber-500 group-hover:text-[#050816] group-hover:border-amber-500 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 text-center flex items-center justify-center gap-2 mt-auto">
+                                                            <div className="w-full py-4 bg-white/5 border border-white/10 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 text-center flex items-center justify-center gap-2 mt-auto shadow-lg hover:shadow-amber-500/25">
                                                                 Access Module
                                                                 <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
                                                             </div>
@@ -398,7 +401,8 @@ const Hub = () => {
                             </div>
 
                             {/* Utility Sections */}
-                            <motion.div
+                            {/* Utility Sections - Hidden as per request */}
+                            {/* <motion.div
                                 initial={{ opacity: 0 }}
                                 whileInView={{ opacity: 1 }}
                                 transition={{ duration: 1.5 }}
@@ -417,7 +421,6 @@ const Hub = () => {
                                             Invoke Expert
                                         </button>
                                     </div>
-                                    {/* Abstract Decor */}
                                     <Star className="absolute -bottom-10 -right-10 w-48 h-48 text-white/5 rotate-12 group-hover:rotate-[30deg] transition-transform duration-1000" />
                                 </div>
 
@@ -436,7 +439,7 @@ const Hub = () => {
                                     </div>
                                     <ShieldCheck className="absolute -bottom-10 -right-10 w-48 h-48 text-white/5 -rotate-12 group-hover:-rotate-[25deg] transition-transform duration-1000" />
                                 </div>
-                            </motion.div>
+                            </motion.div> */}
                         </div>
                     </div>
                 </div>

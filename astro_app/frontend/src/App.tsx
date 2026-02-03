@@ -36,6 +36,7 @@ import CosmicHub from './pages/CosmicHub';
 import MarketTiming from './pages/MarketTiming';
 import GannIntelligence from './pages/GannIntelligence';
 import CryptoStocksDashboard from './pages/CryptoStocksDashboard';
+import CryptoTiming from './pages/CryptoTiming';
 import RealTimeTrading from './pages/RealTimeTrading';
 const MarketPsychology = lazy(() => import('./pages/MarketPsychology'));
 const CorporatePlanning = lazy(() => import('./pages/CorporatePlanning'));
@@ -170,6 +171,12 @@ function App() {
                 <Route path="/cosmic/crypto-stock" element={
                   <ProtectedRoute>
                     <CryptoStocksDashboard />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/cosmic/crypto-timing" element={
+                  <ProtectedRoute>
+                    <CryptoTiming />
                   </ProtectedRoute>
                 } />
 
