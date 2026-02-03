@@ -738,7 +738,7 @@ class TransitExplanationRequest(BaseModel):
     mode: str = "Beginner"
 
 class TransitTimelineRequest(BaseModel):
-    timeline_events: List[Dict[str, Any]]
+    current_date: Optional[str] = None # "DD/MM/YYYY"
 
 # --- Transit AI Endpoints ---
 
@@ -784,16 +784,41 @@ async def explain_transit(request: TransitExplanationRequest):
 @router.post("/transits/timeline")
 async def get_transit_timeline_story(request: TransitTimelineRequest):
     """
-    Get a narrative story for the upcoming transit timeline.
+    Get real upcoming transit events and a narrative story.
     """
     try:
         from astro_app.backend.services.transit_ai_service import TransitAIService
+        from astro_app.backend.astrology.timeline import get_upcoming_events
+        from datetime import datetime
+        
+        # 1. Determine Start Date
+        start_date = request.current_date
+        if not start_date:
+            start_date = datetime.now().strftime("%d/%m/%Y")
+            
+        # 2. Calculate Real Events
+        real_events = get_upcoming_events(start_date, days=30)
+        
+        # 3. Generate Story via AI
         service = TransitAIService()
-        result = service.get_timeline_story(request.timeline_events)
-        return {"status": "success", "data": {"story": result}}
+        story = service.get_timeline_story(real_events)
+        
+        return {
+            "status": "success", 
+            "data": {
+                "events": real_events,
+                "story": story
+            }
+        }
     except Exception as e:
         logger.error(f"Transit timeline error: {str(e)}")
+        # Fallback with at least one mock event if calculation fails
         return {
             "status": "partial_success",
-            "data": {"story": "Upcoming trends look balanced."}
+            "data": {
+                "events": [
+                    {"date": "Upcoming", "event": "Planetary shifts ahead", "impact": "Medium"}
+                ],
+                "story": "The coming month brings a series of planetary shifts. Navigate them with awareness."
+            }
         }

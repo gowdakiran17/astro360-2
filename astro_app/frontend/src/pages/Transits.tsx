@@ -1,27 +1,43 @@
 import { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import api from '../services/api';
-import TransitClimateCard from '../components/transits/TransitClimateCard';
-import TransitPrioritySection from '../components/transits/TransitPrioritySection';
-import TransitTimeline from '../components/transits/TransitTimeline';
+import CosmicWeatherCard from '../components/transits/CosmicWeatherCard';
+import MajorTransits from '../components/transits/MajorTransits';
+import FastTransitsStrip from '../components/transits/FastTransitsStrip';
+import CosmicPriorities from '../components/transits/CosmicPriorities';
+import TimelineStory from '../components/transits/TimelineStory';
+import AlignmentPractice from '../components/transits/AlignmentPractice';
 import TransitInspector from '../components/transits/TransitInspector';
 import { useChartSettings } from '../context/ChartContext';
-import { AlertTriangle, Info } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 // --- Types ---
-interface TransitData {
-    planets: any[];
-    location_details: any;
+interface Planet {
+    name: string;
+    sign: string;
+    longitude: number;
+    house: number;
+    isRetrograde?: boolean;
 }
 
 interface AIInsight {
     summary: string;
-    priority_order: string[];
+    priority_order: any[];
     action_guidance: {
         do: string[];
         avoid: string[];
     };
+    alignment_practice: {
+        morning: string;
+        afternoon: string;
+        evening: string;
+    };
 }
+
+const ZODIAC_ORDER = [
+    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+];
 
 const Transits = () => {
     const { currentProfile } = useChartSettings();
@@ -29,16 +45,19 @@ const Transits = () => {
     const [error, setError] = useState<string | null>(null);
 
     // Data States
-    const [transitData, setTransitData] = useState<TransitData | null>(null);
+    const [transitPlanets, setTransitPlanets] = useState<Planet[]>([]);
+    const [dashaInfo, setDashaInfo] = useState<{ maha: string; antar: string; } | null>(null);
+    const [moonContext, setMoonContext] = useState<{ sign: string; house: number; }>({ sign: 'Unknown', house: 1 });
+
+    // AI States
     const [aiInsight, setAiInsight] = useState<AIInsight>({
         summary: "Aligning with the cosmos...",
         priority_order: [],
-        action_guidance: { do: [], avoid: [] }
+        action_guidance: { do: [], avoid: [] },
+        alignment_practice: { morning: "", afternoon: "", evening: "" }
     });
+    const [selectedTransit, setSelectedTransit] = useState<Planet | null>(null);
     const [timelineStory, setTimelineStory] = useState<string>("");
-
-    // UI States
-    const [selectedTransit, setSelectedTransit] = useState<any | null>(null);
 
     useEffect(() => {
         if (currentProfile) {
@@ -46,13 +65,22 @@ const Transits = () => {
         }
     }, [currentProfile]);
 
+    const getSignIndex = (signName: string) => ZODIAC_ORDER.indexOf(signName) + 1;
+
+    const calculateHouseFromMoon = (planetSign: string, moonSign: string): number => {
+        const pIdx = getSignIndex(planetSign);
+        const mIdx = getSignIndex(moonSign);
+        if (pIdx === 0 || mIdx === 0) return 1; // Fallback
+        return ((pIdx - mIdx + 12) % 12) + 1;
+    };
+
     const fetchData = async () => {
         if (!currentProfile) return;
 
         setLoading(true);
         setError(null);
         try {
-            // 1. Fetch Natal Chart (for Ascendant & Moon Sign Context)
+            // 1. Prepare Payloads
             const natalPayload = {
                 date: currentProfile.date,
                 time: currentProfile.time,
@@ -62,84 +90,108 @@ const Transits = () => {
                 location: currentProfile.location
             };
 
-            // 2. Fetch Deterministic Transits (Source of Truth)
             const now = new Date();
-            const transitDate = now.toLocaleDateString("en-GB"); // DD/MM/YYYY
-            const transitTime = now.toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' });
-
-            // We use the profile's location for transit impact relative to user
             const transitPayload = {
-                date: transitDate,
-                time: transitTime,
+                date: now.toLocaleDateString("en-GB"), // DD/MM/YYYY
+                time: now.toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' }),
                 timezone: currentProfile.timezone,
                 latitude: currentProfile.latitude,
                 longitude: currentProfile.longitude,
                 location_name: currentProfile.location
             };
 
-            // Run requests in parallel
+            // 2. Fetch Natal & Transits (Parallel)
             const [natalRes, transitRes] = await Promise.all([
                 api.post('chart/birth', natalPayload),
                 api.post('chart/transits', transitPayload)
             ]);
 
-            const planets = transitRes.data.planets;
-            setTransitData(transitRes.data);
+            const natalPlanets = natalRes.data.planets;
+            const rawTransitPlanets = transitRes.data.planets;
 
-            // Extract User Context from Natal Chart
-            const ascendantSign = natalRes.data.ascendant.sign;
-            const moonSign = natalRes.data.planets.find((p: any) => p.name === "Moon")?.sign || "Unknown";
+            // 3. Process Context (Moon Sign)
+            const natalMoon = natalPlanets.find((p: any) => p.name === "Moon");
+            const natalMoonSign = natalMoon?.sign || "Aries";
+            const natalMoonLon = natalMoon?.longitude || 0;
 
-            // 3. Fetch AI Insights (Explanation Layer)
+            // 4. Enhance Transit Data (Calculate House from Moon)
+            const enhancedPlanets = rawTransitPlanets.map((p: any) => ({
+                ...p,
+                house: calculateHouseFromMoon(p.sign, natalMoonSign)
+            }));
+            setTransitPlanets(enhancedPlanets);
+
+            // 5. Update Moon Context State
+            const currentMoon = enhancedPlanets.find((p: any) => p.name === "Moon");
+            setMoonContext({
+                sign: currentMoon?.sign || "Unknown",
+                house: currentMoon?.house || 1
+            });
+
+            // 6. Fetch Dasha (Needs Moon Longitude)
+            let currentDasha = null;
+            try {
+                const dashaRes = await api.post('chart/dasha', {
+                    birth_details: natalPayload,
+                    moon_longitude: natalMoonLon
+                });
+                const summary = dashaRes.data.summary;
+                if (summary) {
+                    currentDasha = {
+                        maha: summary.current_mahadasha.lord,
+                        antar: summary.current_antardasha.lord
+                    };
+                    setDashaInfo(currentDasha);
+                }
+            } catch (dashaErr) {
+                console.warn("Dasha fetch failed:", dashaErr);
+            }
+
+            // 7. Fetch AI Insights
             const aiPayload = {
                 chart_data: {
-                    ascendant: ascendantSign,
-                    moon_sign: moonSign,
+                    ascendant: { sign: natalRes.data.ascendant.sign },
+                    moon_sign: natalMoonSign,
+                    current_dasha: currentDasha ? `${currentDasha.maha}-${currentDasha.antar}` : "Unknown"
                 },
-                transits: planets.map((p: any) => ({ name: p.name, sign: p.sign, house: p.house || "Unknown" }))
+                transits: enhancedPlanets.map((p: any) => ({
+                    name: p.name,
+                    sign: p.sign,
+                    house: p.house,
+                    is_retrograde: p.isRetrograde
+                }))
             };
 
             try {
                 const insightRes = await api.post('ai/transits/daily-insight', aiPayload);
-                // Enhanced handler: Accept partial success, or fall back if data looks empty
                 const data = insightRes.data.data;
                 const status = insightRes.data.status;
 
                 if ((status === "success" || status === "partial_success") && data && data.summary) {
-                    // Check if data is actually robust
-                    if (data.priority_order && data.priority_order.length > 0) {
-                        setAiInsight(data);
-                    } else {
-                        // Data exists but priorities are missing - fill gaps with fallback
-                        const fallback = generateFallbackInsight(planets);
-                        setAiInsight({
-                            ...data,
-                            priority_order: fallback.priority_order,
-                            action_guidance: fallback.action_guidance
-                        });
-                    }
+                    setAiInsight({
+                        summary: data.summary,
+                        priority_order: data.priority_order || [],
+                        action_guidance: data.action_guidance || { do: [], avoid: [] },
+                        alignment_practice: data.alignment_practice || generateFallbackPractice()
+                    });
                 } else {
-                    console.warn("AI returned fail status/empty data, using full fallback");
-                    setAiInsight(generateFallbackInsight(planets));
+                    useFallbackInsight(enhancedPlanets);
                 }
             } catch (aiError) {
-                console.warn("AI Service unavailable or throttled:", aiError);
-                setAiInsight(generateFallbackInsight(planets));
+                console.error("AI Insight Error:", aiError);
+                useFallbackInsight(enhancedPlanets);
             }
 
-            // 4. Fetch Timeline Story
-            // Mocking timeline events for now
-            const mockEvents = [
-                { date: "Feb 05", event: "Sun trine Jupiter", impact: "High" },
-                { date: "Feb 12", event: "Mars enters Capricorn", impact: "Medium" }
-            ];
-            // We deliberately don't block on this one
+            // 8. Fetch Timeline (Real)
             try {
-                const timelineRes = await api.post('ai/transits/timeline', { timeline_events: mockEvents });
+                const timelineRes = await api.post('ai/transits/timeline', { current_date: now.toLocaleDateString("en-GB") });
                 if (timelineRes.data.status === "success" || timelineRes.data.status === "partial_success") {
                     setTimelineStory(timelineRes.data.data.story);
+                    setTimelineEvents(timelineRes.data.data.events || []);
                 }
-            } catch (ignored) { /* Timeline failure is non-critical */ }
+            } catch (err) {
+                console.warn("Timeline fetch failed:", err);
+            }
 
         } catch (err) {
             console.error("Error loading transits page:", err);
@@ -149,57 +201,79 @@ const Transits = () => {
         }
     };
 
-    // --- Helper: Local Fallback Generator ---
-    // If AI fails, we generate a basic insight based on the Moon Sign (from transitData)
-    const generateFallbackInsight = (planets: any[]): AIInsight => {
+    // UI Helper
+    const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
+
+    const useFallbackInsight = (planets: any[]) => {
         const moon = planets.find(p => p.name === "Moon");
         const moonSign = moon ? moon.sign : "the Sky";
-
-        return {
-            summary: `The Moon is currently moving through ${moonSign}. This transit brings emotional focus to the qualities of ${moonSign}—ground yourself and observe your feelings.`,
-            priority_order: [`Moon in ${moonSign}`, "Solar Vitality", "Daily Routine"],
+        setAiInsight({
+            summary: `The Moon shifts through ${moonSign}, highlighting emotional clarity. Trust your intuition today.`,
+            priority_order: [
+                { title: `Moon in ${moonSign}`, subtitle: "Emotional Focus", why: "Luna guides your inner state today.", action: "Reflect and journal.", score: 9 },
+                { title: "Saturn Structure", subtitle: "Discipline", why: "Saturn asks for patience.", action: "Organize your tasks.", score: 8 }
+            ],
             action_guidance: {
-                do: ["Stick to routine", "Stay hydrated", "Reflect on goals"],
-                avoid: ["Impulsive risks", "Overthinking", "Rushing"]
-            }
-        };
+                do: ["Stay grounded", "Complete pending tasks"],
+                avoid: ["Hasty decisions", "Unnecessary conflict"]
+            },
+            alignment_practice: generateFallbackPractice()
+        });
+    };
+
+    const generateFallbackPractice = () => ({
+        morning: "Take 5 deep breaths to center yourself.",
+        afternoon: "Focus on one major task at a time.",
+        evening: "Review your day with gratitude."
+    });
+
+    const handlePlanetClick = (planetName: string) => {
+        const planet = transitPlanets.find(p => p.name === planetName);
+        if (planet) {
+            setSelectedTransit(planet);
+        }
     };
 
     return (
         <MainLayout title="Cosmic Transits" breadcrumbs={['Forecasting', 'Transits']}>
-            <div className="min-h-screen bg-[#030014] relative overflow-hidden font-sans -mx-4 -my-4 md:-mx-8 md:-my-8 px-4 md:px-8 py-8">
+            <div className="min-h-screen bg-[#030014] bg-gradient-to-b from-[#0B0122] via-[#050816] to-[#030014] relative font-sans -mx-4 -my-4 md:-mx-8 md:-my-8 px-4 md:px-8 py-8 overflow-hidden text-slate-100">
 
-                {/* Background Stars */}
-                <div className="absolute inset-0 z-0">
-                    {[...Array(50)].map((_, i) => (
-                        <div key={i} className="absolute bg-white rounded-full opacity-20"
+                {/* Mystical Background Elements (from Home) */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-[-10%] left-[-10%] w-[80%] h-[80%] bg-indigo-500/5 blur-[120px] rounded-full animate-pulse-slow opacity-20" />
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] bg-amber-600/5 blur-[120px] rounded-full animate-pulse-slow opacity-20" style={{ animationDelay: '3s' }} />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.03)_0%,transparent_70%)]" />
+                </div>
+
+                {/* Star Field Background */}
+                <div className="fixed inset-0 pointer-events-none z-[1]">
+                    {Array.from({ length: 150 }, (_, i) => (
+                        <div
+                            key={i}
+                            className="absolute w-0.5 h-0.5 bg-white rounded-full animate-twinkle opacity-20"
                             style={{
-                                top: `${Math.random() * 100}%`,
                                 left: `${Math.random() * 100}%`,
-                                width: `${Math.random() * 2 + 1}px`,
-                                height: `${Math.random() * 2 + 1}px`,
-                                animation: `pulse ${Math.random() * 3 + 2}s infinite`
+                                top: `${Math.random() * 100}%`,
+                                animationDelay: `${Math.random() * 5}s`,
+                                animationDuration: `${3 + Math.random() * 4}s`
                             }}
                         />
                     ))}
                 </div>
 
-                <div className="relative z-10 max-w-[1400px] mx-auto space-y-12">
+                <div className="relative z-10 max-w-[1200px] mx-auto space-y-12 pb-20">
 
-                    {/* Header with Education */}
-                    <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row items-start justify-between gap-6">
                         <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-3xl md:text-4xl font-serif text-white">Daily Transits</h1>
-                                <div className="group relative">
-                                    <Info className="w-5 h-5 text-slate-500 hover:text-indigo-400 cursor-pointer transition-colors" />
-                                    <div className="absolute left-0 bottom-full mb-2 w-64 p-3 bg-indigo-900/90 border border-white/10 rounded-lg text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                                        Transits track where the planets are in the sky right now relative to your birth chart. They act as "Cosmic Weather"—influencing the general mood and opportunities of the day.
-                                    </div>
-                                </div>
+                            <div className="flex items-center gap-4 mb-3">
+                                <h1 className="text-4xl md:text-5xl font-serif text-white tracking-wide">Daily Transits 2.0</h1>
+                                <span className="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-widest border border-amber-500/30">
+                                    LIVE FEED
+                                </span>
                             </div>
-                            <p className="text-slate-400 max-w-xl text-sm md:text-base leading-relaxed">
-                                Understanding the current planetary movements helps you navigate your day with awareness rather than reacting blindly.
+                            <p className="text-slate-300 max-w-2xl text-base leading-relaxed">
+                                Your personalized cosmic weather report. Navigate planetary currents with Moon-centric insights and AI-powered guidance.
                             </p>
                         </div>
                     </div>
@@ -212,40 +286,67 @@ const Transits = () => {
                         </div>
                     )}
 
-                    {/* 1. Climate Card (AI Core Summary) */}
-                    <TransitClimateCard
-                        insight={aiInsight}
+                    {/* 1. Cosmic Weather Card */}
+                    <CosmicWeatherCard
+                        date={new Date()}
+                        quote={aiInsight.summary}
+                        moonSign={moonContext.sign}
+                        moonHouse={moonContext.house}
+                        dasha={dashaInfo}
                         loading={loading}
+                        onAskAI={() => console.log("Open AI Chat")}
                     />
 
-                    {/* 2. Priority & Guidance */}
-                    <TransitPrioritySection
+                    {/* 2. Major Transits (Slow Moving) */}
+                    <MajorTransits
+                        planets={transitPlanets}
+                        loading={loading}
+                        onPlanetClick={handlePlanetClick}
+                    />
+
+                    {/* 3. Fast Transits (Daily Movers) */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-3">
+                            <FastTransitsStrip
+                                planets={transitPlanets}
+                                loading={loading}
+                                onPlanetClick={handlePlanetClick}
+                            />
+                        </div>
+                    </div>
+
+                    {/* 4. Cosmic Priorities & Guidance */}
+                    <CosmicPriorities
                         priorities={aiInsight.priority_order}
-                        actions={aiInsight.action_guidance}
-                        transits={transitData?.planets || []}
+                        guidance={aiInsight.action_guidance}
                         loading={loading}
                     />
 
-                    {/* 3. Timeline */}
-                    <TransitTimeline
-                        story={timelineStory}
-                        events={[
-                            { date: "Feb 05", event: "Sun trine Jupiter", impact: "High" as any },
-                            { date: "Feb 12", event: "Mars enters Capricorn", impact: "Medium" as any },
-                            { date: "Feb 18", event: "Full Moon in Leo", impact: "High" as any }
-                        ]}
-                        loading={loading}
-                    />
-
-                    {/* 4. Data Inspector (AI Modal) */}
-                    {selectedTransit && (
-                        <TransitInspector
-                            transit={selectedTransit}
-                            onClose={() => setSelectedTransit(null)}
+                    {/* 5. Timeline & Alignment */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <TimelineStory
+                            story={timelineStory}
+                            events={timelineEvents.length > 0 ? timelineEvents : [
+                                { date: "Upcoming", event: "Calculating planetary shifts...", impact: "Low" }
+                            ]}
+                            loading={loading}
                         />
-                    )}
+                        <AlignmentPractice
+                            practices={aiInsight.alignment_practice}
+                            loading={loading}
+                        />
+                    </div>
 
                 </div>
+
+                {/* 6. Transit Inspector Modal */}
+                {selectedTransit && (
+                    <TransitInspector
+                        transit={selectedTransit}
+                        onClose={() => setSelectedTransit(null)}
+                    />
+                )}
+
             </div>
         </MainLayout>
     );
