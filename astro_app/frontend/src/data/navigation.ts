@@ -1,7 +1,7 @@
 import {
     Home, Star, Sparkles, Calendar, Zap, Compass,
     Grid, BarChart2, Moon, Globe, Sunrise, Clock, Users, Layers, Layout,
-    Briefcase, TrendingUp
+    TrendingUp, Activity, Crosshair, Bitcoin, Brain, Building2
 } from 'lucide-react';
 
 export const MENU_ITEMS = [
@@ -15,7 +15,71 @@ export const MENU_ITEMS = [
     {
         section: 'Cosmic Intelligence Hub',
         items: [
-            { to: '/cosmic/business', icon: Briefcase, label: 'Business & Finance', description: 'Astrological insights for markets and business' },
+            {
+                to: '/cosmic/market-timing',
+                icon: Activity,
+                label: 'Market Timing Intelligence',
+                purpose: 'Tell users when to buy, sell, launch, apply, negotiate.',
+                uses: ['Transits', 'Dasha', 'Moon', 'Nakshatra', 'Numerology'],
+                output: ['Best dates', 'Risk windows', 'Opportunity windows'],
+                description: 'Astro-timing for critical decisions'
+            },
+            {
+                to: '/cosmic/gann-trading',
+                icon: Crosshair,
+                label: 'Gann Trading Intelligence',
+                badge: 'PREMIUM',
+                purpose: 'Advanced Time-Price analysis for serious traders using Gann\'s planetary laws.',
+                uses: ['Square of 9', 'Planetary Harmonics', 'Retrogrades', 'Cycle Analysis'],
+                output: ['Price Targets', 'Reversal Dates', 'Cycle Warnings'],
+                description: 'Planetary price and time harmonics'
+            },
+            {
+                to: '/cosmic/crypto-stock',
+                icon: Bitcoin,
+                label: 'Crypto vs Stock Dashboard',
+                purpose: 'Personalized financial decision engine based on your wealth DNA.',
+                uses: ['Wealth DNA', 'Asset Suitability', 'Risk vs Stability', 'Personal Trends'],
+                output: ['Best Asset Today', 'Crypto Score', 'Stock Score', 'Wealth Persona'],
+                description: 'Personalized asset ranking system'
+            },
+            {
+                to: '/cosmic/trading-intelligence',
+                icon: TrendingUp,
+                label: 'Real-time Trading Intelligence',
+                badge: 'PREMIUM',
+                purpose: 'Live actionable trading signals and volatility warnings.',
+                uses: ['Today is a buy zone', 'Avoid new trades till Friday', 'High volatility window'],
+                output: ['Buy zones', 'No-trade windows', 'Volatility alerts'],
+                description: 'Actionable astro-trading signals'
+            },
+            {
+                to: '/cosmic/market-psychology',
+                icon: Brain,
+                label: 'Market Psychology Intelligence',
+                purpose: 'Analyze market sentiment using lunar and planetary influences.',
+                uses: ['Moon', 'Rahu', 'Mercury'],
+                output: ['Market fear', 'Market greed', 'Crowd behavior'],
+                description: 'Lunar influence on crowd sentiment'
+            },
+            {
+                to: '/cosmic/corporate-planning',
+                icon: Building2,
+                label: 'Corporate Planning Intelligence',
+                purpose: 'Strategic timing for founders, managers, and HR.',
+                uses: ['Organizational charts', 'Planetary periods', 'Transits'],
+                output: ['When to hire', 'When to fire', 'When to expand', 'When to restructure'],
+                description: 'Astro-strategy for business leaders'
+            },
+            {
+                to: '/cosmic/team-dynamics',
+                icon: Users,
+                label: 'Team Dynamics Intelligence',
+                purpose: 'Optimize team composition and conflict resolution.',
+                uses: ['Birth charts', 'Nakshatra', 'Moon sign'],
+                output: ['Team compatibility', 'Leadership alignment', 'Conflict zones'],
+                description: 'Harmonize your workforce'
+            },
         ]
     },
     {
