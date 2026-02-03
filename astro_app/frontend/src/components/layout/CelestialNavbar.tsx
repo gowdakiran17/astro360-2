@@ -19,11 +19,11 @@ interface NavItem {
 }
 
 const ITEMS: NavItem[] = [
-    { id: 'home', label: 'Sky', icon: Home, path: '/home' },
-    { id: 'charts', label: 'Stars', icon: Star, path: '/my-charts' },
-    { id: 'ai', label: 'Divine AI', icon: Sparkles, path: '/ai-astrologer', isCenter: true },
-    { id: 'kp', label: 'Nadi', icon: Zap, path: '/kp/dashboard' },
-    { id: 'cosmic', label: 'Cosmic', icon: BrainCircuit, path: '/ai-astrologer' }, // Replaced Soul with Cosmic
+    { id: 'home', label: 'Home', icon: Home, path: '/home' },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/dashboard/main' },
+    { id: 'ai', label: 'AI Chat', icon: Sparkles, path: '/ai-astrologer', isCenter: true },
+    { id: 'dasha', label: 'Dasha', icon: Zap, path: '/calculations/vimshottari' },
+    { id: 'numerology', label: 'Numerology', icon: BrainCircuit, path: '/tools/numerology' },
 ];
 
 const CelestialNavbar = () => {
@@ -69,10 +69,10 @@ const CelestialNavbar = () => {
                         onClick={() => navigate('/home')}
                     >
                         <div className="relative">
-                            <div className="absolute inset-0 bg-amber-500 blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-700" />
+                            <div className="absolute inset-0 bg-amber-500/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                             <div className="relative flex flex-col items-center">
-                                <span className="text-[10px] font-black tracking-[0.4em] text-amber-500 uppercase leading-none mb-1">Astro</span>
-                                <span className="text-2xl font-black tracking-tighter text-white uppercase leading-none">360</span>
+                                <span className="text-[11px] font-black tracking-[0.4em] text-amber-500 uppercase leading-none mb-1.5 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]">Bhava</span>
+                                <span className="text-3xl font-black tracking-tighter text-white uppercase leading-none drop-shadow-2xl">360</span>
                             </div>
                         </div>
                     </div>
@@ -222,7 +222,7 @@ const CelestialNavbar = () => {
                                             className="absolute inset-0 bg-white/20 rounded-full"
                                         />
                                     </motion.button>
-                                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-amber-500 text-center mt-2">Divine AI</p>
+                                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-amber-500 text-center mt-2">{item.label}</p>
                                 </div>
                             );
                         }

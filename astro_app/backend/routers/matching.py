@@ -34,7 +34,7 @@ async def get_compatibility(request: CompatibilityRequest, current_user: User = 
     Returns Ashtakoot Milan compatibility score and details.
     """
     try:
-        data = await calculate_match_score(request.boy, request.girl)
+        data = await calculate_match_score(request.boy.model_dump(), request.girl.model_dump())
         return data
     except Exception as e:
         logger.error(f"Error calculating compatibility: {e}", exc_info=True)
@@ -46,7 +46,7 @@ async def get_business_compatibility(request: CompatibilityRequest, current_user
     Returns Business Partnership Compatibility score and details.
     """
     try:
-        data = await calculate_business_match(request.boy, request.girl)
+        data = await calculate_business_match(request.boy.model_dump(), request.girl.model_dump())
         return data
     except Exception as e:
         logger.error(f"Error calculating business compatibility: {e}", exc_info=True)

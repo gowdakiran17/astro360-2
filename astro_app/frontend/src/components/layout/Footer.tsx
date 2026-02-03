@@ -15,7 +15,7 @@ const Footer = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
                 <Heart className="w-4 h-4 text-white fill-current" />
               </div>
-              <span className="text-xl font-bold text-slate-900 dark:text-white font-display">Astro360</span>
+              <span className="text-xl font-bold text-slate-900 dark:text-white font-display">Bhava360</span>
             </div>
             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6">
               Blending ancient Vedic wisdom with modern AI to provide deep, personalized astrological insights for your life's journey.
@@ -72,7 +72,7 @@ const Footer = () => {
       <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-500">
           <div className="flex items-center gap-6">
-            <span>© {currentYear} Astro360 Inc. All rights reserved.</span>
+            <span>© {currentYear} Bhava360 Inc. All rights reserved.</span>
             <span className="hidden md:inline text-slate-300 dark:text-slate-700">|</span>
             <span className="flex items-center gap-1"><Globe className="w-3 h-3" /> English (US)</span>
           </div>

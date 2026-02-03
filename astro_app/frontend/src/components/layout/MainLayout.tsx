@@ -1,6 +1,4 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import CelestialNavbar from './CelestialNavbar';
 
 interface MainLayoutProps {
@@ -13,14 +11,11 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children, title, showHeader = true, disableContentPadding = false }: MainLayoutProps) => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   // Update document title
   useEffect(() => {
     if (title) {
-      document.title = `${title} | Astro360`;
+      document.title = `${title} | Bhava360`;
     }
   }, [title]);
 

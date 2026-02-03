@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 Base.metadata.create_all(bind=engine)
 
 # FastAPI App
-app = FastAPI(title="Astrology360 API", version="1.0.0")
+app = FastAPI(title="Bhava360 API", version="1.0.0")
 
 # Global Exception Handlers
 @app.exception_handler(PermissionError)
@@ -115,7 +115,7 @@ app.include_router(chat_history_router, prefix="/api", tags=["chat_history"])
 # To be safe, I will include matching_router under `/chart` as well? No, that exposes `/chart/ashtakoot` which might be fine.
 # Let's include matching_router under `/chart` as well for backward compatibility?
 # Actually, I'll essentially duplicate the mount for now to strictly mimic previous behavior if frontend expects it.
-app.include_router(matching_router, prefix="/chart", tags=["matching_alias"])
+app.include_router(matching_router, prefix="/api/chart", tags=["matching_alias"])
 
 
 @app.get("/")
