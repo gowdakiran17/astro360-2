@@ -2,14 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import MainLayout from '../components/layout/MainLayout';
 import {
-    Info, Moon, ChevronRight, Calendar, Download, Settings, Layers, ArrowRight
+    Loader2, AlertCircle, Sparkles, Layers, Search
 } from 'lucide-react';
 import { useChartSettings } from '../context/ChartContext';
-import DashaChat from '../components/dasha/DashaChat';
-import VisualTimeline from '../components/dasha/VisualTimeline';
-import TransitOverlay from '../components/dasha/TransitOverlay';
-import RemediesCard from '../components/dasha/RemediesCard';
-import { jsPDF } from 'jspdf';
+import DashaHero from '../components/dasha/DashaHero';
+import DashaTree from '../components/dasha/DashaTree';
+import DashaInsightCard from '../components/dasha/DashaInsightCard';
+import DashaEnergyMeters from '../components/dasha/DashaEnergyMeters';
 
 interface DashaLevel {
     lord: string;
@@ -24,10 +23,10 @@ interface DashaLevel {
 }
 
 interface DashaSummary {
-    current_mahadasha: string;
-    current_antardasha: string;
-    current_pratyantardasha: string;
-    current_sookshma?: string;
+    current_mahadasha: DashaLevel | null;
+    current_antardasha: DashaLevel | null;
+    current_pratyantardasha: DashaLevel | null;
+    current_sookshma?: DashaLevel | null;
 }
 
 interface VimshottariDashaData {
@@ -43,67 +42,51 @@ const VimshottariDasha = () => {
     const [dashaData, setDashaData] = useState<VimshottariDashaData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [ayanamsa, setAyanamsa] = useState('LAHIRI');
+    const [searchQuery, setSearchQuery] = useState('');
 
-    // Transit Overlay State
-    const [showTransitOverlay, setShowTransitOverlay] = useState(false);
-
-    // Selection State
-    const [selectedMD, setSelectedMD] = useState<DashaLevel | null>(null);
-    const [selectedAD, setSelectedAD] = useState<DashaLevel | null>(null);
-    const [selectedPD, setSelectedPD] = useState<DashaLevel | null>(null);
-    const [selectedSD, setSelectedSD] = useState<DashaLevel | null>(null);
+    const formatDate = (dateStr: string) => {
+        if (dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return dateStr;
+    };
 
     const fetchDashaData = useCallback(async () => {
         if (!currentProfile) return;
-        const profile = currentProfile;
-        
+
         setLoading(true);
         setError(null);
         try {
-            const formattedDate = formatDate(profile.date);
-            
-            // 1. Get Birth Chart for Moon Longitude (or let backend handle it)
-            // We'll let backend handle it for robustness with Ayanamsa
-
-            const payloadDasha = {
-                birth_details: {
-                    date: formattedDate,
-                    time: profile.time,
-                    latitude: profile.latitude,
-                    longitude: profile.longitude,
-                    timezone: profile.timezone
-                },
-                ayanamsa: ayanamsa
+            const birthDetails = {
+                date: formatDate(currentProfile.date),
+                time: currentProfile.time,
+                latitude: currentProfile.latitude,
+                longitude: currentProfile.longitude,
+                timezone: currentProfile.timezone
             };
 
-            const response = await api.post<VimshottariDashaData>('/chart/dasha', payloadDasha);
-            const data = response.data;
-            setDashaData(data);
-
-            // Set initial selection to Current Period
-            if (data.summary?.current_mahadasha) {
-                const md = data.dashas.find((d) => d.lord === data.summary.current_mahadasha) || null;
-                setSelectedMD(md);
-                if (md) {
-                    const ad = md.antardashas?.find((d) => d.lord === data.summary.current_antardasha) || null;
-                    setSelectedAD(ad);
-                    if (ad) {
-                        const pd = ad.pratyantardashas?.find((d) => d.lord === data.summary.current_pratyantardasha) || null;
-                        setSelectedPD(pd);
-                        if (pd) {
-                            const sd = pd.sookshma_dashas?.find((d) => d.lord === data.summary.current_sookshma) || null;
-                            setSelectedSD(sd);
-                        }
-                    }
-                }
-            } else {
-                // Default to first
-                setSelectedMD(data.dashas[0] || null);
+            // 1. Get Moon Longitude first for precision
+            let moonLongitude = null;
+            try {
+                const chartResponse = await api.post('/chart/birth', birthDetails);
+                const moon = chartResponse.data.planets.find((p: any) => p.name === 'Moon');
+                if (moon) moonLongitude = moon.longitude;
+            } catch (e) {
+                console.warn("Failed to fetch pre-chart for moon longitude", e);
             }
 
-        } catch (err) {
+            // 2. Calculate Dasha with explicit Moon position
+            const response = await api.post<VimshottariDashaData>('/chart/dasha', {
+                birth_details: birthDetails,
+                moon_longitude: moonLongitude,
+                ayanamsa
+            });
+            setDashaData(response.data);
+        } catch (err: any) {
             console.error(err);
-            setError('Failed to calculate Vimshottari Dasha.');
+            const msg = err.response?.data?.detail || 'Failed to calculate Dasha periods.';
+            setError(msg);
         } finally {
             setLoading(false);
         }
@@ -115,304 +98,167 @@ const VimshottariDasha = () => {
         }
     }, [currentProfile, fetchDashaData]);
 
-    const formatDate = (dateStr: string) => {
-        // Ensure DD/MM/YYYY format
-        if (dateStr.includes('-')) {
-            const parts = dateStr.split('-');
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-        return dateStr;
-    };
+    // Current MD is directly available in summary now (as object)
+    const currentMD = dashaData?.summary?.current_mahadasha;
 
-    const downloadReport = () => {
-        if (!currentProfile || !dashaData) return;
-        const profile = currentProfile;
+    const filteredDashas = dashaData?.dashas.filter(d =>
+        d.lord.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
-        const doc = new jsPDF();
-        let y = 20;
-
-        // Header
-        doc.setFontSize(20);
-        doc.text("Vimshottari Dasha Report", 105, y, { align: "center" });
-        y += 15;
-
-        // User Details
-        doc.setFontSize(12);
-        doc.text(`Name: ${profile.name}`, 20, y);
-        y += 7;
-        doc.text(`Date of Birth: ${profile.date} ${profile.time}`, 20, y);
-        y += 7;
-        doc.text(`Ayanamsa: ${ayanamsa}`, 20, y);
-        y += 15;
-
-        // Current Period
-        doc.setFontSize(14);
-        doc.setTextColor(79, 70, 229); // Indigo
-        doc.text("Current Period", 20, y);
-        doc.setTextColor(0, 0, 0); // Black
-        y += 10;
-        doc.setFontSize(12);
-        doc.text(`Mahadasha: ${dashaData?.summary?.current_mahadasha}`, 20, y);
-        y += 7;
-        doc.text(`Antardasha: ${dashaData?.summary?.current_antardasha}`, 20, y);
-        y += 7;
-        doc.text(`Pratyantardasha: ${dashaData?.summary?.current_pratyantardasha}`, 20, y);
-        y += 15;
-
-        // Full Mahadasha Table
-        doc.setFontSize(14);
-        doc.setTextColor(79, 70, 229);
-        doc.text("Mahadasha Timeline (120 Years)", 20, y);
-        doc.setTextColor(0, 0, 0);
-        y += 10;
-
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("Planet", 20, y);
-        doc.text("Start Date", 60, y);
-        doc.text("End Date", 100, y);
-        doc.text("Duration", 140, y);
-        doc.setFont("helvetica", "normal");
-        y += 5;
-        doc.line(20, y, 190, y); // Header Line
-        y += 5;
-
-        dashaData.dashas.forEach((d) => {
-            if (y > 270) {
-                doc.addPage();
-                y = 20;
-            }
-            doc.text(d.lord, 20, y);
-            doc.text(d.start_date, 60, y);
-            doc.text(d.end_date, 100, y);
-            doc.text(`${d.duration_years.toFixed(1)} Yrs`, 140, y);
-            y += 7;
-        });
-        
-        doc.save("dasha-report.pdf");
-    };
-
-    // Helper to render a column
-    const renderColumn = (
-        title: string,
-        items: DashaLevel[] | undefined,
-        selectedItem: DashaLevel | null,
-        onSelect: (item: DashaLevel) => void
-    ) => {
-        if (!items || items.length === 0) return (
-            <div className="flex-1 min-w-[200px] bg-slate-50 rounded-xl border border-slate-200 p-4 flex items-center justify-center text-slate-400 text-xs text-center">
-                Select previous level to view {title}
-            </div>
-        );
-
+    if (loading) {
         return (
-            <div className="flex-1 min-w-[220px] bg-white rounded-xl border border-slate-200 flex flex-col h-[500px] shadow-sm">
-                <div className="p-3 border-b border-slate-100 bg-slate-50 rounded-t-xl font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                    <Layers className="w-3 h-3 text-indigo-500" />
-                    {title}
+            <MainLayout breadcrumbs={['Calculations', 'Dasha']}>
+                <div className="min-h-screen bg-[#0A0E1F] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
+                        <span className="text-slate-400 font-bold uppercase tracking-widest text-xs animate-pulse">Calculating 120-Year Cycle...</span>
+                    </div>
                 </div>
-                <div className="overflow-y-auto flex-1 p-2 space-y-1 custom-scrollbar">
-                    {items.map((item, idx) => (
-                        <div
-                            key={idx}
-                            onClick={() => onSelect(item)}
-                            className={`p-3 rounded-lg cursor-pointer transition-all border ${
-                                selectedItem?.lord === item.lord && selectedItem?.start_date === item.start_date
-                                    ? 'bg-indigo-50 border-indigo-200 shadow-sm'
-                                    : 'hover:bg-slate-50 border-transparent hover:border-slate-100'
-                            }`}
-                        >
-                            <div className="flex justify-between items-center mb-1">
-                                <span className={`font-bold text-sm ${selectedItem?.lord === item.lord ? 'text-indigo-700' : 'text-slate-700'}`}>
-                                    {item.lord}
-                                </span>
-                                {item.is_current && (
-                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                )}
-                            </div>
-                            <div className="text-[10px] text-slate-500 flex justify-between">
-                                <span>{item.start_date}</span>
-                                <ArrowRight className="w-3 h-3 text-slate-300" />
-                                <span>{item.end_date}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            </MainLayout>
         );
-    };
+    }
+
+    if (!currentProfile) {
+        return (
+            <MainLayout breadcrumbs={['Calculations', 'Dasha']}>
+                <div className="min-h-screen flex items-center justify-center bg-[#0A0E1F] text-white">
+                    <p className="text-slate-400">Please select a profile to view Dasha.</p>
+                </div>
+            </MainLayout>
+        )
+    }
 
     return (
-        <MainLayout title="Vimshottari Dasha" breadcrumbs={['Calculations', 'Dasha']}>
-            <div className="w-full space-y-6 pb-20 px-4 md:px-6">
-                
-                {error && (
-                    <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200">
-                        {error}
-                    </div>
-                )}
+        <MainLayout breadcrumbs={['Calculations', 'Dasha']}>
+            <div className="min-h-screen w-full bg-[#030014] bg-gradient-to-b from-[#0B0122] via-[#050816] to-[#030014] text-slate-100 relative overflow-hidden font-sans -mx-4 -my-4 md:-mx-8 md:-my-8 p-4 md:p-8">
 
-                {/* Header Controls */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
-                            <Moon className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold text-slate-900">Vimshottari Dasha System</h1>
-                            <p className="text-xs text-slate-500">120-Year Planetary Cycles</p>
-                        </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                            <Settings className="w-4 h-4 text-slate-400" />
-                            <select 
-                                value={ayanamsa} 
-                                onChange={(e) => setAyanamsa(e.target.value)}
-                                className="bg-transparent border-none text-xs font-medium text-slate-700 focus:ring-0 cursor-pointer"
-                            >
-                                <option value="LAHIRI">Lahiri (Chitrapaksha)</option>
-                                <option value="RAMAN">BV Raman</option>
-                                <option value="KP">KP System</option>
-                                <option value="FAGAN_BRADLEY">Fagan Bradley</option>
-                            </select>
-                        </div>
-                        <button 
-                            onClick={downloadReport}
-                            className="flex items-center space-x-2 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors"
-                        >
-                            <Download className="w-3 h-3" />
-                            <span>Export</span>
-                        </button>
+                {/* Mystical Background Elements (Consistent with Home) */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-[-10%] left-[-10%] w-[80%] h-[80%] bg-indigo-500/5 blur-[120px] rounded-full animate-pulse-slow opacity-20" />
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] bg-blue-600/5 blur-[120px] rounded-full animate-pulse-slow opacity-20" style={{ animationDelay: '3s' }} />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.03)_0%,transparent_70%)]" />
+                    {/* Decorative Celestial Patterns */}
+                    <div className="absolute top-1/4 right-[5%] opacity-[0.03] rotate-12 scale-150">
+                        <Sparkles className="w-96 h-96 text-yellow-500" />
                     </div>
                 </div>
 
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-24 space-y-4">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-                        <p className="text-slate-500 animate-pulse text-sm">Calculating planetary periods...</p>
-                    </div>
-                ) : dashaData ? (
-                    <div className="space-y-6">
-                        
-                        {/* Visual Timeline */}
-                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
-                            <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-indigo-500" />
-                                120-Year Timeline
-                            </h3>
-                            <VisualTimeline 
-                                dashas={dashaData.dashas} 
-                                startYear={new Date(dashaData.dashas[0].start_date).getFullYear()} 
-                            />
-                        </div>
+                {/* Star Field Background */}
+                <div className="fixed inset-0 pointer-events-none z-[1]">
+                    {Array.from({ length: 150 }, (_, i) => (
+                        <div
+                            key={i}
+                            className="absolute w-0.5 h-0.5 bg-white rounded-full animate-twinkle opacity-20"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 100}%`,
+                                animationDelay: `${Math.random() * 5}s`,
+                                animationDuration: `${3 + Math.random() * 4}s`
+                            }}
+                        />
+                    ))}
+                </div>
 
-                        {/* Current Period Summary */}
-                        <div className="bg-gradient-to-r from-indigo-900 to-slate-900 p-6 rounded-2xl shadow-xl text-white">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <h2 className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-1">Current Period</h2>
-                                    <div className="text-2xl font-black flex items-center gap-3">
-                                        {dashaData.summary?.current_mahadasha} 
-                                        <ChevronRight className="w-5 h-5 text-indigo-500" />
-                                        {dashaData.summary?.current_antardasha}
-                                        <ChevronRight className="w-5 h-5 text-indigo-500" />
-                                        <span className="text-indigo-300">{dashaData.summary?.current_pratyantardasha}</span>
-                                    </div>
-                                    <p className="text-slate-400 text-xs mt-2 max-w-lg">
-                                        You are currently running the Pratyantardasha of {dashaData.summary?.current_pratyantardasha}, 
-                                        under the Mahadasha of {dashaData.summary?.current_mahadasha}. 
-                                        This period emphasizes results related to {dashaData.summary?.current_mahadasha}'s house placement.
-                                    </p>
+                <div className="relative z-10 max-w-7xl mx-auto space-y-12 pb-20 pt-8">
+
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 text-red-200 mb-6">
+                            <AlertCircle className="w-5 h-5 shrink-0" />
+                            <p className="text-sm font-medium">{error}</p>
+                            <button onClick={fetchDashaData} className="ml-auto text-xs bg-red-500/20 hover:bg-red-500/30 px-3 py-1 rounded transition-colors uppercase font-bold tracking-wider">
+                                Retry
+                            </button>
+                        </div>
+                    )}
+
+                    {dashaData && currentMD ? (
+                        <>
+                            {/* Hero Section */}
+                            <section>
+                                <div className="flex items-center justify-between mb-8">
+                                    <h1 className="text-2xl font-black text-white uppercase tracking-wider flex items-center gap-3">
+                                        <Layers className="w-6 h-6 text-indigo-400" />
+                                        Vimshottari Dasha
+                                    </h1>
+
+                                    {/* Ayanamsa Selector (Mini) */}
+                                    <select
+                                        value={ayanamsa}
+                                        onChange={(e) => setAyanamsa(e.target.value)}
+                                        className="bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-slate-400 px-3 py-2 cursor-pointer focus:outline-none focus:border-indigo-500"
+                                    >
+                                        <option value="LAHIRI">Lahiri</option>
+                                        <option value="KP">KP System</option>
+                                    </select>
                                 </div>
-                                <div className="hidden lg:block text-right">
-                                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Balance of Dasha</div>
-                                    <div className="text-xl font-bold">{dashaData.balance_years} Years</div>
-                                    <div className="text-xs text-slate-500">at birth ({dashaData.balance_lord})</div>
-                                </div>
-                            </div>
-                        </div>
 
-                        {/* Drill Down Columns */}
-                        <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
-                            {renderColumn("Mahadasha", dashaData.dashas, selectedMD, (item) => {
-                                setSelectedMD(item);
-                                setSelectedAD(null);
-                                setSelectedPD(null);
-                                setSelectedSD(null);
-                            })}
-                            
-                            {renderColumn("Antardasha", selectedMD?.antardashas, selectedAD, (item) => {
-                                setSelectedAD(item);
-                                setSelectedPD(null);
-                                setSelectedSD(null);
-                            })}
-
-                            {renderColumn("Pratyantardasha", selectedAD?.pratyantardashas, selectedPD, (item) => {
-                                setSelectedPD(item);
-                                setSelectedSD(null);
-                            })}
-
-                            {renderColumn("Sookshma", selectedPD?.sookshma_dashas, selectedSD, (item) => {
-                                setSelectedSD(item);
-                            })}
-                            
-                            {renderColumn("Prana", selectedSD?.prana_dashas, null, () => {})}
-                        </div>
-
-                        {/* AI Chat & Info Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 space-y-6">
-                                <DashaChat currentContext={dashaData} />
-                            </div>
-                            <div className="space-y-6">
-                                <RemediesCard 
-                                    mahadasha={selectedMD?.lord || dashaData.summary.current_mahadasha}
-                                    antardasha={selectedAD?.lord || dashaData.summary.current_antardasha}
+                                <DashaHero
+                                    currentMahadasha={dashaData.summary.current_mahadasha?.lord || 'Unknown'}
+                                    startDate={currentMD.start_date}
+                                    endDate={currentMD.end_date}
+                                    durationYears={currentMD.duration_years}
                                 />
-                                
-                                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                        <Info className="w-4 h-4 text-indigo-500" />
-                                        Interpretation Guide
-                                    </h3>
-                                    <div className="space-y-4 text-sm text-slate-600">
-                                        <p>
-                                            <strong className="text-indigo-700">Mahadasha:</strong> Sets the overall background tone and major life events for {selectedMD?.duration_years} years.
+                            </section>
+
+                            <div className="grid lg:grid-cols-3 gap-8">
+                                {/* Left Col: Tree View */}
+                                <div className="lg:col-span-2 space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                            Planetary Timeline
+                                            <span className="text-xs font-normal text-slate-500 bg-white/5 px-2 py-0.5 rounded ml-2">120 Years</span>
+                                        </h2>
+
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search planet..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="bg-white/5 border border-white/10 rounded-full pl-8 pr-4 py-1.5 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 w-40 transition-all focus:w-52"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-[#0A0E1F]/40 backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 min-h-[500px]">
+                                        <DashaTree dashas={filteredDashas} />
+                                    </div>
+                                </div>
+
+                                {/* Right Col: Insights */}
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-bold text-white">Current Influence</h2>
+                                    <DashaInsightCard
+                                        mahadasha={dashaData.summary.current_mahadasha?.lord || 'Unknown'}
+                                        antardasha={dashaData.summary.current_antardasha?.lord || 'Unknown'}
+                                    />
+
+                                    <DashaEnergyMeters
+                                        mahadasha={dashaData.summary.current_mahadasha?.lord || 'Unknown'}
+                                        antardasha={dashaData.summary.current_antardasha?.lord || 'Unknown'}
+                                    />
+
+                                    {/* Future: Transit Overlay Trigger could go here */}
+                                    <div className="bg-indigo-600/20 border border-indigo-500/30 p-6 rounded-[2rem] text-center">
+                                        <p className="text-indigo-200 text-sm font-medium mb-4">
+                                            Want to see how these periods interact with current transits?
                                         </p>
-                                        <p>
-                                            <strong className="text-indigo-700">Antardasha:</strong> The specific sub-period that directs the energy of the Mahadasha.
-                                        </p>
+                                        <button className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-colors shadow-lg shadow-indigo-500/20">
+                                            Explore Transits
+                                        </button>
                                     </div>
                                 </div>
                             </div>
+                        </>
+                    ) : (
+                        <div className="text-center py-20">
+                            <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                            <p className="text-slate-400">No Dasha data found.</p>
                         </div>
-
-                    </div>
-                ) : (
-                    <div className="text-center py-20 text-slate-500">
-                        Please select a profile to view Dasha details.
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
-            {/* Transit Overlay */}
-            {currentProfile && (
-                <TransitOverlay 
-                    isOpen={showTransitOverlay}
-                    onClose={() => setShowTransitOverlay(false)}
-                    birthDetails={{
-                        date: formatDate(currentProfile.date),
-                        time: currentProfile.time,
-                        latitude: currentProfile.latitude,
-                        longitude: currentProfile.longitude,
-                        timezone: currentProfile.timezone
-                    }}
-                    targetDate={new Date().toISOString().split('T')[0]}
-                    dashaPeriod={{ md: '', ad: '', pd: '' }}
-                    ayanamsa={ayanamsa}
-                />
-            )}
         </MainLayout>
     );
 };

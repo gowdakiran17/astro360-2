@@ -726,3 +726,74 @@ async def get_daily_horoscopes(request: DailyHoroscopeRequest):
             "message": str(e),
             "data": None
         }
+
+# --- Transit AI Request Models ---
+
+class TransitSummaryRequest(BaseModel):
+    chart_data: Dict[str, Any]
+    transits: List[Dict[str, Any]]
+
+class TransitExplanationRequest(BaseModel):
+    transit_event: Dict[str, Any]
+    mode: str = "Beginner"
+
+class TransitTimelineRequest(BaseModel):
+    timeline_events: List[Dict[str, Any]]
+
+# --- Transit AI Endpoints ---
+
+@router.post("/transits/daily-insight")
+async def get_transit_daily_insight(request: TransitSummaryRequest):
+    """
+    Get daily core summary, priority ranking, and action guidance for transits.
+    """
+    try:
+        from astro_app.backend.services.transit_ai_service import TransitAIService
+        service = TransitAIService()
+        result = service.generate_daily_summary(request.chart_data, request.transits)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        logger.error(f"Transit daily insight error: {str(e)}")
+        # Fallback
+        return {
+            "status": "partial_success",
+            "data": {
+                "summary": "Focus on the present moment. The stars support steady progress.",
+                "priority_order": [],
+                "action_guidance": {"do": [], "avoid": []}
+            }
+        }
+
+@router.post("/transits/explain")
+async def explain_transit(request: TransitExplanationRequest):
+    """
+    Get detailed AI explanation for a specific transit in a specific mode.
+    """
+    try:
+        from astro_app.backend.services.transit_ai_service import TransitAIService
+        service = TransitAIService()
+        result = service.explain_transit(request.transit_event, request.mode)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        logger.error(f"Transit explanation error: {str(e)}")
+        return {
+            "status": "error",
+            "message": "Could not generate explanation."
+        }
+
+@router.post("/transits/timeline")
+async def get_transit_timeline_story(request: TransitTimelineRequest):
+    """
+    Get a narrative story for the upcoming transit timeline.
+    """
+    try:
+        from astro_app.backend.services.transit_ai_service import TransitAIService
+        service = TransitAIService()
+        result = service.get_timeline_story(request.timeline_events)
+        return {"status": "success", "data": {"story": result}}
+    except Exception as e:
+        logger.error(f"Transit timeline error: {str(e)}")
+        return {
+            "status": "partial_success",
+            "data": {"story": "Upcoming trends look balanced."}
+        }

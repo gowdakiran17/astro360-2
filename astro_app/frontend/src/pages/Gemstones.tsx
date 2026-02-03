@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import {
     Diamond, Shield, Sparkles, Info, Flame, AlertTriangle,
-    Droplets, Calendar, Star
+    Droplets, Calendar, Star, Hexagon, Crown
 } from 'lucide-react';
 import api from '../services/api';
 import AIReportButton from '../components/ai/AIReportButton';
 import { useChartSettings } from '../context/ChartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// --- Shared Types ---
 interface GemAnalysis {
     suitability: "Highly Recommended" | "Suitable" | "Caution" | "Avoid";
     analysis: string;
@@ -40,6 +41,37 @@ interface GemstoneResponse {
     };
     note: string;
 }
+
+// --- Background Components ---
+const StarField = () => {
+    const stars = Array.from({ length: 40 }).map((_, i) => ({
+        id: i,
+        top: `${Math.random() * 100}%`,
+        left: `${Math.random() * 100}%`,
+        size: Math.random() * 2 + 1,
+        animationDelay: `${Math.random() * 5}s`,
+        animationDuration: `${Math.random() * 3 + 2}s`
+    }));
+
+    return (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+            {stars.map((star) => (
+                <div
+                    key={star.id}
+                    className="absolute bg-white rounded-full opacity-20 animate-pulse"
+                    style={{
+                        top: star.top,
+                        left: star.left,
+                        width: star.size,
+                        height: star.size,
+                        animationDelay: star.animationDelay,
+                        animationDuration: star.animationDuration
+                    }}
+                />
+            ))}
+        </div>
+    );
+};
 
 const Gemstones = () => {
     const { currentProfile } = useChartSettings();
@@ -75,14 +107,14 @@ const Gemstones = () => {
         }
     };
 
-    // Helper for Suitability Badge Colors (Light Theme)
+    // Helper for Suitability Badge Colors (Dark Theme)
     const getSuitabilityColor = (suitability?: string) => {
         switch (suitability) {
-            case "Highly Recommended": return "bg-emerald-50 text-emerald-700 border-emerald-200";
-            case "Suitable": return "bg-indigo-50 text-indigo-700 border-indigo-200";
-            case "Caution": return "bg-amber-50 text-amber-700 border-amber-200";
-            case "Avoid": return "bg-red-50 text-red-700 border-red-200";
-            default: return "bg-slate-50 text-slate-600 border-slate-200";
+            case "Highly Recommended": return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+            case "Suitable": return "bg-indigo-500/20 text-indigo-300 border-indigo-500/40";
+            case "Caution": return "bg-amber-500/20 text-amber-300 border-amber-500/40";
+            case "Avoid": return "bg-red-500/20 text-red-300 border-red-500/40";
+            default: return "bg-slate-500/20 text-slate-300 border-slate-500/40";
         }
     };
 
@@ -95,31 +127,34 @@ const Gemstones = () => {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay }}
-                className="relative group"
+                className="relative group h-full"
             >
-                {/* Royal Light Card */}
-                <div className="relative overflow-hidden rounded-[2rem] bg-white border border-slate-100 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_50px_-10px_rgba(79,70,229,0.1)] hover:-translate-y-1">
+                {/* Dark Cosmic Card */}
+                <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0A0E1F]/80 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/50 transition-all duration-500 hover:shadow-[0_20px_50px_-10px_rgba(245,158,11,0.1)] hover:border-amber-500/30 hover:-translate-y-2 h-full flex flex-col">
 
-                    {/* Subtle Decorative Backgrounds */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-50/50 to-transparent rounded-bl-full" />
-                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-amber-50/50 to-transparent rounded-tr-full" />
+                    {/* Subtle Glows */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-[60px] rounded-full group-hover:bg-amber-500/10 transition-colors" />
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 blur-[60px] rounded-full" />
 
-                    <div className="relative p-8 flex flex-col h-full">
+                    <div className="relative p-8 flex flex-col h-full z-10">
                         {/* Header */}
                         <div className="flex justify-between items-start mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 text-indigo-600 shadow-sm">
-                                    <Icon className="w-6 h-6" />
+                            <div className="flex items-center gap-4">
+                                <div className="p-3.5 rounded-2xl bg-gradient-to-tr from-slate-900 to-black border border-white/10 text-amber-500 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                    <Icon className="w-5 h-5 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
                                 </div>
-                                <div>
-                                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">{category}</h3>
+                                <div className="space-y-1">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-amber-500/80 transition-colors">{category}</h3>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 uppercase tracking-wide">
-                                            {data.planet}
-                                        </span>
+                                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                                            <div className="w-1 h-1 rounded-full bg-slate-400" />
+                                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">
+                                                {data.planet}
+                                            </span>
+                                        </div>
                                         {data.analysis && (
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border border-dashed uppercase tracking-wide ${getSuitabilityColor(data.analysis.suitability)}`}>
-                                                {data.analysis.suitability}
+                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider shadow-sm ${getSuitabilityColor(data.analysis.suitability)}`}>
+                                                {data.analysis.suitability === "Highly Recommended" ? "Elite" : data.analysis.suitability}
                                             </span>
                                         )}
                                     </div>
@@ -129,79 +164,65 @@ const Gemstones = () => {
 
                         {/* Title & Gem Name */}
                         <div className="text-center mb-8 relative">
-                            <h2 className="text-4xl md:text-5xl font-serif text-slate-900 mb-2 drop-shadow-sm tracking-tight">
+                            <h2 className="text-4xl md:text-5xl font-serif text-white mb-2 drop-shadow-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
                                 {data.gem_name}
                             </h2>
-                            <p className="font-serif italic text-xl text-indigo-500/80">"{data.indian_name}"</p>
-
-                            {/* Decorative Line */}
-                            <div className="w-16 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent mx-auto mt-6" />
+                            <p className="font-serif italic text-lg text-amber-400/90">"{data.indian_name}"</p>
                         </div>
 
-                        {/* Strength Meter */}
-                        {data.analysis && (
-                            <div className="mb-8 bg-slate-50/50 rounded-xl p-4 border border-slate-100">
-                                <div className="flex justify-between items-end mb-2">
-                                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Planetary Vigor</span>
-                                    <span className="text-sm font-bold text-slate-800">{data.analysis?.strength_score}%</span>
-                                </div>
-                                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${Math.min(data.analysis.strength_score, 100)}%` }}
-                                        transition={{ duration: 1.5, ease: "easeOut", delay: delay + 0.5 }}
-                                        className={`h-full rounded-full ${data.analysis.strength_score < 100 ? 'bg-gradient-to-r from-amber-400 to-orange-500' : 'bg-gradient-to-r from-emerald-400 to-teal-500'}`}
-                                    />
-                                </div>
-                                <p className="text-[11px] text-slate-500 mt-2 leading-relaxed text-center">
-                                    {data.analysis.analysis}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Navigation Tabs */}
-                        <div className="flex p-1 rounded-xl bg-slate-100 border border-slate-200 mb-6">
+                        {/* Interaction Tabs */}
+                        <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-black/40 border border-white/5 mb-6">
                             {[
-                                { id: 'essence', label: 'Essence' },
+                                { id: 'essence', label: 'Power' },
                                 { id: 'ritual', label: 'Ritual' },
                                 { id: 'mantra', label: 'Mantra' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all duration-300 ${activeTab === tab.id
-                                            ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/50'
-                                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50'
+                                    className={`py-2.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all duration-300 relative overflow-hidden ${activeTab === tab.id
+                                        ? 'bg-amber-500/10 text-amber-400 shadow-[inset_0_0_20px_rgba(245,158,11,0.1)] border border-amber-500/20'
+                                        : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
                                         }`}
                                 >
                                     {tab.label}
+                                    {activeTab === tab.id && (
+                                        <motion.div
+                                            layoutId="activeTabGem"
+                                            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]"
+                                        />
+                                    )}
                                 </button>
                             ))}
                         </div>
 
-                        {/* Tab Content */}
-                        <div className="flex-1 min-h-[180px]">
+                        {/* Content Area with Fixed Height */}
+                        <div className="flex-1 min-h-[160px] relative">
                             <AnimatePresence mode="wait">
                                 {activeTab === 'essence' && (
                                     <motion.div
                                         key="essence"
-                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="space-y-4 text-center"
+                                        exit={{ opacity: 0, scale: 0.98 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="space-y-5"
                                     >
-                                        <p className="text-sm leading-7 text-slate-600 font-light">
+                                        <p className="text-sm leading-relaxed text-slate-300 font-medium text-center px-2">
                                             {data.benefits}
                                         </p>
-                                        <div className="grid grid-cols-2 gap-3 pt-2">
-                                            <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                                <div className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Metal</div>
-                                                <div className="text-sm font-medium text-slate-800">{data.wear_metal}</div>
+
+                                        {/* Metal/Finger Grid */}
+                                        <div className="grid grid-cols-2 gap-3 mt-auto">
+                                            <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center group/item hover:border-amber-500/20 transition-colors">
+                                                <Hexagon className="w-4 h-4 text-slate-500 mb-1.5 group-hover/item:text-amber-500 transition-colors" />
+                                                <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Metal</span>
+                                                <span className="text-xs font-bold text-white mt-0.5">{data.wear_metal}</span>
                                             </div>
-                                            <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                                <div className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Finger</div>
-                                                <div className="text-sm font-medium text-slate-800">{data.wear_finger}</div>
+                                            <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center group/item hover:border-amber-500/20 transition-colors">
+                                                <div className="w-1 h-4 bg-slate-600 rounded-full mb-1.5 group-hover/item:bg-amber-500 transition-colors" />
+                                                <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Finger</span>
+                                                <span className="text-xs font-bold text-white mt-0.5">{data.wear_finger}</span>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -210,25 +231,26 @@ const Gemstones = () => {
                                 {activeTab === 'ritual' && (
                                     <motion.div
                                         key="ritual"
-                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        transition={{ duration: 0.3 }}
+                                        exit={{ opacity: 0, scale: 0.98 }}
+                                        transition={{ duration: 0.2 }}
                                         className="space-y-4"
                                     >
-                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
-                                            <div className="p-2 rounded-full bg-indigo-100 text-indigo-600">
+                                        <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex gap-4">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 text-indigo-400">
                                                 <Droplets className="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Purification</h4>
-                                                <p className="text-xs text-indigo-800/70 leading-relaxed">{data.ritual}</p>
+                                                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5">Purification</h4>
+                                                <p className="text-xs text-indigo-200/80 leading-relaxed font-medium">{data.ritual}</p>
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-1 gap-2">
-                                            <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
-                                                <Calendar className="w-4 h-4 text-amber-500" />
-                                                <span className="text-xs text-slate-600">Wear on <strong>{data.wearing_day}</strong> (Shukla Paksha)</span>
+                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                                            <Calendar className="w-4 h-4 text-amber-500" />
+                                            <div className="flex flex-col">
+                                                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Auspicious Time</span>
+                                                <span className="text-xs text-white font-bold">{data.wearing_day} <span className="text-slate-500 font-medium">(Shukla Paksha)</span></span>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -237,26 +259,28 @@ const Gemstones = () => {
                                 {activeTab === 'mantra' && (
                                     <motion.div
                                         key="mantra"
-                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        transition={{ duration: 0.3 }}
+                                        exit={{ opacity: 0, scale: 0.98 }}
+                                        transition={{ duration: 0.2 }}
                                         className="text-center space-y-5"
                                     >
-                                        <div className="relative p-6 rounded-2xl bg-amber-50 border border-amber-100 overflow-hidden">
+                                        <div className="relative p-6 rounded-2xl bg-amber-500/5 border border-amber-500/10 overflow-hidden group/mantra hover:bg-amber-500/10 transition-colors">
+                                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
                                             <Flame className="w-6 h-6 text-amber-500 mx-auto mb-3 animate-pulse" />
-                                            <p className="text-lg font-serif italic text-amber-900 leading-relaxed">
+                                            <p className="text-lg font-serif italic text-amber-100/90 leading-relaxed drop-shadow-md">
                                                 "{data.mantra}"
                                             </p>
-                                            <div className="mt-3 inline-block px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[10px] font-bold text-amber-800 uppercase tracking-widest">
+                                            <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-[9px] font-black text-amber-400 uppercase tracking-widest">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                                                 Chant 108 Times
                                             </div>
                                         </div>
 
                                         {data.caution && (
-                                            <div className="flex items-center gap-3 p-3 rounded-xl bg-red-50 border border-red-100 text-left">
-                                                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
-                                                <p className="text-xs text-red-900/80 leading-tight">
+                                            <div className="flex items-center gap-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-left">
+                                                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                                                <p className="text-[10px] text-red-200/80 leading-tight font-medium">
                                                     <strong>Caution:</strong> {data.caution}
                                                 </p>
                                             </div>
@@ -272,117 +296,141 @@ const Gemstones = () => {
     };
 
     return (
-        <MainLayout title="Gemstone Recommendations" breadcrumbs={['Tools', 'Gemstones']}>
-            {/* Elegant Light Background */}
-            <div className="fixed inset-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50/20 -z-10" />
+        <MainLayout title="Cosmic Gemology" breadcrumbs={['Tools', 'Gemstones']}>
+            <div className="min-h-screen bg-[#050816] relative overflow-hidden font-sans -mx-4 -my-4 md:-mx-8 md:-my-8 pb-32">
 
-            <div className="w-full min-h-screen pb-24 px-4 sm:px-6 relative z-10 font-sans">
+                {/* 1. Background Universe */}
+                <StarField />
+                <div className="fixed inset-0 pointer-events-none">
+                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-900/20 blur-[120px] rounded-full mix-blend-screen" />
+                    <div className="absolute bottom-[10%] right-[-10%] w-[50%] h-[50%] bg-amber-900/10 blur-[100px] rounded-full mix-blend-screen" />
+                </div>
 
-                {/* Header Section */}
-                <header className="pt-12 pb-16 text-center max-w-4xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm text-indigo-600 mb-6">
-                            <Sparkles className="w-4 h-4" />
-                            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Vedic Gemology</span>
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-serif text-slate-900 mb-6 tracking-tight leading-tight">
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-indigo-800">Crystalline</span> <span className="font-light text-slate-400">Harmony</span>
-                        </h1>
-                        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-light leading-relaxed">
-                            Discover the stones that resonate with your unique cosmic blueprint. Expertly curated for power, protection, and prosperity.
-                        </p>
-                    </motion.div>
-                </header>
+                <div className="relative z-10 w-full max-w-[1600px] mx-auto pt-12 px-4 md:px-12">
 
-                {/* Error State */}
-                {error && (
-                    <div className="max-w-md mx-auto mt-20 p-6 bg-red-50 border border-red-100 rounded-2xl text-center">
-                        <AlertTriangle className="w-10 h-10 text-red-500 mx-auto mb-4" />
-                        <h3 className="text-lg font-bold text-red-900 mb-2">Something went wrong</h3>
-                        <p className="text-sm text-red-700">{error}</p>
-                        <button
-                            onClick={fetchGemstones}
-                            className="mt-6 px-6 py-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-full text-xs font-bold uppercase tracking-widest transition-colors"
+                    {/* Header */}
+                    <header className="text-center max-w-2xl mx-auto mb-16 relative">
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1 }}
                         >
-                            Try Again
-                        </button>
-                    </div>
-                )}
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-lg mb-6 group cursor-default hover:bg-white/10 transition-colors">
+                                <Sparkles className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
+                                <span className="text-[10px] font-black text-amber-100 uppercase tracking-[0.25em]">Vedic Gemology</span>
+                            </div>
+                            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-[0.9] drop-shadow-2xl">
+                                Crystalline <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">Harmony</span>
+                            </h1>
+                            <p className="text-lg text-slate-400 font-medium leading-relaxed max-w-xl mx-auto">
+                                Discover the stones that resonate with your unique cosmic frequency.
+                                Curated for power, protection, and prosperity.
+                            </p>
+                        </motion.div>
+                    </header>
 
-                {/* Loading State */}
-                {loading && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-[600px] rounded-[2rem] bg-white animate-pulse border border-slate-100" />
-                        ))}
-                    </div>
-                )}
+                    {/* Error State */}
+                    {error && (
+                        <div className="max-w-md mx-auto mt-20 p-6 bg-red-900/20 border border-red-500/30 rounded-2xl text-center backdrop-blur-md">
+                            <AlertTriangle className="w-10 h-10 text-red-500 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-red-200 mb-2">Cosmic Discord</h3>
+                            <p className="text-sm text-red-200/70">{error}</p>
+                            <button
+                                onClick={fetchGemstones}
+                                className="mt-6 px-6 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-full text-xs font-black uppercase tracking-widest transition-colors border border-red-500/30"
+                            >
+                                Realign
+                            </button>
+                        </div>
+                    )}
 
-                {/* Main Content */}
-                {!loading && data && (
-                    <div className="max-w-7xl mx-auto">
-                        {/* Ascendant Info */}
-                        <div className="text-center mb-16">
-                            <div className="inline-block p-1 rounded-full bg-gradient-to-r from-transparent via-slate-200 to-transparent">
-                                <div className="px-8 py-3 rounded-full bg-white border border-slate-100 flex items-center gap-3 shadow-lg">
-                                    <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Ascendant</span>
-                                    <div className="w-px h-4 bg-slate-200" />
-                                    <span className="text-xl font-serif text-indigo-900 tracking-wide">{data.ascendant}</span>
+                    {/* Loading State */}
+                    {loading && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-12">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="h-[600px] rounded-[2.5rem] bg-white/5 animate-pulse border border-white/5" />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Main Content */}
+                    {!loading && data && (
+                        <div className="max-w-7xl mx-auto">
+                            {/* Ascendant Badge */}
+                            <div className="flex justify-center mb-16">
+                                <motion.div
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="relative group"
+                                >
+                                    <div className="absolute inset-0 bg-amber-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
+                                    <div className="relative px-8 py-3 rounded-2xl bg-[#0A0E1F] border border-white/10 flex items-center gap-4 shadow-2xl">
+                                        <div className="flex flex-col text-right">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Ascendant</span>
+                                            <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Rising Sign</span>
+                                        </div>
+                                        <div className="w-px h-8 bg-white/10" />
+                                        <div className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                                            <Crown className="w-5 h-5 text-amber-500 fill-amber-500/20" />
+                                            {data.ascendant}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </div>
+
+                            {/* Gem Grid */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12 px-2">
+                                <GemShowcase
+                                    category="Life Stone"
+                                    data={data.recommendations.life_stone}
+                                    icon={Shield}
+                                    delay={0.3}
+                                />
+                                <GemShowcase
+                                    category="Lucky Stone"
+                                    data={data.recommendations.lucky_stone}
+                                    icon={Star}
+                                    delay={0.4}
+                                />
+                                <GemShowcase
+                                    category="Benefic Stone"
+                                    data={data.recommendations.benefic_stone}
+                                    icon={Diamond}
+                                    delay={0.5}
+                                />
+                            </div>
+
+                            {/* AI CTA */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.6 }}
+                                className="flex justify-center mt-24"
+                            >
+                                <div className="relative group">
+                                    <div className="absolute inset-0 bg-amber-500 blur-[60px] opacity-20 group-hover:opacity-30 transition-opacity duration-700" />
+                                    <AIReportButton
+                                        context={`Deep Gemology Analysis for ${data.ascendant} Ascendant. Analyze strength, metal, and wearing rituals based on current chart.`}
+                                        data={data}
+                                        buttonText="Consult the Oracle"
+                                        className="!bg-[#0A0E1F] hover:!bg-[#0F1429] !text-white !border !border-amber-500/30 !shadow-2xl !px-10 !py-5 !text-xs !tracking-[0.3em] !uppercase !font-black !rounded-2xl relative z-10"
+                                    />
                                 </div>
+                            </motion.div>
+
+                            {/* Footer Note */}
+                            <div className="mt-20 text-center max-w-2xl mx-auto pb-12 opacity-60 hover:opacity-100 transition-opacity">
+                                <Info className="w-4 h-4 text-slate-500 mx-auto mb-4" />
+                                <p className="text-[10px] text-slate-400 leading-loose font-bold tracking-widest uppercase">
+                                    Astrological gemstones accelerate planetary karmas. <br />
+                                    We recommend a <span className="text-amber-500">Pran Pratishta</span> ceremony before wearing.
+                                </p>
                             </div>
                         </div>
-
-                        {/* Gem Showcase Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 px-4">
-                            <GemShowcase
-                                category="Life Stone"
-                                data={data.recommendations.life_stone}
-                                icon={Shield}
-                                delay={0.2}
-                            />
-                            <GemShowcase
-                                category="Lucky Stone"
-                                data={data.recommendations.lucky_stone}
-                                icon={Star}
-                                delay={0.4}
-                            />
-                            <GemShowcase
-                                category="Benefic Stone"
-                                data={data.recommendations.benefic_stone}
-                                icon={Diamond}
-                                delay={0.6}
-                            />
-                        </div>
-
-                        {/* AI Report CTA */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 1 }}
-                            className="flex justify-center mt-20"
-                        >
-                            <AIReportButton
-                                context={`Deep Astro-Gemology Analysis for ${data.ascendant} Ascendant`}
-                                data={data}
-                                buttonText="Consult the Oracle AI"
-                                className="!bg-slate-900 hover:!bg-slate-800 !text-white !border-none !shadow-xl !px-8 !py-4 !text-sm !tracking-widest !uppercase"
-                            />
-                        </motion.div>
-
-                        {/* Footer Note */}
-                        <div className="mt-20 text-center max-w-3xl mx-auto pb-12">
-                            <Info className="w-5 h-5 text-slate-300 mx-auto mb-4" />
-                            <p className="text-xs text-slate-400 leading-relaxed font-light tracking-wide uppercase">
-                                Astrological gemstones amplify planetary resonance. While our algorithms account for Shadbala and House Placement,
-                                we recommend a personal initiation ceremony (Pran Pratishta) for maximum efficacy.
-                            </p>
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </MainLayout>
     );
