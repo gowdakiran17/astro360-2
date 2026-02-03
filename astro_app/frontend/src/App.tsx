@@ -33,11 +33,13 @@ import ZodiacProfile from './pages/ZodiacProfile';
 import DailyHoroscope from './pages/DailyHoroscope';
 import UserProfile from './pages/UserProfile';
 import CosmicHub from './pages/CosmicHub';
-import BusinessIntelligence from './pages/BusinessIntelligence';
 import MarketTiming from './pages/MarketTiming';
 import GannIntelligence from './pages/GannIntelligence';
 import CryptoStocksDashboard from './pages/CryptoStocksDashboard';
 import RealTimeTrading from './pages/RealTimeTrading';
+const MarketPsychology = lazy(() => import('./pages/MarketPsychology'));
+const CorporatePlanning = lazy(() => import('./pages/CorporatePlanning'));
+const TeamDynamics = lazy(() => import('./pages/TeamDynamics'));
 import RemediesPage from './pages/dashboard/RemediesPage';
 
 
@@ -153,32 +155,45 @@ function App() {
                     <CosmicHub />
                   </ProtectedRoute>
                 } />
-                <Route path="/cosmic/business" element={
-                  <ProtectedRoute>
-                    <BusinessIntelligence />
-                  </ProtectedRoute>
-                } />
-                <Route path="/cosmic/business/market-timing" element={
+                <Route path="/cosmic/market-timing" element={
                   <ProtectedRoute>
                     <MarketTiming />
                   </ProtectedRoute>
                 } />
 
-                <Route path="/cosmic/business/gann" element={
+                <Route path="/cosmic/gann-trading" element={
                   <ProtectedRoute>
                     <GannIntelligence />
                   </ProtectedRoute>
                 } />
 
-                <Route path="/cosmic/business/crypto-stocks" element={
+                <Route path="/cosmic/crypto-stock" element={
                   <ProtectedRoute>
                     <CryptoStocksDashboard />
                   </ProtectedRoute>
                 } />
 
-                <Route path="/cosmic/business/real-time" element={
+                <Route path="/cosmic/trading-intelligence" element={
                   <ProtectedRoute>
                     <RealTimeTrading />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/cosmic/market-psychology" element={
+                  <ProtectedRoute>
+                    <MarketPsychology />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/cosmic/corporate-planning" element={
+                  <ProtectedRoute>
+                    <CorporatePlanning />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/cosmic/team-dynamics" element={
+                  <ProtectedRoute>
+                    <TeamDynamics />
                   </ProtectedRoute>
                 } />
 
