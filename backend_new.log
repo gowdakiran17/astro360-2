@@ -9248,3 +9248,85 @@ INFO:watchfiles.main:1 change detected
 INFO:watchfiles.main:7 changes detected
 INFO:watchfiles.main:8 changes detected
 INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:134 changes detected
+INFO:watchfiles.main:5 changes detected
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:4 changes detected
+INFO:     127.0.0.1:56217 - "POST /api/chart/compatibility HTTP/1.1" 405 Method Not Allowed
+INFO:watchfiles.main:1 change detected
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Analyzing period: 2/2026
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Processing 28 days sequentially
+WARNING:astro_app.backend.services.ai_predictions:google-genai package not installed. Install with: pip install google-genai
+INFO:astro_app.backend.services.ai_predictions:AI Prediction Service disabled (no API key found)
+INFO:     127.0.0.1:56238 - "POST /api/chart/period/month HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:56240 - "POST /api/chart/period/overview HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Analyzing period: 2/2026
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Processing 28 days sequentially
+WARNING:astro_app.backend.services.ai_predictions:google-genai package not installed. Install with: pip install google-genai
+INFO:astro_app.backend.services.ai_predictions:AI Prediction Service disabled (no API key found)
+INFO:     127.0.0.1:56245 - "POST /api/chart/period/month HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:56247 - "POST /api/chart/period/overview HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:     127.0.0.1:56313 - "POST /api/chart/panchang HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56316 - "POST /api/chart/birth HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:56317 - "POST /api/chart/period/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56321 - "POST /api/chart/panchang HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56322 - "POST /api/chart/birth HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:56323 - "POST /api/chart/period/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56327 - "POST /api/chart/dasha HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56331 - "POST /api/chart/dasha HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56337 - "POST /api/ai/quick-predictions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56339 - "POST /api/ai/daily-horoscopes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56345 - "POST /api/ai/quick-predictions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56347 - "POST /api/ai/daily-horoscopes HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Analyzing period: 2/2026
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Processing 28 days sequentially
+WARNING:astro_app.backend.services.ai_predictions:google-genai package not installed. Install with: pip install google-genai
+INFO:astro_app.backend.services.ai_predictions:AI Prediction Service disabled (no API key found)
+INFO:     127.0.0.1:56363 - "POST /api/chart/period/month HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:56367 - "POST /api/chart/period/overview HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Analyzing period: 2/2026
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Processing 28 days sequentially
+WARNING:astro_app.backend.services.ai_predictions:google-genai package not installed. Install with: pip install google-genai
+INFO:astro_app.backend.services.ai_predictions:AI Prediction Service disabled (no API key found)
+INFO:     127.0.0.1:56368 - "POST /api/chart/period/month HTTP/1.1" 200 OK
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth DT: 1990-04-17 05:06:00, TZ: 5.5, UTC: 1990-04-16 23:36:00
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Birth JD: 2447998.4833333334
+INFO:astro_app.backend.astrology.period_analysis.orchestrator:Calculated Natal Ascendant: 0 (Deg: 8.209403266727906)
+INFO:     127.0.0.1:56369 - "POST /api/chart/period/overview HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:     127.0.0.1:56503 - "POST /api/chart/sade-sati HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56505 - "POST /api/chart/sade-sati HTTP/1.1" 200 OK

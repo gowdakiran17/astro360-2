@@ -219,30 +219,30 @@ const DetailedHouseCard = ({ index, score, isExpanded, onToggle }: { index: numb
     const house = HOUSE_DATA[index];
 
     return (
-        <div className={`group rounded-xl border transition-all duration-300 relative overflow-hidden ${borderColor} ${isExpanded ? 'bg-slate-900/95 shadow-2xl ring-1 ring-white/10 z-20 col-span-1 md:col-span-2 lg:col-span-3' : 'bg-slate-800/30 hover:bg-slate-800/50'}`}>
-            <button onClick={onToggle} className="p-4 w-full text-left focus:outline-none">
-                <div className="flex justify-between items-start mb-2">
+        <div className={`group rounded-[1.5rem] border transition-all duration-300 relative overflow-hidden ${borderColor} ${isExpanded ? 'bg-[#0A0E1F] shadow-2xl ring-1 ring-white/10 z-20 col-span-1 md:col-span-2 lg:col-span-3 scale-[1.02]' : 'bg-[#0A0E1F]/60 hover:bg-[#0A0E1F]/80'}`}>
+            <button onClick={onToggle} className="p-5 w-full text-left focus:outline-none">
+                <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] bg-slate-900/50 px-1.5 py-0.5 rounded">H{index + 1}</span>
-                        <span className="text-[9px] px-1.5 py-0.5 bg-indigo-500/10 text-indigo-300 rounded border border-indigo-500/20">{house.purushartha}</span>
-                        {isExpanded && <span className="text-[9px] px-1.5 py-0.5 bg-purple-500/10 text-purple-300 rounded border border-purple-500/20 flex items-center gap-1"><Sparkles className="w-2 h-2" /> {house.archetype}</span>}
+                        <span className="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-[0.2em] bg-white/5 px-2 py-1 rounded-lg border border-white/5">H{index + 1}</span>
+                        <span className="text-[10px] lg:text-xs font-bold px-2 py-1 bg-amber-500/10 text-amber-500 rounded-lg border border-amber-500/20 uppercase tracking-wider">{house.purushartha}</span>
+                        {isExpanded && <span className="text-[10px] lg:text-xs px-2 py-1 bg-purple-500/10 text-purple-300 rounded-lg border border-purple-500/20 flex items-center gap-1.5 uppercase tracking-wider font-bold"><Sparkles className="w-3 h-3" /> {house.archetype}</span>}
                     </div>
                     <div className="flex items-center gap-2">
-                        {status === 'strong' && <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />}
-                        {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+                        {status === 'strong' && <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />}
+                        {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-500" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-end justify-between gap-4">
                     <div>
-                        <h4 className={`font-bold text-sm mb-0.5 ${isExpanded ? 'text-white text-xl' : 'text-slate-200'}`}>{house.full}</h4>
-                        {!isExpanded && <div className="flex gap-1 mt-1">{house.keywords.map(k => <span key={k} className="text-[8px] text-slate-500 bg-slate-900 px-1 rounded">{k}</span>)}</div>}
+                        <h4 className={`font-black mb-1 leading-tight ${isExpanded ? 'text-white text-3xl lg:text-4xl tracking-tight' : 'text-slate-100 text-lg lg:text-xl'}`}>{house.full}</h4>
+                        {!isExpanded && <div className="flex flex-wrap gap-1.5 mt-2">{house.keywords.map(k => <span key={k} className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-white/5 px-2 py-1 rounded-md border border-white/5">{k}</span>)}</div>}
                     </div>
-                    <div className="text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                            {trend === 'up' && <TrendingUp className="w-3 h-3 text-emerald-500" />}
-                            {trend === 'down' && <AlertCircle className="w-3 h-3 text-rose-500" />}
-                            <span className={`font-bold font-display tracking-tight ${color} ${isExpanded ? 'text-4xl' : 'text-2xl'}`}>{score}</span>
+                    <div className="text-right shrink-0">
+                        <div className="flex items-center justify-end gap-2">
+                            {trend === 'up' && <TrendingUp className="w-4 h-4 text-emerald-500" />}
+                            {trend === 'down' && <AlertCircle className="w-4 h-4 text-rose-500" />}
+                            <span className={`font-black font-display tracking-tighter ${color} ${isExpanded ? 'text-5xl lg:text-6xl drop-shadow-lg' : 'text-3xl lg:text-4xl'}`}>{score}</span>
                         </div>
                     </div>
                 </div>
@@ -252,11 +252,11 @@ const DetailedHouseCard = ({ index, score, isExpanded, onToggle }: { index: numb
                 <div className="px-5 pb-6 pt-2 border-t border-white/5 animate-fade-in-down">
 
                     {/* 1. Deep Insight Block */}
-                    <div className="mb-6 bg-slate-950/30 p-4 rounded-xl border border-white/5">
-                        <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                            <BookOpen className="w-3.5 h-3.5" /> Cosmic Insight
+                    <div className="mb-6 bg-[#0A0E1F] p-5 lg:p-6 rounded-2xl border border-white/5 shadow-inner">
+                        <h5 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <BookOpen className="w-4 h-4" /> Cosmic Insight
                         </h5>
-                        <p className="text-sm text-slate-300 leading-relaxed font-light">
+                        <p className="text-base lg:text-lg text-slate-200 leading-relaxed font-medium">
                             "{house.insight}"
                         </p>
                     </div>
@@ -264,31 +264,31 @@ const DetailedHouseCard = ({ index, score, isExpanded, onToggle }: { index: numb
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
                         {/* 2. Action Plan Columns */}
-                        <div className="bg-emerald-500/5 rounded-xl p-3 border border-emerald-500/10">
-                            <h5 className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><CheckCircle className="w-3 h-3" /> Best Alignment</h5>
-                            <ul className="space-y-2">{house.activities.map((act, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-2"><div className="mt-1.5 w-1 h-1 rounded-full bg-emerald-500"></div> {act}</li>)}</ul>
+                        <div className="bg-emerald-500/5 rounded-2xl p-4 lg:p-5 border border-emerald-500/10">
+                            <h5 className="text-[10px] lg:text-xs font-black text-emerald-400 uppercase tracking-widest mb-4 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Best Alignment</h5>
+                            <ul className="space-y-3">{house.activities.map((act, i) => <li key={i} className="text-sm text-slate-200 flex items-start gap-2.5 font-medium"><div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div> {act}</li>)}</ul>
                         </div>
-                        <div className="bg-rose-500/5 rounded-xl p-3 border border-rose-500/10">
-                            <h5 className="text-[9px] font-bold text-rose-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><AlertCircle className="w-3 h-3" /> Shadows to Watch</h5>
-                            <ul className="space-y-2">{house.cautions.map((c, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-2"><div className="mt-1.5 w-1 h-1 rounded-full bg-rose-500"></div> {c}</li>)}</ul>
+                        <div className="bg-rose-500/5 rounded-2xl p-4 lg:p-5 border border-rose-500/10">
+                            <h5 className="text-[10px] lg:text-xs font-black text-rose-400 uppercase tracking-widest mb-4 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> Shadows to Watch</h5>
+                            <ul className="space-y-3">{house.cautions.map((c, i) => <li key={i} className="text-sm text-slate-200 flex items-start gap-2.5 font-medium"><div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div> {c}</li>)}</ul>
                         </div>
 
                         {/* 3. The Cosmic Apothecary (Remedies) */}
-                        <div className="bg-indigo-500/5 rounded-xl p-3 border border-indigo-500/10 flex flex-col justify-between">
+                        <div className="bg-indigo-500/5 rounded-2xl p-4 lg:p-5 border border-indigo-500/10 flex flex-col justify-between">
                             <div>
-                                <h5 className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Shield className="w-3 h-3" /> Cosmic Remedy</h5>
-                                <p className="text-xs text-slate-300 italic mb-3">"{house.remedy}"</p>
+                                <h5 className="text-[10px] lg:text-xs font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2"><Shield className="w-4 h-4" /> Cosmic Remedy</h5>
+                                <p className="text-sm text-slate-200 indent-2 italic mb-4 font-medium leading-relaxed">"{house.remedy}"</p>
                             </div>
-                            <div className="space-y-2 pt-3 border-t border-indigo-500/10">
-                                <div className="flex items-center gap-2">
-                                    <Flame className="w-3 h-3 text-orange-400" />
-                                    <span className="text-[10px] text-slate-400 uppercase tracking-wider">Mantra:</span>
-                                    <span className="text-xs font-bold text-slate-200">{house.mantra}</span>
+                            <div className="space-y-3 pt-4 border-t border-indigo-500/10">
+                                <div className="flex items-center gap-3">
+                                    <Flame className="w-4 h-4 text-orange-400" />
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mantra:</span>
+                                    <span className="text-sm font-bold text-white tracking-wide">{house.mantra}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Gem className="w-3 h-3 text-pink-400" />
-                                    <span className="text-[10px] text-slate-400 uppercase tracking-wider">Gem:</span>
-                                    <span className="text-xs font-bold text-slate-200">{house.gemstone}</span>
+                                <div className="flex items-center gap-3">
+                                    <Gem className="w-4 h-4 text-pink-400" />
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gem:</span>
+                                    <span className="text-sm font-bold text-white tracking-wide">{house.gemstone}</span>
                                 </div>
                             </div>
                         </div>
@@ -313,20 +313,20 @@ const HouseStrengthMatrix = ({ strengths }: HouseStrengthMatrixProps) => {
     return (
         <div className="glass-card p-6 relative overflow-visible z-10"> {/* overflow-visible for expanded cards */}
             {/* Background Decoration */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
 
-            <div className="flex items-center justify-between mb-8 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 relative z-10 gap-4">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl border border-indigo-500/20 shadow-lg shadow-indigo-500/10">
-                        <Star className="w-6 h-6 text-indigo-400" />
+                    <div className="p-4 bg-gradient-to-br from-amber-500/20 to-purple-500/20 rounded-2xl border border-amber-500/20 shadow-lg shadow-amber-500/10">
+                        <Star className="w-8 h-8 text-amber-500" />
                     </div>
                     <div>
-                        <h3 className="text-2xl font-bold text-white font-display uppercase tracking-wider">Life Balance Matrix</h3>
-                        <p className="text-sm text-slate-400 mt-0.5">12-Point Analysis & Strength Distribution</p>
+                        <h3 className="text-3xl font-black text-white font-display uppercase tracking-wider">Life Balance Matrix</h3>
+                        <p className="text-base text-slate-400 mt-1 font-medium">12-Point Analysis & Strength Distribution</p>
                     </div>
                 </div>
-                <button className="text-[10px] font-bold text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-full border border-indigo-500/20 transition-colors flex items-center gap-1.5">
-                    <Zap className="w-3 h-3" /> AI Insights Active
+                <button className="text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-4 py-2 rounded-full border border-amber-500/20 transition-colors flex items-center gap-2 self-start md:self-auto shadow-lg">
+                    <Zap className="w-4 h-4" /> AI Insights Active
                 </button>
             </div>
 
