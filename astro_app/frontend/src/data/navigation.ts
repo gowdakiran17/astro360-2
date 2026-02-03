@@ -1,7 +1,7 @@
 import {
     Home, Star, Sparkles, Calendar, Zap, Compass,
     Grid, BarChart2, Moon, Globe, Sunrise, Clock, Users, Layers, Layout,
-    Briefcase, Cpu, TrendingUp
+    Briefcase, TrendingUp
 } from 'lucide-react';
 
 export const MENU_ITEMS = [
@@ -10,8 +10,6 @@ export const MENU_ITEMS = [
         items: [
             { to: '/dashboard/main', icon: Home, label: 'Main Dashboard', description: 'Your personalized Vedic overview' },
             { to: '/ai-astrologer', icon: Sparkles, label: 'VedaAI Chat', badge: 'AI', description: 'Consult with our advanced AI astrologer' },
-            { to: '/ai-guru', icon: Cpu, label: 'AI Guru', badge: 'AI', description: 'Learn astrology from an AI-powered expert' },
-            { to: '/ai-horary', icon: Sparkles, label: 'Horary Prasna', badge: 'AI', description: 'Get answers to specific questions' },
         ]
     },
     {

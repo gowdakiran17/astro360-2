@@ -29,6 +29,7 @@ const ProAstrologerHome = () => {
   const [dashaData, setDashaData] = useState<any>(null);
   const [periodOverview, setPeriodOverview] = useState<any>(null);
   const [aiPredictions, setAiPredictions] = useState<any>(null);
+  const [dailyHoroscopeData, setDailyHoroscopeData] = useState<any>(null);
   const [selectedDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
 
@@ -95,12 +96,31 @@ const ProAstrologerHome = () => {
         }
 
         try {
-          const aiRes = await api.post('ai/quick-predictions', {
-            chart_data: chart,
-            dasha_data: fetchedDashaData
-          });
+          const [aiRes, horoscopeRes] = await Promise.all([
+            api.post('ai/quick-predictions', {
+              chart_data: chart,
+              dasha_data: fetchedDashaData
+            }),
+            api.post('ai/daily-horoscopes', {
+              chart_data: {
+                name: currentProfile?.name,
+                date: birthDetails.date,
+                time: birthDetails.time,
+                location: currentProfile?.location,
+                timezone: currentProfile?.timezone,
+                latitude: currentProfile?.latitude,
+                longitude: currentProfile?.longitude
+              },
+              dasha_data: fetchedDashaData,
+              current_date: targetDate.toISOString()
+            })
+          ]);
+
           if (aiRes.data?.status === 'success') setAiPredictions(aiRes.data.data);
-        } catch (e) { console.error("AI Predictions Error:", e); }
+          if (horoscopeRes.data?.status === 'success') setDailyHoroscopeData(horoscopeRes.data.data);
+        } catch (e) {
+          console.error("AI/Horoscope Error:", e);
+        }
       }
     } catch (e: any) {
       console.error("Fetch Data Error:", e);
@@ -216,7 +236,11 @@ const ProAstrologerHome = () => {
             <span className="text-[10px] font-black tracking-[0.4em] text-yellow-400 uppercase mb-2 md:mb-4 opacity-80 pl-1">Unified Celestial Intelligence</span>
             <HomeHeader userName={currentProfile?.name || 'Cosmic Soul'} location={currentProfile?.location} showActions={true} />
           </div>
-          <CosmicHero chartData={chartData} panchangData={periodOverview?.daily_analysis?.panchang} />
+          <CosmicHero
+            chartData={chartData}
+            panchangData={periodOverview?.daily_analysis?.panchang}
+            dailyHoroscopeData={dailyHoroscopeData}
+          />
         </div>
 
         {/* Daily Horoscopes Section */}
@@ -239,6 +263,8 @@ const ProAstrologerHome = () => {
                   longitude: currentProfile?.longitude
                 }}
                 dashaData={dashaData}
+                dailyHoroscopeData={dailyHoroscopeData}
+                onRefresh={() => fetchData(currentProfile, selectedDate)}
               />
             </div>
           </section>
