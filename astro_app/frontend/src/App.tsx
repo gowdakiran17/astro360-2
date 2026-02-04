@@ -89,7 +89,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   // Allow unauthenticated access locally or check user
   // For demo purposes, we might be lenient or strict based on auth setup
   if (!user) {
-    // return <Navigate to="/login" />; // Uncomment to enforce auth
+    return <Navigate to="/login" />;
   }
 
   return <>{children}</>;
@@ -103,12 +103,11 @@ function App() {
           <ChartProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/login-old" element={<Login />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
                 {/* Main App Routes */}
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Navigate to="/" replace />} />
 
                 <Route path="/home" element={
                   <ProtectedRoute>

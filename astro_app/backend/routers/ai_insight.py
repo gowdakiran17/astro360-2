@@ -694,13 +694,25 @@ async def get_daily_horoscopes(request: DailyHoroscopeRequest):
                     moon_longitude=moon_data.get("longitude")
                 )
         
-        # Calculate current transits (simplified - using birth chart positions as placeholder)
-        # In production, this would fetch real-time ephemeris data
+        # Calculate real-time transits for the current moment
+        current_date_str = current_time.strftime("%d/%m/%Y")
+        current_time_str = current_time.strftime("%H:%M")
+        # Use a default or system timezone for transits if not specific
+        transit_tz = "+00:00" # UTC for universal transits
+        
+        real_transits_chart = calculate_chart(
+            current_date_str,
+            current_time_str,
+            transit_tz,
+            float(latitude),
+            float(longitude)
+        )
+        
         current_transits = {}
-        for planet in birth_chart.get("planets", []):
+        for planet in real_transits_chart.get("planets", []):
             current_transits[planet["name"]] = planet["longitude"]
         
-        # Get current Moon longitude (placeholder)
+        # Get real current Moon longitude
         current_moon_longitude = current_transits.get("Moon", 0.0)
         
         # Initialize horoscope engine
