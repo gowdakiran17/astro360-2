@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import Hub from './pages/Hub';
 import MainDashboard from './pages/MainDashboard';
 import AstrologyHome from './pages/AstrologyHome';
+import LandingPage from './pages/LandingPage';
 import MyCharts from './pages/MyCharts';
 import LifePredictorPage from './pages/LifePredictorPage';
 import ChartRectification from './pages/ChartRectification';
@@ -102,11 +103,12 @@ function App() {
           <ChartProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/login" element={<Login />} />
+                <Route path="/login-old" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
                 {/* Main App Routes */}
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<Navigate to="/" replace />} />
 
                 <Route path="/home" element={
                   <ProtectedRoute>

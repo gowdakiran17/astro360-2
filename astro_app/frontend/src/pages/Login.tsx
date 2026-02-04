@@ -194,7 +194,7 @@ const Login = () => {
               }}
             />
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">Bhava Portal</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">Bhava 360 Portal</h2>
               <p className="text-white/40 text-xs tracking-wide">Enter your details to access your dashboard.</p>
             </div>
 
