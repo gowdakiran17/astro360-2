@@ -66,7 +66,7 @@ const KPChart: React.FC = () => {
 
 
     const getHouse = (longitude: number, ascLongitude: number) => {
-        let house = Math.floor((longitude - ascLongitude + 360) % 360 / 30) + 1;
+        const house = Math.floor((longitude - ascLongitude + 360) % 360 / 30) + 1;
         return house;
     };
 

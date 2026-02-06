@@ -4,13 +4,19 @@ import App from './App.tsx'
 import './index.css'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
-// Replace with your actual client ID or use env
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID_HERE"
+const rawClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+const clientId = rawClientId && rawClientId !== 'YOUR_GOOGLE_CLIENT_ID_HERE' ? rawClientId : ''
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const root = (
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={clientId}>
+    {clientId ? (
+      <GoogleOAuthProvider clientId={clientId}>
+        <App />
+      </GoogleOAuthProvider>
+    ) : (
       <App />
-    </GoogleOAuthProvider>
-  </React.StrictMode>,
+    )}
+  </React.StrictMode>
 )
+
+ReactDOM.createRoot(document.getElementById('root')!).render(root)

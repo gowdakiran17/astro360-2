@@ -855,7 +855,7 @@ const PersonalizedRemedies: React.FC<PersonalizedRemediesProps> = ({ chartData, 
 
                                         <div className="flex-1">
                                             <h4 className="text-white font-medium text-lg mb-3 leading-snug">
-                                                {remedy.secrets[revealedIndex]}
+                                                {remedy?.secrets?.[revealedIndex] || "Secret unavailable"}
                                             </h4>
                                             <p className="text-sm text-slate-500 leading-relaxed italic">
                                                 {remedy.why.vault}

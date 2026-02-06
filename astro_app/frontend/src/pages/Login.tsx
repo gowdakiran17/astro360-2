@@ -17,6 +17,8 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const isGoogleEnabled = !!googleClientId && googleClientId !== 'YOUR_GOOGLE_CLIENT_ID_HERE';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,28 +267,36 @@ const Login = () => {
               </motion.button>
             </form>
 
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/5"></div>
-              </div>
-              <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
-                <span className="px-4 bg-transparent text-white/20">Or sign in with</span>
-              </div>
-            </div>
+            {isGoogleEnabled ? (
+              <>
+                <div className="relative my-8">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/5"></div>
+                  </div>
+                  <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
+                    <span className="px-4 bg-transparent text-white/20">Or sign in with</span>
+                  </div>
+                </div>
 
-            <div className="flex justify-center group/google">
-              <div className="relative p-[1px] rounded-xl bg-gradient-to-tr from-white/10 to-transparent group-hover/google:from-amber-500/50 transition-all duration-500">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => {
-                    setError('Google login failed. Please try again.');
-                  }}
-                  theme="filled_black"
-                  shape="pill"
-                  width="100%"
-                />
+                <div className="flex justify-center group/google">
+                  <div className="relative p-[1px] rounded-xl bg-gradient-to-tr from-white/10 to-transparent group-hover/google:from-amber-500/50 transition-all duration-500">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={() => {
+                        setError('Google login failed. Please try again.');
+                      }}
+                      theme="filled_black"
+                      shape="pill"
+                      width="100%"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="mt-6 text-center text-[10px] font-black uppercase tracking-widest text-white/30">
+                Google sign-in unavailable. Set VITE_GOOGLE_CLIENT_ID.
               </div>
-            </div>
+            )}
 
             <p className="mt-10 text-center text-[10px] font-black uppercase tracking-widest text-white/30">
               New here? <Link to="/register" className="text-amber-500 hover:text-white transition-colors ml-1">Create an account</Link>

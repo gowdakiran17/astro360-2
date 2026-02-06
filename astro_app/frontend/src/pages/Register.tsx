@@ -17,6 +17,8 @@ const Register = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const isGoogleEnabled = !!googleClientId && googleClientId !== 'YOUR_GOOGLE_CLIENT_ID_HERE';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,22 +157,8 @@ const Register = () => {
           </Link>
         </div>
 
-        {/* --- GLASSMORPHISM CARD --- */}
-        <div className="group relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 to-indigo-500/20 rounded-[2.5rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
-
-          <div className="relative bg-white/5 backdrop-blur-3xl border border-white/10 p-10 rounded-[2.5rem] shadow-2xl overflow-hidden">
-            {/* Inner glow (removed in favor of uniform card style) */}
-            <div
-              className="absolute inset-0 opacity-[0.02] pointer-events-none"
-              style={{
-                backgroundImage: `url(${zodiacWheel})`,
-                backgroundSize: '150%',
-                backgroundPosition: 'center',
-              }}
-            />
-
-            <div className="relative z-10">
+        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-lg">
+            <div>
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-white mb-1">Begin Your Journey</h2>
                 <p className="text-white/30 text-xs">Unlock personalized insights from the stars.</p>
@@ -192,10 +180,10 @@ const Register = () => {
                   <label className="text-[10px] font-black uppercase tracking-widest text-amber-500/80 ml-1">Email Address</label>
                   <div className="relative group/input">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                      <Mail className="h-5 w-5 text-white/20 group-focus-within/input:text-amber-500 transition-colors" />
+                      <Mail className="h-5 w-5 text-slate-400 group-focus-within/input:text-blue-400 transition-colors" />
                     </div>
                     <input
-                      className="w-full h-14 bg-white/[0.03] border border-white/10 rounded-2xl pl-12 pr-4 text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500/50 transition-all font-medium text-sm"
+                      className="w-full h-14 bg-slate-900 border border-slate-800 rounded-2xl pl-12 pr-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/40 transition-all font-medium text-sm"
                       type="email"
                       placeholder="Enter your email"
                       value={email}
@@ -209,10 +197,10 @@ const Register = () => {
                   <label className="text-[10px] font-black uppercase tracking-widest text-amber-500/80 ml-1">Secure Password</label>
                   <div className="relative group/input">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                      <Lock className="h-5 w-5 text-white/20 group-focus-within/input:text-amber-500 transition-colors" />
+                      <Lock className="h-5 w-5 text-slate-400 group-focus-within/input:text-blue-400 transition-colors" />
                     </div>
                     <input
-                      className="w-full h-14 bg-white/[0.03] border border-white/10 rounded-2xl pl-12 pr-4 text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500/50 transition-all font-medium text-sm"
+                      className="w-full h-14 bg-slate-900 border border-slate-800 rounded-2xl pl-12 pr-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/40 transition-all font-medium text-sm"
                       type="password"
                       placeholder="Create a password"
                       value={password}
@@ -240,33 +228,40 @@ const Register = () => {
                 </motion.button>
               </form>
 
-              <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/5"></div>
-                </div>
-                <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
-                  <span className="px-4 bg-transparent text-white/20">Or sign up with</span>
-                </div>
-              </div>
+              {isGoogleEnabled ? (
+                <>
+                  <div className="relative my-8">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/5"></div>
+                    </div>
+                    <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
+                      <span className="px-4 bg-transparent text-white/20">Or sign up with</span>
+                    </div>
+                  </div>
 
-              <div className="flex justify-center group/google">
-                <div className="relative p-[1px] rounded-xl bg-gradient-to-tr from-white/10 to-transparent group-hover/google:from-amber-500/50 transition-all duration-500">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => setError('Google sign up failed.')}
-                    theme="filled_black"
-                    shape="pill"
-                    width="100%"
-                    text="signup_with"
-                  />
+                  <div className="flex justify-center group/google">
+                    <div className="relative p-[1px] rounded-xl bg-gradient-to-tr from-white/10 to-transparent group-hover/google:from-amber-500/50 transition-all duration-500">
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={() => setError('Google sign up failed.')}
+                        theme="filled_black"
+                        shape="pill"
+                        width="100%"
+                        text="signup_with"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="mt-6 text-center text-[10px] font-black uppercase tracking-widest text-white/30">
+                  Google sign-up unavailable. Set VITE_GOOGLE_CLIENT_ID.
                 </div>
-              </div>
+              )}
 
               <p className="mt-10 text-center text-[10px] font-black uppercase tracking-widest text-white/30">
                 Already registered? <Link to="/login" className="text-amber-500 hover:text-white transition-colors ml-1 underline underline-offset-4">Sign In Now</Link>
               </p>
             </div>
-          </div>
         </div>
 
         {/* Footer info */}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Moon, Sun, ChevronUp, ChevronDown, Sparkles, Target, Heart } from 'lucide-react';
+import { Moon, Sun, ChevronUp, ChevronDown, Sparkles, Compass } from 'lucide-react';
 
 interface NakshatraIntelligenceCenterProps {
   chartData: any;
@@ -73,266 +73,107 @@ const NakshatraIntelligenceCenter: React.FC<NakshatraIntelligenceCenterProps> = 
   const sunData = NAKSHATRA_FULL_DATA[sunNak] || NAKSHATRA_FULL_DATA['Ashwini'];
   const lagnaData = NAKSHATRA_FULL_DATA[lagNak] || NAKSHATRA_FULL_DATA['Ashwini'];
 
+  const NakshatraCard = ({ title, subTitle, nakshatra, sign, pada, data, icon: Icon, colorClass }: any) => (
+    <div className="bg-slate-950 rounded-xl border border-slate-800 p-5 hover:border-slate-700 transition-all">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${colorClass} bg-opacity-10`}>
+            <Icon className={`w-5 h-5 ${colorClass.replace('bg-', 'text-')}`} />
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">{title}</h4>
+            <p className="text-xs text-slate-500">{subTitle}</p>
+          </div>
+        </div>
+        <span className="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700">
+            Pada {pada}
+        </span>
+      </div>
+      
+      <div className="mb-4">
+        <h3 className="text-2xl font-bold text-slate-100 mb-1">{nakshatra}</h3>
+        <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">{sign}</p>
+      </div>
+
+      <p className="text-sm text-slate-400 leading-relaxed mb-4 min-h-[60px]">
+        {data.description}
+      </p>
+
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs border-t border-slate-800 pt-3">
+        <div>
+            <span className="text-slate-500 block mb-0.5">Deity</span>
+            <span className="text-slate-300 font-medium">{data.deity}</span>
+        </div>
+        <div>
+            <span className="text-slate-500 block mb-0.5">Symbol</span>
+            <span className="text-slate-300 font-medium">{data.symbol}</span>
+        </div>
+        <div className="col-span-2 mt-1">
+            <span className="text-slate-500 block mb-0.5">Key Themes</span>
+            <div className="flex flex-wrap gap-1.5">
+                {data.keyThemes.map((theme: string, i: number) => (
+                    <span key={i} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                        {theme}
+                    </span>
+                ))}
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="bg-white/[0.08] backdrop-blur-3xl border border-white/[0.15] rounded-[2.5rem] overflow-hidden shadow-2xl relative group">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-8 md:px-12 py-8 md:py-10 bg-gradient-to-br from-yellow-500/[0.05] to-orange-500/[0.05] border-b border-white/[0.08] flex items-center justify-between hover:from-yellow-500/[0.08] hover:to-orange-500/[0.08] transition-all duration-700 group/header relative z-10"
-      >
-        <div className="flex items-center gap-6">
-          <div className="p-4 bg-yellow-500/10 rounded-2xl border border-yellow-500/20 shadow-xl shadow-yellow-500/10 group-hover/header:rotate-12 transition-transform duration-700">
-            <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-          </div>
-          <div className="text-left">
-            <h2 className="text-base md:text-lg font-black text-white uppercase tracking-[0.3em] mb-2">Nakshatra Intelligence Center</h2>
-            <p className="text-base text-yellow-300 uppercase tracking-[0.15em] font-bold">Deep psychological and karmic analysis</p>
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-500/10 rounded-lg">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-200">Nakshatra Intelligence</h3>
         </div>
-        <div className="flex items-center gap-5">
-          <div className="hidden sm:block px-6 py-3 bg-yellow-500/10 rounded-full border border-yellow-500/20 shadow-xl shadow-yellow-500/5 backdrop-blur-md">
-            <span className="text-sm font-black text-yellow-400 uppercase tracking-[0.25em]">Temporal Matrix</span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover/header:bg-white/10 transition-all border border-white/10 group-hover/header:scale-110 active:scale-95">
-            {isExpanded ? <ChevronUp className="w-6 h-6 text-yellow-500" /> : <ChevronDown className="w-6 h-6 text-yellow-500" />}
-          </div>
-        </div>
-      </button>
+        <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-slate-400 hover:text-slate-200 transition-colors"
+        >
+            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </button>
+      </div>
 
       {isExpanded && (
-        <div className="p-8 md:p-12">
-          {/* Three Nakshatra Cards with Category Labels - Redesigned */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Psychological Moon Card + Primary Label */}
-            <div className="flex flex-col gap-4">
-              {/* Primary Category Badge */}
-              <div className="flex items-center gap-5 bg-white/[0.05] px-6 py-3 rounded-full border border-white/[0.12] hover:bg-white/[0.08] transition-all">
-                <span className="text-base font-black uppercase tracking-[0.2em] text-white">Primary</span>
-                <span className="text-base font-black tracking-[0.15em] text-orange-400 uppercase">Psychological Core</span>
-              </div>
-
-              <div className="bg-gradient-to-br from-yellow-500/[0.08] to-orange-500/[0.08] rounded-[2.5rem] p-8 border border-yellow-500/20 relative overflow-hidden group/card hover:scale-[1.02] transition-all duration-500 shadow-xl">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6 relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-yellow-500/20 rounded-xl">
-                      <Moon className="w-5 h-5 text-yellow-400" />
-                    </div>
-                    <span className="text-xs font-black text-yellow-400 uppercase tracking-[0.2em]">Psychological Moon</span>
-                  </div>
-                  <div className="px-4 py-1.5 bg-yellow-500/20 rounded-full border border-yellow-500/30">
-                    <span className="text-xs font-black text-yellow-300 uppercase">Pada {getPada(moon)}</span>
-                  </div>
-                </div>
-
-                {/* Nakshatra Name */}
-                <h3 className="text-4xl font-black text-white mb-2 tracking-tighter relative z-10">{moonNak}</h3>
-                <p className="text-base font-bold text-yellow-300 uppercase tracking-wide mb-6 relative z-10">{getSign(moon)}</p>
-
-                {/* Metadata Grid */}
-                <div className="grid grid-cols-3 gap-4 mb-6 relative z-10">
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Deity</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{moonData.deity}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Symbol</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{moonData.symbol}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Regent</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{moonData.rulingPlanet}</p>
-                  </div>
-                </div>
-
-                {/* Key Themes */}
-                <div className="flex flex-wrap gap-2 relative z-10">
-                  {moonData.keyThemes.slice(0, 2).map((theme: string, i: number) => (
-                    <span key={i} className="text-xs font-black uppercase tracking-wide text-yellow-400 flex items-center gap-1.5">
-                      <span className="w-1 h-1 rounded-full bg-yellow-400 animate-pulse" />
-                      {theme}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Vitalizing Sun Card + Secondary Label */}
-            <div className="flex flex-col gap-4">
-              {/* Secondary Category Badge */}
-              <div className="flex items-center gap-5 bg-white/[0.05] px-6 py-3 rounded-full border border-white/[0.12] hover:bg-white/[0.08] transition-all">
-                <span className="text-base font-black uppercase tracking-[0.2em] text-white">Secondary</span>
-                <span className="text-base font-black tracking-[0.15em] text-yellow-400 uppercase">Soul Purpose</span>
-              </div>
-
-              <div className="bg-gradient-to-br from-orange-500/[0.08] to-yellow-500/[0.08] rounded-[2.5rem] p-8 border border-orange-500/20 relative overflow-hidden group/card hover:scale-[1.02] transition-all duration-500 shadow-xl">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6 relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-orange-500/20 rounded-xl">
-                      <Sun className="w-5 h-5 text-orange-400" />
-                    </div>
-                    <span className="text-xs font-black text-orange-400 uppercase tracking-[0.2em]">Vitalizing Sun</span>
-                  </div>
-                  <div className="px-4 py-1.5 bg-orange-500/20 rounded-full border border-orange-500/30">
-                    <span className="text-xs font-black text-orange-300 uppercase">Pada {getPada(sun)}</span>
-                  </div>
-                </div>
-
-                {/* Nakshatra Name */}
-                <h3 className="text-4xl font-black text-white mb-2 tracking-tighter relative z-10">{sunNak}</h3>
-                <p className="text-base font-bold text-orange-300 uppercase tracking-wide mb-6 relative z-10">{getSign(sun)}</p>
-
-                {/* Metadata Grid */}
-                <div className="grid grid-cols-3 gap-4 mb-6 relative z-10">
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Deity</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{sunData.deity}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Symbol</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{sunData.symbol}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Regent</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{sunData.rulingPlanet}</p>
-                  </div>
-                </div>
-
-                {/* Key Themes */}
-                <div className="flex flex-wrap gap-2 relative z-10">
-                  {sunData.keyThemes.slice(0, 2).map((theme: string, i: number) => (
-                    <span key={i} className="text-xs font-black uppercase tracking-wide text-orange-400 flex items-center gap-1.5">
-                      <span className="w-1 h-1 rounded-full bg-orange-400 animate-pulse" />
-                      {theme}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Karmic Ascendant Card + Tertiary Label */}
-            <div className="flex flex-col gap-4">
-              {/* Tertiary Category Badge */}
-              <div className="flex items-center gap-5 bg-white/[0.05] px-6 py-3 rounded-full border border-white/[0.12] hover:bg-white/[0.08] transition-all">
-                <span className="text-base font-black uppercase tracking-[0.2em] text-white">Tertiary</span>
-                <span className="text-base font-black tracking-[0.15em] text-orange-400 uppercase">Surface Manifestation</span>
-              </div>
-
-              <div className="bg-gradient-to-br from-yellow-500/[0.08] to-orange-500/[0.08] rounded-[2.5rem] p-8 border border-yellow-500/20 relative overflow-hidden group/card hover:scale-[1.02] transition-all duration-500 shadow-xl">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6 relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-yellow-500/20 rounded-xl">
-                      <Target className="w-5 h-5 text-yellow-400" />
-                    </div>
-                    <span className="text-xs font-black text-yellow-400 uppercase tracking-[0.2em]">Karmic Ascendant</span>
-                  </div>
-                  <div className="px-4 py-1.5 bg-yellow-500/20 rounded-full border border-yellow-500/30">
-                    <span className="text-xs font-black text-yellow-300 uppercase">Pada {getPada(ascendant)}</span>
-                  </div>
-                </div>
-
-                {/* Nakshatra Name */}
-                <h3 className="text-4xl font-black text-white mb-2 tracking-tighter relative z-10">{lagNak}</h3>
-                <p className="text-base font-bold text-yellow-300 uppercase tracking-wide mb-6 relative z-10">{getSign(ascendant)}</p>
-
-                {/* Metadata Grid */}
-                <div className="grid grid-cols-3 gap-4 mb-6 relative z-10">
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Deity</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{lagnaData.deity}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Symbol</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{lagnaData.symbol}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-white/60 uppercase tracking-wider block mb-1">Regent</span>
-                    <p className="text-sm font-black text-white uppercase break-words">{lagnaData.rulingPlanet}</p>
-                  </div>
-                </div>
-
-                {/* Key Themes */}
-                <div className="flex flex-wrap gap-2 relative z-10">
-                  {lagnaData.keyThemes.slice(0, 2).map((theme: string, i: number) => (
-                    <span key={i} className="text-xs font-black uppercase tracking-wide text-yellow-400 flex items-center gap-1.5">
-                      <span className="w-1 h-1 rounded-full bg-yellow-400 animate-pulse" />
-                      {theme}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Detailed Interpretation Section */}
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-yellow-500/[0.08] to-orange-500/[0.08] border border-yellow-500/20 shadow-2xl backdrop-blur-md p-10 md:p-12">
-              <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-yellow-500/[0.05] to-transparent pointer-events-none" />
-              <div className="flex items-center gap-5 mb-8 relative z-10">
-                <div className="p-4 bg-yellow-500/10 rounded-2xl border border-yellow-500/20">
-                  <Sparkles className="w-6 h-6 text-yellow-400" />
-                </div>
-                <h4 className="text-lg font-black text-white uppercase tracking-[0.25em]">Deep Interpretation</h4>
-              </div>
-              <p className="text-xl md:text-2xl text-white leading-relaxed italic font-medium relative z-10 tracking-tight drop-shadow-sm mb-10">
-                "{moonData.description}"
-              </p>
-              <div className="mt-10 flex flex-wrap gap-4 relative z-10">
-                {moonData.coreTraits.map((trait, i) => (
-                  <span key={i} className="px-6 py-3 text-base font-black bg-white/[0.08] text-white rounded-full border border-white/[0.15] uppercase tracking-[0.15em] hover:bg-white/[0.12] transition-all cursor-default hover:text-yellow-400 hover:border-yellow-400/30 shadow-lg">
-                    {trait}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="bg-white/[0.06] rounded-[2.5rem] p-10 border border-white/[0.12] group/stat shadow-xl hover:bg-white/[0.09] transition-all relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-48 h-48 bg-yellow-500/5 rounded-full blur-2xl -ml-24 -mt-24 pointer-events-none" />
-                <div className="flex items-center gap-4 mb-6 relative z-10">
-                  <div className="p-3 bg-yellow-500/10 rounded-2xl border border-yellow-500/20 group-hover/stat:rotate-12 transition-transform">
-                    <Target className="w-6 h-6 text-yellow-400" />
-                  </div>
-                  <span className="text-base font-black text-white uppercase tracking-[0.25em]">Life Purpose</span>
-                </div>
-                <p className="text-4xl font-black text-white tracking-tighter uppercase leading-tight">{moonData.lifePurpose}</p>
-                <div className="w-16 h-1 bg-yellow-500/40 rounded-full mt-8 shadow-[0_0_8px_rgba(251,191,36,0.4)]" />
-              </div>
-              <div className="bg-white/[0.06] rounded-[2.5rem] p-10 border border-white/[0.12] group/stat shadow-xl hover:bg-white/[0.09] transition-all relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-48 h-48 bg-orange-500/5 rounded-full blur-2xl -ml-24 -mt-24 pointer-events-none" />
-                <div className="flex items-center gap-4 mb-6 relative z-10">
-                  <div className="p-3 bg-orange-500/10 rounded-2xl border border-orange-500/20 group-hover/stat:rotate-12 transition-transform">
-                    <Heart className="w-6 h-6 text-orange-400" />
-                  </div>
-                  <span className="text-base font-black text-white uppercase tracking-[0.25em]">Temperament</span>
-                </div>
-                <p className="text-3xl font-black text-white tracking-tighter uppercase leading-tight">{moonData.quality}</p>
-                <div className="w-16 h-1 bg-orange-500/40 rounded-full mt-8 shadow-[0_0_8px_rgba(249,115,22,0.4)]" />
-              </div>
-            </div>
-            <div className="sm:col-span-2 bg-gradient-to-r from-yellow-500/10 via-white/[0.03] to-transparent rounded-[2.5rem] p-8 md:p-10 border border-yellow-500/20 relative overflow-hidden group/karmic shadow-2xl hover:scale-[1.01] transition-all duration-700">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl opacity-50 pointer-events-none group-hover:bg-yellow-500/20 transition-all duration-1000" />
-              <div className="flex items-start gap-6 relative z-10">
-                <div className="p-4 bg-yellow-500/10 rounded-2xl border border-yellow-500/20 group-hover/karmic:rotate-[-12deg] transition-transform duration-700">
-                  <Sparkles className="w-8 h-8 text-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.4)]" />
-                </div>
-                <div>
-                  <span className="text-base font-black text-yellow-400 uppercase tracking-[0.4em] block mb-3">Karmic Matrix Power</span>
-                  <p className="text-base text-white leading-relaxed font-black tracking-tight uppercase drop-shadow-sm">{moonData.power}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <NakshatraCard 
+            title="Psychological Core"
+            subTitle="Primary Moon Nakshatra"
+            nakshatra={moonNak}
+            sign={getSign(moon)}
+            pada={getPada(moon)}
+            data={moonData}
+            icon={Moon}
+            colorClass="bg-blue-500 text-blue-400"
+          />
+          <NakshatraCard 
+            title="Soul Purpose"
+            subTitle="Sun Nakshatra"
+            nakshatra={sunNak}
+            sign={getSign(sun)}
+            pada={getPada(sun)}
+            data={sunData}
+            icon={Sun}
+            colorClass="bg-amber-500 text-amber-400"
+          />
+          <NakshatraCard 
+            title="Physical Body"
+            subTitle="Ascendant Nakshatra"
+            nakshatra={lagNak}
+            sign={getSign(ascendant)}
+            pada={getPada(ascendant)}
+            data={lagnaData}
+            icon={Compass}
+            colorClass="bg-emerald-500 text-emerald-400"
+          />
         </div>
       )}
-    </div >
+    </div>
   );
 };
 

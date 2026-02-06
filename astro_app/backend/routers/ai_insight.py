@@ -5,6 +5,7 @@ import logging
 from astro_app.backend.services.vedastro_client import VedAstroClient
 from astro_app.backend.services.gemini_service import GeminiService
 from astro_app.backend.services.kimi_service import KimiService
+from astro_app.backend.services.mock_ai_service import MockAIService
 import os
 from astro_app.backend.geo.service import search_location
 from astro_app.backend.astrology.chart import calculate_chart
@@ -17,8 +18,14 @@ router = APIRouter()
 # Initialize services
 # Initialize services based on provider
 AI_PROVIDER = os.getenv("AI_PROVIDER", "Gemini")
-gemini_service = GeminiService() # Keep Gemini as default/fallback
+try:
+    gemini_service = GeminiService() # Keep Gemini as default/fallback
+except Exception as e:
+    logger.warning(f"Failed to initialize GeminiService: {e}")
+    gemini_service = None
+
 kimi_service = KimiService() # Initialize KimiService unconditionally for fallback capability
+mock_ai_service = MockAIService()
 
 class AIChatRequest(BaseModel):
     user_query: str
@@ -504,11 +511,15 @@ async def ai_chat(request: AIChatRequest):
                 )
             else:
                  # Default to Gemini with Kimi Fallback
-                answer = gemini_service.generate_chat_response(
-                    user_query=request.user_query,
-                    system_prompt=system_prompt,
-                    context_data=full_context
-                )
+                if gemini_service:
+                    answer = gemini_service.generate_chat_response(
+                        user_query=request.user_query,
+                        system_prompt=system_prompt,
+                        context_data=full_context
+                    )
+                else:
+                     # Simulate failure if service not available
+                     answer = "I apologize, but I am having trouble connecting to the stars right now. Please try again later."
                 
                 # Check for Gemini failure (heuristic based on error message)
                 if "I apologize" in answer and "trouble connecting" in answer:
@@ -519,8 +530,21 @@ async def ai_chat(request: AIChatRequest):
                             system_prompt=system_prompt,
                             context_data=full_context
                         )
+                        # Check for Kimi failure (if it returns error or raises exception caught by outer block)
+                        # But KimiService.generate_chat_response usually returns a string.
+                        # If Kimi also fails, we might want to use Mock as last resort.
                     else:
                         logger.error("Kimi fallback requested but KimiService not initialized")
+                        
+            # Check if answer indicates failure from both services (if Kimi also fails similar way)
+            failure_keywords = ["I apologize", "trouble connecting", "Config Error", "API key", "Error"]
+            if any(k in answer for k in failure_keywords) and len(answer) < 200:
+                 logger.warning("All AI services failed, using Mock fallback...")
+                 answer = mock_ai_service.generate_chat_response(
+                    user_query=request.user_query,
+                    system_prompt=system_prompt,
+                    context_data=full_context
+                 )
             
             return AIChatResponse(
                 answer=answer,

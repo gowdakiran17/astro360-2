@@ -22,7 +22,7 @@ const PredictionRow: React.FC<PredictionRowProps> = ({
         const start = new Date(dateRange.start);
         const end = new Date(dateRange.end);
 
-        let current = new Date(start);
+        const current = new Date(start);
         while (current <= end) {
             dates.push(current.toISOString().split('T')[0]);
             current.setDate(current.getDate() + 1);

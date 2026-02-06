@@ -175,11 +175,11 @@ const Transits = () => {
                         alignment_practice: data.alignment_practice || generateFallbackPractice()
                     });
                 } else {
-                    useFallbackInsight(enhancedPlanets);
+                    fallbackInsight(enhancedPlanets);
                 }
             } catch (aiError) {
                 console.error("AI Insight Error:", aiError);
-                useFallbackInsight(enhancedPlanets);
+                fallbackInsight(enhancedPlanets);
             }
 
             // 8. Fetch Timeline (Real)
@@ -204,7 +204,7 @@ const Transits = () => {
     // UI Helper
     const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
 
-    const useFallbackInsight = (planets: any[]) => {
+    const fallbackInsight = (planets: any[]) => {
         const moon = planets.find(p => p.name === "Moon");
         const moonSign = moon ? moon.sign : "the Sky";
         setAiInsight({

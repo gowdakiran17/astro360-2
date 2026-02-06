@@ -1,4 +1,4 @@
-import ProAstrologerHome from '../components/dashboard/modern/ProAstrologerHome';
+import ResponsiveDashboard from '../components/dashboard/mobile-first/ResponsiveDashboard';
 import MainLayout from '../components/layout/MainLayout';
 
 const MainDashboard = () => {
@@ -9,7 +9,7 @@ const MainDashboard = () => {
             showHeader={true}
             disableContentPadding={true}
         >
-            <ProAstrologerHome />
+            <ResponsiveDashboard />
         </MainLayout>
     );
 };

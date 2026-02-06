@@ -33,7 +33,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi
       <motion.div
         className="fixed inset-0 pointer-events-none z-[-1] hidden lg:block"
         animate={{
-          background: `radial-gradient(600px at ${mousePos.x}px ${mousePos.y}px, rgba(245, 158, 11, 0.05), transparent 80%)`
+          background: `radial-gradient(600px at ${mousePos.x}px ${mousePos.y}px, rgba(59, 130, 246, 0.05), transparent 80%)`
         }}
       />
 
@@ -44,9 +44,9 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi
           transition={{ duration: 0.8 }}
           className="flex items-center gap-4 mb-6"
         >
-          <div className="px-5 py-2.5 bg-gradient-to-r from-amber-500/25 to-orange-500/10 border border-amber-500/30 rounded-full shadow-[0_0_20px_rgba(0,0,0,0.3)] backdrop-blur-3xl relative overflow-hidden group/greeting">
-            <div className="absolute inset-0 bg-amber-400/10 animate-pulse" />
-            <p className="text-xs font-black text-amber-500 uppercase tracking-[0.4em] relative z-10 flex items-center gap-2">
+          <div className="px-5 py-2.5 bg-gradient-to-r from-blue-500/25 to-indigo-500/10 border border-blue-500/30 rounded-full shadow-[0_0_20px_rgba(0,0,0,0.3)] backdrop-blur-3xl relative overflow-hidden group/greeting">
+            <div className="absolute inset-0 bg-blue-400/10 animate-pulse" />
+            <p className="text-xs font-black text-blue-400 uppercase tracking-[0.4em] relative z-10 flex items-center gap-2">
               <Sparkles className="w-3 h-3 animate-spin-slow" />
               {getGreeting()}
             </p>
@@ -55,7 +55,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi
             initial={{ width: 0 }}
             animate={{ width: 120 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="h-px bg-gradient-to-r from-amber-500/50 to-transparent"
+            className="h-px bg-gradient-to-r from-blue-500/50 to-transparent"
           />
         </motion.div>
 
@@ -67,7 +67,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi
           <h1 className="text-5xl md:text-[7rem] font-black text-white mb-4 tracking-tighter uppercase leading-[0.85] relative">
             <span className="block text-white/90">Hello,</span>
             <span className="relative inline-block">
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-200 via-white to-orange-400 drop-shadow-[0_0_30px_rgba(251,191,36,0.5)]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-br from-blue-200 via-white to-indigo-400 drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">
                 {userName}
               </span>
               {/* Dynamic Underline */}
@@ -75,7 +75,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 1.5, delay: 1 }}
-                className="absolute -bottom-2 left-0 right-0 h-1 md:h-2 bg-gradient-to-r from-amber-500 to-transparent rounded-full origin-left"
+                className="absolute -bottom-2 left-0 right-0 h-1 md:h-2 bg-gradient-to-r from-blue-500 to-transparent rounded-full origin-left"
               />
             </span>
           </h1>
@@ -117,12 +117,12 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ userName, location = "New Delhi
           transition={{ duration: 0.8, delay: 0.5 }}
           className="flex gap-4 w-full md:w-auto self-end mb-2"
         >
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-4 px-10 py-5 bg-white/[0.05] border border-white/[0.15] rounded-[2rem] text-xs font-black text-white hover:bg-white/[0.1] hover:border-amber-500/40 transition-all duration-700 backdrop-blur-3xl uppercase tracking-[0.3em] group/act shadow-2xl">
-            <Download className="w-5.5 h-5.5 text-amber-500 group-hover/act:-translate-y-1.5 transition-all duration-500" />
+          <button className="flex-1 md:flex-none flex items-center justify-center gap-4 px-10 py-5 bg-slate-900 border border-slate-800 rounded-[2rem] text-xs font-black text-white hover:bg-slate-800 hover:border-slate-700 transition-all duration-300 uppercase tracking-[0.3em] group/act shadow-lg">
+            <Download className="w-5.5 h-5.5 text-blue-500 group-hover/act:-translate-y-1.5 transition-all duration-500" />
             <span className="whitespace-nowrap">Archive Insights</span>
           </button>
 
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-4 px-10 py-5 bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-[#050816] rounded-[2rem] text-xs font-black transition-all duration-700 shadow-[0_20px_40px_rgba(245,158,11,0.2)] border border-white/30 active:scale-95 uppercase tracking-[0.3em] group/act-s">
+          <button className="flex-1 md:flex-none flex items-center justify-center gap-4 px-10 py-5 bg-gradient-to-br from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white rounded-[2rem] text-xs font-black transition-all duration-700 shadow-[0_20px_40px_rgba(59,130,246,0.2)] border border-white/30 active:scale-95 uppercase tracking-[0.3em] group/act-s">
             <Share2 className="w-5.5 h-5.5 group-hover/act-s:rotate-[30deg] transition-all duration-700" />
             <span className="whitespace-nowrap">Unveil Share</span>
           </button>
