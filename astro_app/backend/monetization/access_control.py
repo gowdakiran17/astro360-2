@@ -13,6 +13,7 @@ class Feature(str, Enum):
     
     # Advanced / Specialized (Premium)
     DIVISIONAL_CHARTS = "divisional_charts"
+    SOLAR_RETURN = "solar_return"
     ASTRO_VASTU = "astro_vastu"
     VEHICLE_EVALUATION = "vehicle_evaluation"
     DETAILED_INTERPRETATION = "detailed_interpretation"
@@ -27,6 +28,7 @@ TIER_ACCESS = {
         Feature.PLANETARY_DETAILS,
         Feature.MAHADASHA,
         Feature.DIVISIONAL_CHARTS,
+        Feature.SOLAR_RETURN,
         Feature.ASSET_INTELLIGENCE,
         Feature.DETAILED_INTERPRETATION  # Enabled for testing/demo
     },
@@ -35,6 +37,7 @@ TIER_ACCESS = {
         Feature.PLANETARY_DETAILS,
         Feature.MAHADASHA,
         Feature.DIVISIONAL_CHARTS,
+        Feature.SOLAR_RETURN,
         Feature.ASTRO_VASTU,
         Feature.VEHICLE_EVALUATION,
         Feature.DETAILED_INTERPRETATION,

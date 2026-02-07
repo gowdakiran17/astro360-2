@@ -7,7 +7,7 @@ import { useChart } from '../../context/ChartContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const Card = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-    <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 transition-all duration-300 ${className}`}>
+    <div className={`bg-[#11162A] rounded-2xl shadow-lg border border-[#FFFFFF]/08 transition-all duration-300 ${className}`}>
         {children}
     </div>
 );
@@ -96,17 +96,17 @@ const NakshatraNadiDashboard: React.FC = () => {
 
         const getColorClass = (planet: string) => {
             const colors: Record<string, string> = {
-                'Sun': 'border-amber-500 bg-amber-500/10 text-amber-200',
-                'Moon': 'border-slate-500 bg-slate-500/10 text-slate-200',
-                'Mars': 'border-rose-600 bg-rose-600/10 text-rose-200',
-                'Mercury': 'border-emerald-600 bg-emerald-600/10 text-emerald-200',
-                'Jupiter': 'border-yellow-600 bg-yellow-600/10 text-yellow-200',
-                'Venus': 'border-slate-400 bg-slate-400/10 text-slate-200',
-                'Saturn': 'border-blue-700 bg-blue-700/10 text-blue-200',
-                'Rahu': 'border-slate-500 bg-slate-500/10 text-slate-200',
-                'Ketu': 'border-rose-700 bg-rose-700/10 text-rose-200'
+                'Sun': 'border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]',
+                'Moon': 'border-[#A9B0C2] bg-[#A9B0C2]/10 text-[#EDEFF5]',
+                'Mars': 'border-[#E25555] bg-[#E25555]/10 text-[#E25555]',
+                'Mercury': 'border-[#2ED573] bg-[#2ED573]/10 text-[#2ED573]',
+                'Jupiter': 'border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]',
+                'Venus': 'border-[#EDEFF5] bg-[#EDEFF5]/10 text-[#EDEFF5]',
+                'Saturn': 'border-[#6D5DF6] bg-[#6D5DF6]/10 text-[#6D5DF6]',
+                'Rahu': 'border-[#6F768A] bg-[#6F768A]/10 text-[#A9B0C2]',
+                'Ketu': 'border-[#E25555] bg-[#E25555]/10 text-[#E25555]'
             };
-            return colors[planet] || 'border-slate-600 bg-slate-600/10 text-slate-200';
+            return colors[planet] || 'border-[#6F768A] bg-[#6F768A]/10 text-[#A9B0C2]';
         };
 
         const getPlanetAbbr = (planet: string) => {
@@ -121,13 +121,13 @@ const NakshatraNadiDashboard: React.FC = () => {
             if (!layerData) return null;
             const { name, sig } = layerData;
             return (
-                <div className="flex items-center gap-2 py-2 border-b last:border-0 border-slate-700/50">
-                    <span className="text-[10px] text-slate-500 font-bold w-8">{label}</span>
+                <div className="flex items-center gap-2 py-2 border-b last:border-0 border-[#FFFFFF]/08">
+                    <span className="text-[10px] text-[#6F768A] font-bold w-8">{label}</span>
                     <span className="font-bold text-sm min-w-[24px]">{getPlanetAbbr(name)}</span>
                     <span className="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold shrink-0">
                         {sig.pos || '-'}
                     </span>
-                    <span className="text-xs text-slate-400 flex-1 truncate">
+                    <span className="text-xs text-[#A9B0C2] flex-1 truncate">
                         {sig.lords && sig.lords.length > 0 ? sig.lords.join(', ') : '-'}
                     </span>
                 </div>
@@ -138,15 +138,15 @@ const NakshatraNadiDashboard: React.FC = () => {
             <div className="space-y-6">
                 {/* House Lordship Reference Table */}
                 {houseLordships && Object.keys(houseLordships).length > 0 && (
-                    <Card className="bg-slate-900/50 border-slate-800 p-4">
+                    <Card className="bg-[#0B0F1A]/50 border-[#FFFFFF]/08 p-4">
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="text-[10px] font-bold text-amber-500/50 uppercase tracking-widest">Lordship Reference</span>
+                            <span className="text-[10px] font-bold text-[#F5A623]/50 uppercase tracking-widest">Lordship Reference</span>
                         </div>
                         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-y-3 gap-x-2 text-[10px]">
                             {Object.entries(houseLordships).map(([house, lord]: [string, any]) => (
                                 <div key={house} className="flex flex-col items-center">
-                                    <span className="text-slate-500 mb-1">H{house}</span>
-                                    <span className="text-slate-200 font-bold px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 w-full text-center">
+                                    <span className="text-[#6F768A] mb-1">H{house}</span>
+                                    <span className="text-[#EDEFF5] font-bold px-1.5 py-0.5 rounded bg-[#0B0F1A] border border-[#FFFFFF]/08 w-full text-center">
                                         {getPlanetAbbr(lord)}
                                     </span>
                                 </div>
@@ -178,23 +178,23 @@ const NakshatraNadiDashboard: React.FC = () => {
         );
     };
 
-    if (loading) return <div className="h-screen flex items-center justify-center bg-slate-950"><LoadingSpinner /></div>;
-    if (!data) return <div className="p-8 text-center text-slate-500 bg-slate-950 min-h-screen">Unable to load analysis. Please check backend connection.</div>;
+    if (loading) return <div className="h-screen flex items-center justify-center bg-[#0B0F1A]"><LoadingSpinner /></div>;
+    if (!data) return <div className="p-8 text-center text-[#6F768A] bg-[#0B0F1A] min-h-screen">Unable to load analysis. Please check backend connection.</div>;
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-200 p-6 space-y-8 animate-in fade-in duration-500">
+        <div className="min-h-screen bg-[#0B0F1A] text-[#EDEFF5] p-6 space-y-8 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold text-[#EDEFF5]">
                         Nakshatra Nadi Analysis
                     </h1>
-                    <p className="text-slate-400 text-sm mt-1">Specialized Pt. Dinesh Guruji Technique</p>
+                    <p className="text-[#A9B0C2] text-sm mt-1">Specialized Pt. Dinesh Guruji Technique</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={fetchNadiAnalysis}
-                        className="px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 rounded-lg text-indigo-400 text-sm transition-all"
+                        className="px-4 py-2 bg-[#6D5DF6]/20 hover:bg-[#6D5DF6]/30 border border-[#6D5DF6]/30 rounded-lg text-[#6D5DF6] text-sm transition-all"
                     >
                         Refresh Calculation
                     </button>
@@ -202,29 +202,29 @@ const NakshatraNadiDashboard: React.FC = () => {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex border-b border-slate-800">
+            <div className="flex border-b border-[#FFFFFF]/08">
                 <button
                     onClick={() => setActiveTab('gold')}
                     className={`px-6 py-3 font-semibold transition-all relative ${activeTab === 'gold'
-                        ? 'text-amber-400'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'text-[#F5A623]'
+                        : 'text-[#A9B0C2] hover:text-[#EDEFF5]'
                         }`}
                 >
                     Gold Nadi Combination
                     {activeTab === 'gold' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400"></div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F5A623]"></div>
                     )}
                 </button>
                 <button
                     onClick={() => setActiveTab('predictions')}
                     className={`px-6 py-3 font-semibold transition-all relative ${activeTab === 'predictions'
-                        ? 'text-indigo-400'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'text-[#6D5DF6]'
+                        : 'text-[#A9B0C2] hover:text-[#EDEFF5]'
                         }`}
                 >
                     All Predictions
                     {activeTab === 'predictions' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400"></div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6D5DF6]"></div>
                     )}
                 </button>
             </div>
@@ -233,8 +233,8 @@ const NakshatraNadiDashboard: React.FC = () => {
             {activeTab === 'gold' ? (
                 <div className="space-y-6">
                     <div className="text-center mb-6">
-                        <h2 className="text-2xl font-bold text-amber-400 mb-2">GOLD NADI COMBINATION</h2>
-                        <p className="text-sm text-slate-400">
+                        <h2 className="text-2xl font-bold text-[#F5A623] mb-2">GOLD NADI COMBINATION</h2>
+                        <p className="text-sm text-[#A9B0C2]">
                             PL: Planet Lord | NL: Nakshatra Lord | SL: Sub Lord | SSL: Sub-Sub Lord
                         </p>
                     </div>
@@ -247,44 +247,44 @@ const NakshatraNadiDashboard: React.FC = () => {
                         <div className="space-y-4">
                             {/* Dasha Hierarchy Display */}
                             {data.current_bukthi.hierarchy && (
-                                <Card className="p-4 bg-slate-900/50 border-slate-800">
+                                <Card className="p-4 bg-[#0B0F1A]/50 border-[#FFFFFF]/08">
                                     <div className="flex items-center gap-2 mb-4">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Running Period Hierarchy</h3>
+                                        <div className="h-1.5 w-1.5 rounded-full bg-[#6D5DF6] animate-pulse"></div>
+                                        <h3 className="text-xs font-bold text-[#6F768A] uppercase tracking-widest">Running Period Hierarchy</h3>
                                     </div>
                                     <div className="grid grid-cols-3 gap-3">
                                         {/* Mahadasha */}
-                                        <div className="bg-slate-900 rounded-lg border border-slate-800 p-3 relative overflow-hidden group hover:border-amber-500/30 transition-colors">
+                                        <div className="bg-[#0B0F1A] rounded-lg border border-[#FFFFFF]/08 p-3 relative overflow-hidden group hover:border-[#F5A623]/30 transition-colors">
                                             <div className="absolute -right-2 -top-2 opacity-5 scale-150 rotate-12 transition-transform group-hover:scale-100 group-hover:rotate-0">
-                                                <span className="text-5xl font-black text-amber-500">MD</span>
+                                                <span className="text-5xl font-black text-[#F5A623]">MD</span>
                                             </div>
-                                            <div className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">Mahadasha</div>
-                                            <div className="text-lg font-bold text-slate-200">{data.current_bukthi.hierarchy.mahadasha?.lord}</div>
-                                            <div className="text-[10px] text-slate-500 mt-1 truncate">
+                                            <div className="text-[10px] text-[#F5A623] font-bold uppercase tracking-wider mb-0.5">Mahadasha</div>
+                                            <div className="text-lg font-bold text-[#EDEFF5]">{data.current_bukthi.hierarchy.mahadasha?.lord}</div>
+                                            <div className="text-[10px] text-[#6F768A] mt-1 truncate">
                                                 {data.current_bukthi.hierarchy.mahadasha?.end_date?.split(' ')[0]}
                                             </div>
                                         </div>
 
                                         {/* Antardasha */}
-                                        <div className="bg-slate-900 rounded-lg border border-indigo-500/50 p-3 relative overflow-hidden shadow-[0_0_15px_-3px_rgba(99,102,241,0.2)]">
+                                        <div className="bg-[#0B0F1A] rounded-lg border border-[#6D5DF6]/50 p-3 relative overflow-hidden shadow-[0_0_15px_-3px_rgba(109,93,246,0.2)]">
                                             <div className="absolute -right-2 -top-2 opacity-10 rotate-12">
-                                                <span className="text-5xl font-black text-indigo-500">AD</span>
+                                                <span className="text-5xl font-black text-[#6D5DF6]">AD</span>
                                             </div>
-                                            <div className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mb-0.5">Antardasha</div>
-                                            <div className="text-lg font-bold text-white">{data.current_bukthi.hierarchy.antardasha?.lord}</div>
-                                            <div className="text-[10px] text-indigo-300/60 mt-1 truncate">
+                                            <div className="text-[10px] text-[#6D5DF6] font-bold uppercase tracking-wider mb-0.5">Antardasha</div>
+                                            <div className="text-lg font-bold text-[#EDEFF5]">{data.current_bukthi.hierarchy.antardasha?.lord}</div>
+                                            <div className="text-[10px] text-[#6D5DF6]/60 mt-1 truncate">
                                                 {data.current_bukthi.hierarchy.antardasha?.end_date?.split(' ')[0]}
                                             </div>
                                         </div>
 
                                         {/* Antara */}
-                                        <div className="bg-slate-900 rounded-lg border border-slate-800 p-3 relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
+                                        <div className="bg-[#0B0F1A] rounded-lg border border-[#FFFFFF]/08 p-3 relative overflow-hidden group hover:border-[#2ED573]/30 transition-colors">
                                             <div className="absolute -right-2 -top-2 opacity-5 scale-150 rotate-12 transition-transform group-hover:scale-100 group-hover:rotate-0">
-                                                <span className="text-5xl font-black text-emerald-500">PD</span>
+                                                <span className="text-5xl font-black text-[#2ED573]">PD</span>
                                             </div>
-                                            <div className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mb-0.5">Pratyantar</div>
-                                            <div className="text-lg font-bold text-slate-200">{data.current_bukthi.hierarchy.antara?.lord || '-'}</div>
-                                            <div className="text-[10px] text-slate-500 mt-1 truncate">
+                                            <div className="text-[10px] text-[#2ED573] font-bold uppercase tracking-wider mb-0.5">Pratyantar</div>
+                                            <div className="text-lg font-bold text-[#EDEFF5]">{data.current_bukthi.hierarchy.antara?.lord || '-'}</div>
+                                            <div className="text-[10px] text-[#6F768A] mt-1 truncate">
                                                 {data.current_bukthi.hierarchy.antara?.end_date?.split(' ')[0]}
                                             </div>
                                         </div>
@@ -293,26 +293,26 @@ const NakshatraNadiDashboard: React.FC = () => {
                             )}
 
                             {/* AI Period Insight */}
-                            <Card className="bg-gradient-to-br from-indigo-950 to-slate-900 border-indigo-500/30 overflow-hidden">
+                            <Card className="bg-gradient-to-br from-[#11162A] to-[#0B0F1A] border-[#6D5DF6]/30 overflow-hidden">
                                 <div className="p-4 flex justify-between items-start gap-4">
                                     <div className="flex items-start gap-3 flex-1">
-                                        <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400 mt-1">
+                                        <div className="p-2 bg-[#6D5DF6]/20 rounded-lg text-[#6D5DF6] mt-1">
                                             {insightLoading && !periodInsight ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <h3 className="font-bold text-slate-200">Current Cosmic Scope</h3>
-                                                    <p className="text-xs text-slate-400 mb-2">AI-powered analysis of your current time period</p>
+                                                    <h3 className="font-bold text-[#EDEFF5]">Current Cosmic Scope</h3>
+                                                    <p className="text-xs text-[#6F768A] mb-2">AI-powered analysis of your current time period</p>
                                                 </div>
                                             </div>
 
                                             {periodInsight ? (
-                                                <div className="prose prose-invert prose-sm max-w-none text-slate-300 bg-black/20 p-3 rounded-lg border border-indigo-500/10">
+                                                <div className="prose prose-invert prose-sm max-w-none text-[#A9B0C2] bg-[#0B0F1A]/20 p-3 rounded-lg border border-[#6D5DF6]/10">
                                                     <ReactMarkdown>{periodInsight}</ReactMarkdown>
                                                 </div>
                                             ) : (
-                                                <div className="text-slate-500 text-xs italic">
+                                                <div className="text-[#6F768A] text-xs italic">
                                                     {insightLoading ? "Analyzing planetary vibrations..." : "Waiting for insight..."}
                                                 </div>
                                             )}
@@ -322,10 +322,10 @@ const NakshatraNadiDashboard: React.FC = () => {
                             </Card>
 
                             {/* Event Selector */}
-                            <Card className="bg-slate-900/50 border-slate-800 p-4">
-                                <label className="block text-sm font-semibold text-slate-300 mb-2">Select Life Event</label>
+                            <Card className="bg-[#0B0F1A]/50 border-[#FFFFFF]/08 p-4">
+                                <label className="block text-sm font-semibold text-[#A9B0C2] mb-2">Select Life Event</label>
                                 <select
-                                    className="w-full p-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:border-indigo-500 focus:outline-none"
+                                    className="w-full p-3 bg-[#11162A] border border-[#FFFFFF]/08 rounded-lg text-[#EDEFF5] focus:border-[#6D5DF6] focus:outline-none"
                                     value={selectedEvent}
                                     onChange={(e) => setSelectedEvent(e.target.value)}
                                 >
@@ -344,12 +344,12 @@ const NakshatraNadiDashboard: React.FC = () => {
                             </Card>
 
                             {/* AI Event Advice */}
-                            <Card className="bg-slate-900/50 border-slate-800 p-4">
+                            <Card className="bg-[#0B0F1A]/50 border-[#FFFFFF]/08 p-4">
                                 <div className="flex justify-between items-start gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <Bot className="w-4 h-4 text-emerald-500" />
-                                            <h3 className="text-sm font-bold text-slate-200">AI Guidance for {selectedEvent.replace('_', ' ').toUpperCase()}</h3>
+                                            <Bot className="w-4 h-4 text-[#2ED573]" />
+                                            <h3 className="text-sm font-bold text-[#EDEFF5]">AI Guidance for {selectedEvent.replace('_', ' ').toUpperCase()}</h3>
                                         </div>
 
                                         {eventInsight ? (

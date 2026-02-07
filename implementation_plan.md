@@ -1,61 +1,134 @@
-# Implementation Plan: Astro360 Feature Expansion
+# Astro360 Feature Implementation Roadmap (200+ Features)
 
-Based on the `GAP_ANALYSIS.md`, this plan outlines the phased approach to bringing the codebase to feature parity with `features.md`.
+This document tracks the progress of building the comprehensive 200+ feature list for Astro360.
+**Status:** Phase 1 (Core Foundations) is in progress.
 
-## Phase 1: Core Enhancements (Days 1-3)
-*Goal: Strengthen existing modules and fill minor gaps in basic astrology.*
+---
 
-### Backend
-1.  **Panchang & Muhurta**:
-    *   Expand `panchang.py` to include **Panchaka Rahita** logic.
-    *   Enhance `muhurata.py` to implement a true **Muhurta Finder** (search within date range).
-2.  **Planetary Analysis**:
-    *   Implement `avasthas.py` (Planetary States: Baal, Kumar, etc.).
-    *   Implement **Bhava Bala** logic in `strength.py`.
-    *   Add **Special Points** (Bhrigu Bindu, Fortuna) to `calculations.py`.
-3.  **Refactor Transits**:
-    *   Add **Nakshatra Ingress** detection to `transits.py`.
+## 🟢 Phase 1: Core Foundations (Current)
+**Goal:** Establish the bedrock astrological calculations, essential API endpoints, and primary charts.
 
-### Frontend
-1.  **UI Updates**:
-    *   Update `PanchangDisplay.tsx` to show Panchaka & Avasthas.
-    *   Add "Special Points" section to Chart view.
+### 1. Chart & Calculation Engine (Feature #1-15)
+*   [x] **Rashi & Navamsa (D1/D9):** Core calculations (#1, #2, #3).
+*   [x] **Planetary Positions:** Sidereal longitudes, nakshatras, padas (#3).
+*   [x] **House Systems:** Placidus/Whole Sign support (#8, #11).
+*   [x] **Divisional Charts:** D1-D60 framework implemented (#3).
+*   [x] **Ayanamsa:** Lahiri (Chitrapaksha) default, others supported (#11, #15).
+*   [x] **Outer Planets:** Uranus, Neptune, Pluto integration (#7).
+*   [ ] **Calculation Settings:** UI for Ayanamsa/House System selection (#11).
+*   [ ] **Chart Visuals:** Interactive Chart Wheel (#193), Aspect Table (#14), Jyotish Reference Table (#13).
 
-## Phase 2: The Jaimini Module (Days 4-6)
-*Goal: Implement the missing Jaimini Astrology system.*
+### 2. Basic Dasha & Planets (Feature #46, #52-53, #28)
+*   [ ] **Vimshottari Dasha:** 5 levels (Maha to Prana) (#46).
+*   [ ] **Dasha Balance & Current:** Auto-calculation at birth/now (#52, #53).
+*   [ ] **Rahu/Ketu Analysis:** True/Mean node options (#28).
 
-### Backend
-1.  **New Module**: Create `astro_app/backend/astrology/jaimini/`.
-2.  **Karakas**: Implement `karakas.py` (Atmakaraka, Amatyakaraka, etc.).
-3.  **Argala**: Implement `argala.py` (Planetary Intervention).
-4.  **Chara Dasha**: Implement `chara_dasha.py` (Sign-based dasha system).
-5.  **Arudha**: Implement `arudha.py` (Arudha Lagna & Padas).
-6.  **Router**: expose endpoints in `jaimini_router.py`.
+### 3. Jaimini Module (Feature #26-27, #48, #97)
+*   [x] **7 Karakas:** Atmakaraka to Darakaraka (#26, #27, #187).
+*   [x] **Arudha Padas:** Lagna Pada (AL) and Upapada (UL) (#97).
+*   [ ] **Chara Dasha:** Sign-based dasha system (#48).
+*   [ ] **Karakamsa:** Placement in Navamsa (#27).
 
-### Frontend
-1.  **Jaimini Dashboard**: Create a dedicated `JaiminiDashboard.tsx` with tabs for Karakas, Dasha, and Arudha.
+### 4. Solar Return (Varshaphal) (Feature #171)
+*   [x] **Tajaka Chart Calculation:** Annual return time calculation (#171).
+*   [x] **Muntha:** Annual progression of the ascendant (#171).
+*   [ ] **Pancha Adhikaris:** The 5 Office Bearers (#171).
+*   [ ] **Year Lord Selection:** Logic to pick the strongest candidate (#171).
 
-## Phase 3: Varshphal (Solar Return) & Advanced Tools (Days 7-10)
-*Goal: Implement annual horoscopy and advanced research tools.*
+---
 
-### Backend
-1.  **Varshphal Engine**: Create `astro_app/backend/astrology/varshphal/`.
-    *   Implement `solar_return.py` (Calculate return time & chart).
-    *   Implement `muntha.py` & `mudda_dasha.py`.
-    *   Implement `panchadhikari.py` (Lords of the year).
-2.  **Panchapakshi**: Create `panchapakshi.py` for Biorhythm calculations.
-3.  **Advanced Transits**:
-    *   Implement `transit_search.py` (Find when Jupiter enters Aries, etc.).
-    *   Implement `transit_hitlist.py` (Sensitive points triggering).
+## 🟡 Phase 2: Deep Analysis
+**Goal:** Implement detailed planetary, nakshatra, and strength analysis ("Gold" tier depth).
 
-### Frontend
-1.  **Varshphal View**: Create `SolarReturnPage.tsx`.
-2.  **Panchapakshi Tool**: Create a "Biorhythm/Activity Planner" UI.
+### 1. Nakshatra Engine (Feature #16-25)
+*   [ ] **Detailed Info:** Deity, Symbol, Ruler, Guna, Element (#16, #19, #24).
+*   [ ] **Nakshatra Explorer:** Searchable database (#20).
+*   [ ] **Positions in Vargas:** Nakshatras in Divisional Charts (#4, #18, #23).
+*   [ ] **Advanced Calculation:** Unequal Nakshatras (#22), Aspects/Latta (#21).
 
-## Phase 4: Niche & Specialist Features (Days 11+)
-*Goal: Add the highly specific and "Pro" features.*
+### 2. Planetary Strength & Dignity (Feature #32-45, #55-57)
+*   [ ] **Shadbala:** Full 6-fold strength calculation (#55).
+*   [ ] **Bhava Bala:** House strength for all 12 houses (#56, #57).
+*   [ ] **Varga Dignities:** Exalted/Own/Friend/Enemy in ALL 16 vargas (#32).
+*   [ ] **Planetary States:** Avasthas (Bala, Kumara etc.) (#100, #44, #45).
+*   [ ] **Yogas & Special Points:** Combustion (#36), Retrograde (#35), Badhaka (#43).
+*   [ ] **Destiny Points:** Bhrigu Bindu (#29), Fortune Point (#31, #38).
 
-1.  **Advanced Ashtakavarga**: Add "Transit Scores" and "Interpetation".
-2.  **Divisional Deities**: Map deities for D60, D45, etc.
-3.  **Moon Tools**: Chandra Kriya/Vela/Avsastha implementation.
-4.  **Offline Support**: Implement `PWA` features or `localStorage` caching mechanisms.
+### 3. Advanced Dasha Systems (Feature #47-51, #54, #102)
+*   [ ] **Yogini Dasha:** 8-planet dasha (#51).
+*   [ ] **Ashtottari Dasha:** 108-year cycle (#51).
+*   [ ] **Kalachakra Dasha:** Wheel of Time dasha (#49, #102).
+*   [ ] **Timeline Visualization:** Dasha graphs (#54, #195).
+
+---
+
+## 🟠 Phase 3: Predictive & Event Engine
+**Goal:** Enable "When will it happen?" capabilities and daily astrology.
+
+### 1. Transits (Gochara) (Feature #73-83)
+*   [ ] **Real-time Transit Chart:** Current planetary positions (#73, #74, #75).
+*   [ ] **Transit/Natal Overlay:** Interactive superimposition (#33, #194).
+*   [ ] **Sade Sati / Dhaiya:** Saturn transit analysis (#59 - inferred).
+*   [ ] **Special Transits:** Kakshya (#60 - inferred), Gandanta (#82), Vargottama (#81).
+*   [ ] **Transit Calendar:** Monthly summary and hitlist (#34, #76, #77).
+
+### 2. Panchang & Time (Feature #64-72, #121-128)
+*   [ ] **Daily Panchang:** Tithi, Vara, Nakshatra, Yoga, Karana (#64, #65).
+*   [ ] **Muhurta:** Rahu Kaal, Yamaganda, Gulika Kaal (#69, #70, #71, #72).
+*   [ ] **Sunrise/Sunset:** Accurate local calculation (#68).
+*   [ ] **Tithi & Lunar:** Tithi Pravesh (#123), Deities (#124), Yogatara (#127).
+
+### 3. Events & Yoga (Feature #111-120, #164-170)
+*   [ ] **Yoga Detection:** 100+ Classical Yogas (Raja, Dhana, Arishta) (#164-169).
+*   [ ] **Life Events:** Tracking and correlation (#111, #112).
+*   [ ] **Auspicious Timing:** Sankranti (#114), Purnima/Amavasya (#116, #117).
+
+---
+
+## 🔵 Phase 4: Specialized Modules
+**Goal:** High-end features for professional astrologers and remedies.
+
+### 1. KP Astrology (Feature #130-133)
+*   [ ] **KP Cusps:** Placidus house system (#131).
+*   [ ] **Significators:** Planet and House significations (A, B, C, D) (#132).
+*   [ ] **Sub-Lord Theory:** The core of KP prediction (#133).
+
+### 2. Ashtakavarga (Feature #58-60)
+*   [ ] **Bhinna Ashtakavarga:** Individual planet points (#59).
+*   [ ] **Sarva Ashtakavarga:** Total points per sign (#58).
+*   [ ] **Prastharas:** Detailed point distribution (#60).
+
+### 3. Compatibility (Feature #159-163)
+*   [ ] **Ashta Kuta:** 36-point matching system (#160, #161).
+*   [ ] **Manglik Dosha:** Mars affliction check (#88 - inferred).
+*   [ ] **Synastry:** Planet-to-planet overlay (#162).
+*   [ ] **Composite Charts:** (#163).
+
+### 4. Remedies & Rituals (Feature #84-94, #155)
+*   [ ] **Personalized Remedies:** Nakshatra (#84), Mantra (#85), Gemstone (#90).
+*   [ ] **Dosha Remedies:** Kaal Sarp, Pitra, etc. (#93).
+*   [ ] **Eclipse Rituals:** Sutak timings (#157), Remedies (#155).
+
+### 5. Advanced Analysis (Feature #95-110, #129, #134-152)
+*   [ ] **Special Points:** Arabic Parts (#129), Mrtyu Bhaga (#138), Pushkara Navamsa (#151).
+*   [ ] **Chakra Analysis:** SarvatoBhadra (#152), Sudarshan (#10).
+*   [ ] **Drekkana Analysis:** Jagannath, Somnath (#103-105).
+
+---
+
+## 🟣 Phase 5: Reports & Monetization
+**Goal:** Generate revenue, downloadable assets, and user management.
+
+### 1. PDF Reports (Feature #176-183)
+*   [ ] **PDF Generation:** High-quality vector PDFs (#176).
+*   [ ] **Report Templates:** Basic (#177), Detailed (#178), Transit (#180), Compatibility (#182).
+
+### 2. Notifications (Feature #198-202)
+*   [ ] **Transit Alerts:** "Jupiter entering Taurus" (#198, #200).
+*   [ ] **Dasha Alerts:** "Entering Mercury Antardasha" (#199).
+*   [ ] **Remedy Reminders:** (#201).
+
+### 3. Monetization & Utilities (Feature #184-192, #203-210)
+*   [ ] **Tiered Access:** Silver/Gold/Platinum enforcement (#203-207).
+*   [ ] **Subscription Logic:** Renewal and upgrades (#209, #210).
+*   [ ] **User Utilities:** Offline Charts (#184), Multiple Profiles (#186), Celebrity DB (#192).

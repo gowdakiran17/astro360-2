@@ -87,17 +87,17 @@ const RemediesCard: React.FC<RemediesCardProps> = ({ mahadasha, antardasha }) =>
     if (!mdRemedy) return null;
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-full">
-            <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-500" />
+        <div className="bg-[#11162A] p-6 rounded-2xl border border-[#FFFFFF]/08 shadow-sm h-full">
+            <h3 className="text-sm font-bold text-[#EDEFF5] mb-4 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#6D5DF6]" />
                 Vedic Remedies (Upayas)
             </h3>
 
             <div className="space-y-6">
                 {/* Mahadasha Remedies */}
                 <div>
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                        For Mahadasha Lord: <span className="text-purple-600">{mahadasha}</span>
+                    <div className="text-xs font-bold text-[#6F768A] uppercase tracking-wider mb-2">
+                        For Mahadasha Lord: <span className="text-[#6D5DF6]">{mahadasha}</span>
                     </div>
                     <div className="bg-purple-50 rounded-xl p-4 space-y-3">
                         <div className="flex items-start gap-3">

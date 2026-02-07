@@ -1,6 +1,6 @@
-import type { ChartData } from '../NorthIndianChart';
+import type { ChartData, Planet } from '../NorthIndianChart';
 
-const SouthIndianChart = ({ data }: { data: ChartData | null }) => {
+const SouthIndianChart = ({ data, useBhava = false, transits = [] }: { data: ChartData | null, useBhava?: boolean, transits?: Planet[] }) => {
   if (!data) return null;
 
   // Planet Colors - Optimized for Dark Theme
@@ -19,19 +19,12 @@ const SouthIndianChart = ({ data }: { data: ChartData | null }) => {
     "Pl": "#94A3B8", // Slate-400
   };
 
-  const getPlanetColor = (name: string) => {
+  const getPlanetColor = (name: string, isTransit = false) => {
+    if (isTransit) return "#2ED573"; // Green for Transits
     return planetColors[name] || "#CBD5E1";
   };
 
   // Map signs to their fixed positions in the 4x4 grid (0-11 indices)
-  // Grid layout:
-  // 11 00 01 02 (Pisces, Aries, Taurus, Gemini)
-  // 10       03 (Aquarius, Cancer)
-  // 09       04 (Capricorn, Leo)
-  // 08 07 06 05 (Sag, Scorpio, Libra, Virgo)
-
-  // Let's define the grid cell coordinates (x, y) for each sign index (0=Aries, 1=Taurus...)
-  // Assuming 400x400 SVG, cell size 100x100
   const signCells = {
     0: { x: 100, y: 0, name: "Aries" },      // Aries
     1: { x: 200, y: 0, name: "Taurus" },     // Taurus
@@ -47,15 +40,41 @@ const SouthIndianChart = ({ data }: { data: ChartData | null }) => {
     11: { x: 0, y: 0, name: "Pisces" },      // Pisces
   };
 
-  // Group planets by sign
-  const planetsBySign: Record<string, string[]> = {};
-  data.planets.forEach(p => {
-    if (!planetsBySign[p.zodiac_sign]) planetsBySign[p.zodiac_sign] = [];
-    planetsBySign[p.zodiac_sign].push(p.name.substring(0, 2));
-  });
+  const zodiacOrder = [
+    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+  ];
 
   // Determine Ascendant Sign
   const ascSign = data.ascendant.zodiac_sign;
+  const ascIndex = zodiacOrder.findIndex(z => z === ascSign);
+
+  // Group planets by sign
+  const planetsBySign: Record<string, Array<{name: string, isTransit: boolean}>> = {};
+  
+  // Natal Planets
+  data.planets.forEach(p => {
+    let targetSign = p.zodiac_sign;
+
+    if (useBhava) {
+      // In Bhava mode, we place planet in the sign corresponding to its House
+      const houseNum = p.kp_house || p.house;
+      const signIdx = (ascIndex + (houseNum - 1)) % 12;
+      targetSign = zodiacOrder[signIdx];
+    }
+
+    if (!planetsBySign[targetSign]) planetsBySign[targetSign] = [];
+    planetsBySign[targetSign].push({ name: p.name.substring(0, 2), isTransit: false });
+  });
+
+  // Transit Planets
+  transits.forEach(p => {
+    // For South Indian chart, signs are fixed position.
+    // Just map by sign name.
+    const targetSign = p.zodiac_sign; // Transits usually viewed in Rashi
+    if (!planetsBySign[targetSign]) planetsBySign[targetSign] = [];
+    planetsBySign[targetSign].push({ name: p.name.substring(0, 2), isTransit: true });
+  });
 
   return (
     <div className="flex justify-center my-6">
@@ -76,9 +95,6 @@ const SouthIndianChart = ({ data }: { data: ChartData | null }) => {
         <line x1="200" y1="300" x2="200" y2="400" /> {/* Bottom stub */}
         <line x1="300" y1="0" x2="300" y2="400" />
 
-        {/* Center Box (Optional label or empty) */}
-        {/* <text x="200" y="200" textAnchor="middle" className="text-slate-200 text-4xl font-bold opacity-20">Rasi</text> */}
-
         {/* Render Signs */}
         {Object.values(signCells).map((coords) => {
 
@@ -88,15 +104,6 @@ const SouthIndianChart = ({ data }: { data: ChartData | null }) => {
 
           return (
             <g key={signName}>
-              {/* Sign Name (Small, corner) */}
-              {/* <text
-                x={coords.x + 5}
-                y={coords.y + 15}
-                className="text-[10px] fill-slate-400 font-bold uppercase"
-              >
-                {signName.substring(0, 3)}
-              </text> */}
-
               {/* Ascendant Marker */}
               {isAscendant && (
                 <text
@@ -113,14 +120,19 @@ const SouthIndianChart = ({ data }: { data: ChartData | null }) => {
               {/* Planets List */}
               {planets.map((p, i) => (
                 <text
-                  key={p}
+                  key={`${p.name}-${i}`}
                   x={coords.x + 50}
                   y={coords.y + (isAscendant ? 40 : 30) + (i * 18)}
                   textAnchor="middle"
                   className="font-bold"
-                  style={{ fontSize: '16px', fill: getPlanetColor(p), stroke: 'none' }}
+                  style={{ 
+                    fontSize: p.isTransit ? '12px' : '16px', 
+                    fill: getPlanetColor(p.name, p.isTransit), 
+                    stroke: 'none',
+                    fontStyle: p.isTransit ? 'italic' : 'normal'
+                  }}
                 >
-                  {p}
+                  {p.name}{p.isTransit ? '*' : ''}
                 </text>
               ))}
             </g>

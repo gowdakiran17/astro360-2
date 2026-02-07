@@ -5,11 +5,12 @@ import {
     Home, Sparkles, Zap, User,
     Bell, LayoutGrid, LogOut, BrainCircuit,
     ShieldCheck, HelpCircle, ChevronRight,
-    Crown
+    Crown, Settings
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useChartSettings } from '../../context/ChartContext';
 import BrandLogo from './BrandLogo';
+import CalculationSettings from '../settings/CalculationSettings';
 
 interface NavItem {
     id: string;
@@ -35,6 +36,7 @@ const CelestialNavbar = () => {
 
     const [isScrolled, setIsScrolled] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -61,7 +63,7 @@ const CelestialNavbar = () => {
                     initial={{ y: -100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className={`w-full h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-6 transition-all duration-300 ${isScrolled ? 'shadow-2xl' : ''}`}
+                    className={`w-full h-16 bg-[#0B0F1A]/90 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 transition-all duration-300 ${isScrolled ? 'shadow-2xl' : ''}`}
                 >
                     <div className="flex items-center cursor-pointer" onClick={() => navigate('/home')}>
                         <BrandLogo size="md" showWordmark />
@@ -75,13 +77,13 @@ const CelestialNavbar = () => {
                                 <button
                                     key={item.id}
                                     onClick={() => navigate(item.path)}
-                                    className={`relative px-2 py-2 rounded-md transition-colors ${active ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+                                    className={`relative px-2 py-2 rounded-md transition-colors ${active ? 'text-[#EDEFF5]' : 'text-[#A9B0C2] hover:text-[#EDEFF5]'}`}
                                 >
                                     <div className="relative flex items-center gap-2.5">
-                                        <item.icon className={`w-4.5 h-4.5 ${active ? 'text-white' : 'text-slate-400'}`} />
+                                        <item.icon className={`w-4.5 h-4.5 ${active ? 'text-[#EDEFF5]' : 'text-[#A9B0C2]'}`} />
                                         <span className="text-xs font-semibold uppercase tracking-wider">{item.label}</span>
                                     </div>
-                                    {active && <div className="absolute left-0 right-0 -bottom-1 h-0.5 bg-indigo-500 rounded" />}
+                                    {active && <div className="absolute left-0 right-0 -bottom-1 h-0.5 bg-[#F5A623] rounded" />}
                                 </button>
                             );
                         })}
@@ -91,15 +93,23 @@ const CelestialNavbar = () => {
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
                             <button
+                                onClick={() => setIsSettingsOpen(true)}
+                                className="p-2.5 text-[#A9B0C2] hover:text-[#EDEFF5] hover:bg-[#11162A] rounded-lg transition-all border border-[rgba(255,255,255,0.08)]"
+                                title="Calculation Settings"
+                            >
+                                <Settings className="w-5 h-5" />
+                            </button>
+
+                            <button
                                 onClick={toggleChartStyle}
-                                className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all border border-slate-800"
+                                className="p-2.5 text-[#A9B0C2] hover:text-[#EDEFF5] hover:bg-[#11162A] rounded-lg transition-all border border-[rgba(255,255,255,0.08)]"
                             >
                                 <LayoutGrid className="w-5 h-5" />
                             </button>
 
-                            <button className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all border border-slate-800 relative">
+                            <button className="p-2.5 text-[#A9B0C2] hover:text-[#EDEFF5] hover:bg-[#11162A] rounded-lg transition-all border border-[rgba(255,255,255,0.08)] relative">
                                 <Bell className="w-5 h-5" />
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-slate-950 animate-pulse" />
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-[#E25555] rounded-full border-2 border-[#0B0F1A] animate-pulse" />
                             </button>
                         </div>
 
@@ -109,18 +119,18 @@ const CelestialNavbar = () => {
                             onMouseEnter={() => setIsProfileOpen(true)}
                             onMouseLeave={() => setIsProfileOpen(false)}
                         >
-                            <button className="h-10 px-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3 hover:bg-slate-800 transition-all">
+                            <button className="h-10 px-3 rounded-xl bg-[#11162A] border border-[rgba(255,255,255,0.08)] flex items-center gap-3 hover:bg-[#11162A]/80 transition-all">
                                 <div className="relative">
-                                    <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-[#050816] font-black text-sm">
+                                    <div className="w-8 h-8 rounded-full bg-[#F5A623] flex items-center justify-center text-[#0B0F1A] font-black text-sm">
                                         {userInitial}
                                     </div>
                                 </div>
                                 <div className="text-left hidden sm:block">
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs font-bold text-white leading-none tracking-tight">{userName}</p>
-                                        <Crown className="w-3 h-3 text-amber-500" />
+                                        <p className="text-xs font-bold text-[#EDEFF5] leading-none tracking-tight">{userName}</p>
+                                        <Crown className="w-3 h-3 text-[#F5A623]" />
                                     </div>
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-amber-500/80">Portal</p>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-[#F5A623]/80">Portal</p>
                                 </div>
                             </button>
 
@@ -130,16 +140,16 @@ const CelestialNavbar = () => {
                                         initial={{ opacity: 0, y: 15, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute top-full right-0 mt-3 w-72 bg-slate-950 border border-slate-800 p-3 rounded-2xl shadow-2xl z-[110]"
+                                        className="absolute top-full right-0 mt-3 w-72 bg-[#0B0F1A] border border-[rgba(255,255,255,0.08)] p-3 rounded-2xl shadow-2xl z-[110]"
                                     >
-                                        <div className="p-4 mb-2 bg-slate-900 rounded-xl border border-slate-800">
+                                        <div className="p-4 mb-2 bg-[#11162A] rounded-xl border border-[rgba(255,255,255,0.08)]">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                                                    <Crown className="w-6 h-6 text-amber-500" />
+                                                <div className="w-12 h-12 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/20 flex items-center justify-center">
+                                                    <Crown className="w-6 h-6 text-[#F5A623]" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs font-black uppercase tracking-widest text-amber-500">Tier</p>
-                                                    <p className="text-sm font-bold text-white">Premium Oracle</p>
+                                                    <p className="text-xs font-black uppercase tracking-widest text-[#F5A623]">Tier</p>
+                                                    <p className="text-sm font-bold text-[#EDEFF5]">Premium Oracle</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -154,7 +164,7 @@ const CelestialNavbar = () => {
                                                 <button
                                                     key={i}
                                                     onClick={() => navigate(link.path)}
-                                                    className="w-full flex items-center justify-between p-3.5 text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all"
+                                                    className="w-full flex items-center justify-between p-3.5 text-[#A9B0C2] hover:text-[#EDEFF5] hover:bg-[#11162A] rounded-xl transition-all"
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <link.icon className="w-5 h-5" />
@@ -165,11 +175,11 @@ const CelestialNavbar = () => {
                                             ))}
                                         </div>
 
-                                        <div className="h-px bg-slate-800 my-2 mx-2" />
+                                        <div className="h-px bg-[rgba(255,255,255,0.08)] my-2 mx-2" />
 
                                         <button
                                             onClick={() => logout()}
-                                            className="w-full flex items-center gap-3 p-3 text-rose-400 hover:text-white hover:bg-rose-500/10 rounded-xl transition-all"
+                                            className="w-full flex items-center gap-3 p-3 text-[#E25555] hover:text-[#EDEFF5] hover:bg-[#E25555]/10 rounded-xl transition-all"
                                         >
                                             <LogOut className="w-4 h-4" />
                                             <span className="text-xs font-bold uppercase tracking-widest">Sign Out</span>
@@ -182,41 +192,71 @@ const CelestialNavbar = () => {
                 </motion.div>
             </header>
 
-            {/* --- MOBILE BOTTOM NAVIGATION --- */}
-            <nav className="md:hidden fixed bottom-6 left-4 right-4 h-16 z-[100]">
-                <div className="relative w-full h-full bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-around px-3 shadow-2xl">
-                    {ITEMS.map((item) => {
-                        const active = isActive(item.path);
-
-                        if (item.isCenter) {
-                            return (
-                                <div key={item.id} className="relative -top-9 px-2">
-                                    <motion.button
-                                        whileTap={{ scale: 0.9 }}
-                                        onClick={() => navigate(item.path)}
-                                        className="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg border-4 border-slate-950"
-                                    >
-                                        <item.icon className="w-7 h-7" />
-                                    </motion.button>
-                                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center mt-1">{item.label}</p>
-                                </div>
-                            );
-                        }
-
-                        return (
-                            <button
-                                key={item.id}
-                                onClick={() => navigate(item.path)}
-                                className={`flex flex-col items-center gap-1 relative py-1 transition-all ${active ? 'text-white' : 'text-slate-400'
-                                    }`}
-                            >
-                                <item.icon className="w-5.5 h-5.5 transition-transform duration-500" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
-                            </button>
-                        );
-                    })}
+            {/* --- MOBILE TOP NAVIGATION --- */}
+            <div className="md:hidden fixed top-0 left-0 right-0 z-[100] h-16 bg-[#0B0F1A]/90 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 transition-all duration-300">
+                <div onClick={() => navigate('/home')}>
+                    <BrandLogo size="sm" showWordmark />
                 </div>
-            </nav>
+
+                <div className="flex items-center gap-3">
+                     <button
+                        onClick={toggleChartStyle}
+                        className="p-2 text-[#A9B0C2] hover:text-white rounded-lg border border-white/10 bg-[#11162A]/50"
+                    >
+                        <LayoutGrid className="w-4 h-4" />
+                    </button>
+
+                    <div className="relative">
+                        <button 
+                            onClick={() => setIsProfileOpen(!isProfileOpen)}
+                            className="flex items-center gap-2 pl-1 pr-1 py-1 rounded-full bg-[#11162A]/50 border border-white/10"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-[#F5A623] flex items-center justify-center text-[#0B0F1A] font-black text-xs border border-[#F5A623]/20 shrink-0">
+                                {userInitial}
+                            </div>
+                            <span className="text-xs font-bold text-[#EDEFF5] max-w-[80px] truncate pr-2 hidden sm:block">
+                                {userName}
+                            </span>
+                            <span className="text-xs font-bold text-[#EDEFF5] max-w-[60px] truncate pr-2 sm:hidden block">
+                                {userName}
+                            </span>
+                        </button>
+                         <AnimatePresence>
+                            {isProfileOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute top-full right-0 mt-2 w-64 bg-[#0B0F1A] border border-white/10 p-2 rounded-xl shadow-2xl z-[110]"
+                                >
+                                    <div className="p-3 mb-2 bg-[#11162A]/50 rounded-lg border border-white/10">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-[#F5A623]/10 flex items-center justify-center">
+                                                <Crown className="w-4 h-4 text-[#F5A623]" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-[#F5A623]">Tier</p>
+                                                <p className="text-xs font-bold text-[#EDEFF5]">Premium Oracle</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-1">
+                                        <button onClick={() => navigate('/account/profile')} className="w-full flex items-center gap-3 p-2 text-[#A9B0C2] hover:text-white hover:bg-[#11162A] rounded-lg transition-all text-xs font-bold uppercase tracking-wide">
+                                            <User className="w-4 h-4" /> Profile
+                                        </button>
+                                        <button onClick={() => logout()} className="w-full flex items-center gap-3 p-2 text-rose-400 hover:text-white hover:bg-rose-500/10 rounded-lg transition-all text-xs font-bold uppercase tracking-wide">
+                                            <LogOut className="w-4 h-4" /> Sign Out
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+            </div>
+
+            <CalculationSettings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         </>
     );
 };

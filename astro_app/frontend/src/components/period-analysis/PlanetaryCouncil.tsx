@@ -32,9 +32,9 @@ const PlanetaryCouncil = ({ ishtaKashta, vimsopaka }: PlanetaryCouncilProps) => 
         const sizeClass = strength > 15 ? 'w-12 h-12 text-base' : (strength > 10 ? 'w-11 h-11 text-sm' : 'w-10 h-10 text-xs');
 
         const colors = {
-            ally: 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300',
-            neutral: 'bg-blue-500/20 border-blue-500/50 text-blue-300',
-            challenger: 'bg-rose-500/20 border-rose-500/50 text-rose-300'
+            ally: 'bg-[#2ED573]/20 border-[#2ED573]/50 text-[#2ED573]',
+            neutral: 'bg-[#6D5DF6]/20 border-[#6D5DF6]/50 text-[#6D5DF6]',
+            challenger: 'bg-[#E25555]/20 border-[#E25555]/50 text-[#E25555]'
         };
 
         return (
@@ -47,13 +47,13 @@ const PlanetaryCouncil = ({ ishtaKashta, vimsopaka }: PlanetaryCouncilProps) => 
                 >
                     {planet.slice(0, 2)}
                 </div>
-                <span className="text-[10px] text-slate-400 font-bold tracking-wider">{strength.toFixed(1)}</span>
+                <span className="text-[10px] text-[#6F768A] font-bold tracking-wider">{strength.toFixed(1)}</span>
 
                 {/* Tooltip */}
-                <div className="absolute bottom-full mb-3 w-40 bg-[#0F1429] border border-white/10 p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10 text-center">
-                    <div className="font-black text-white mb-1 uppercase tracking-widest text-xs">{planet}</div>
-                    <div className="text-emerald-400 text-xs font-bold">Ishta: {ishtaKashta[planet]?.ishta.toFixed(1)}</div>
-                    <div className="text-rose-400 text-xs font-bold">Kashta: {ishtaKashta[planet]?.kashta.toFixed(1)}</div>
+                <div className="absolute bottom-full mb-3 w-40 bg-[#0B0F1A] border border-[#FFFFFF]/08 p-3 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10 text-center">
+                    <div className="font-black text-[#EDEFF5] mb-1 uppercase tracking-widest text-xs">{planet}</div>
+                    <div className="text-[#2ED573] text-xs font-bold">Ishta: {ishtaKashta[planet]?.ishta.toFixed(1)}</div>
+                    <div className="text-[#E25555] text-xs font-bold">Kashta: {ishtaKashta[planet]?.kashta.toFixed(1)}</div>
                 </div>
             </div>
         );
@@ -63,15 +63,15 @@ const PlanetaryCouncil = ({ ishtaKashta, vimsopaka }: PlanetaryCouncilProps) => 
         if (planets.length === 0) return null;
 
         const badgeColors = {
-            ally: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-            neutral: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-            challenger: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+            ally: 'bg-[#2ED573]/10 text-[#2ED573] border-[#2ED573]/20',
+            neutral: 'bg-[#6D5DF6]/10 text-[#6D5DF6] border-[#6D5DF6]/20',
+            challenger: 'bg-[#E25555]/10 text-[#E25555] border-[#E25555]/20'
         };
 
         return (
-            <div className="space-y-4 bg-white/[0.02] rounded-2xl p-4 border border-white/5">
+            <div className="space-y-4 bg-[#FFFFFF]/02 rounded-2xl p-4 border border-[#FFFFFF]/05">
                 <div className="flex items-center justify-between px-1">
-                    <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{label}</span>
+                    <span className="text-xs font-black text-[#6F768A] uppercase tracking-widest">{label}</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded border ${badgeColors[type]} font-black uppercase tracking-wider`}>
                         {badgeLabel}
                     </span>
@@ -84,15 +84,15 @@ const PlanetaryCouncil = ({ ishtaKashta, vimsopaka }: PlanetaryCouncilProps) => 
     };
 
     return (
-        <div className="glass-card p-6 lg:p-8 border-white/5 bg-[#0A0E1F]/60 backdrop-blur-xl rounded-[2rem]">
+        <div className="glass-card p-6 lg:p-8 border-[#FFFFFF]/08 bg-[#11162A]/60 backdrop-blur-xl rounded-[2rem]">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-black text-white flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shadow-lg shadow-indigo-500/10">
-                        <Users className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-xl font-black text-[#EDEFF5] flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#6D5DF6]/10 border border-[#6D5DF6]/30 flex items-center justify-center shadow-lg shadow-[#6D5DF6]/10">
+                        <Users className="w-5 h-5 text-[#6D5DF6]" />
                     </div>
                     Planetary Council
                 </h3>
-                <Info className="w-5 h-5 text-slate-500 cursor-help hover:text-indigo-400 transition-colors" />
+                <Info className="w-5 h-5 text-[#6F768A] cursor-help hover:text-[#6D5DF6] transition-colors" />
             </div>
 
             <div className="space-y-4">

@@ -168,6 +168,37 @@ def calculate_ashtakvarga(planets_data: List[dict], ascendant_sign_idx: int) -> 
     # In the screenshot, it shows "Jupiter Total Avg 4.7". 
     # 56 / 12 = 4.66. So it's just total / 12.
     
+    # 4. Kakshya Analysis (Optional but useful for Transit)
+    # Kakshya order per sign (3 deg 45 min each): Saturn, Jupiter, Mars, Sun, Venus, Mercury, Moon, Lagna
+    KAKSHYA_ORDER = ["Saturn", "Jupiter", "Mars", "Sun", "Venus", "Mercury", "Moon", "Lagna"]
+    
+    kakshya_strength = {} # { sign_idx: [1, 0, 1...] } per Kakshya lord
+    
+    # We can infer Kakshya contribution from Prastaraka
+    # Prastaraka[Planet][Donor] -> List[12]
+    # For a given Sign S, and a Planet P (e.g. Saturn transit), does it have strength?
+    # It depends on which Kakshya (sub-portion) it is in.
+    # If Saturn is in 1st Kakshya (Saturn's Kakshya) of Sign S, we check if Saturn contributed a point to ITSELF in Sign S.
+    # i.e., Prastaraka['Saturn']['Saturn'][S] == 1?
+    
+    # We will compute a lookup table: KakshyaMap[SignIdx][KakshyaLord] = True/False
+    # But wait, Prastaraka is defined per Target Planet.
+    # When Saturn transits Sign S, the points it receives come from its own BAV (Prastaraka['Saturn']).
+    # So if Saturn is in Kakshya of Jupiter, we check Prastaraka['Saturn']['Jupiter'][S].
+    
+    # Let's pre-calculate this matrix for all 7 planets (as transit bodies)
+    kakshya_matrix = {}
+    
+    for p_name in main_planets:
+        kakshya_matrix[p_name] = {}
+        p_prastaraka = prastarakas[p_name]
+        
+        for sign_i in range(12):
+            kakshya_matrix[p_name][sign_i] = {}
+            for k_lord in KAKSHYA_ORDER:
+                has_point = p_prastaraka.get(k_lord, [0]*12)[sign_i] == 1
+                kakshya_matrix[p_name][sign_i][k_lord] = has_point
+
     stats = {
         "strongest_houses": sorted_houses[:3],
         "weakest_houses": sorted_houses[-3:],
@@ -176,6 +207,7 @@ def calculate_ashtakvarga(planets_data: List[dict], ascendant_sign_idx: int) -> 
         "sav": sav,
         "bavs": bavs,
         "prastarakas": prastarakas,
+        "kakshya_matrix": kakshya_matrix, # Added for deep analysis
         "ascendant_sign_idx": ascendant_sign_idx
     }
     

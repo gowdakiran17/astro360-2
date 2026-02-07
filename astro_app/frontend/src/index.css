@@ -8,23 +8,22 @@
 @layer base {
   :root {
     /* Cosmic Theme - Dark Mode Default */
-    --bg-page: #0f172a;
-    /* Slate 900 */
-    --bg-card: rgba(30, 41, 59, 0.7);
-    /* Slate 800 with opacity */
-    --text-primary: #F8FAFC;
-    /* Slate 50 */
-    --text-secondary: #94A3B8;
-    /* Slate 400 */
+    --bg-page: #0B0F1A;
+    /* Deep Cosmic Dark */
+    --bg-card: rgba(255, 255, 255, 0.04);
+    /* Card Background */
+    --text-primary: #EDEFF5;
+    /* Primary Text */
+    --text-secondary: #A9B0C2;
+    /* Secondary Text */
 
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.08);
     --glass-highlight: rgba(255, 255, 255, 0.05);
   }
 
   body {
-    @apply bg-slate-950 text-slate-100 antialiased font-sans bg-fixed;
-    background: radial-gradient(ellipse at top, var(--tw-gradient-stops));
-    @apply from-slate-900 via-slate-950 to-black;
+    @apply bg-[#0B0F1A] text-[#EDEFF5] antialiased font-sans bg-fixed;
+    background: radial-gradient(circle at top center, #11162A, #0B0F1A);
     font-family: 'Outfit', sans-serif;
   }
 
@@ -34,7 +33,7 @@
   h4,
   h5,
   h6 {
-    @apply font-sans tracking-tight;
+    @apply font-sans tracking-tight text-[#EDEFF5];
   }
 }
 
@@ -42,25 +41,25 @@
 
   /* The core "Cosmic Glass" class */
   .glass-card {
-    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl transition-all duration-300;
+    @apply bg-[rgba(255,255,255,0.04)] backdrop-blur-xl border border-[rgba(255,255,255,0.08)] rounded-2xl shadow-xl transition-all duration-300;
   }
 
   .glass-card-hover {
-    @apply hover:bg-slate-800/60 hover:border-white/20 hover:shadow-2xl hover:-translate-y-0.5;
+    @apply hover:bg-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)] hover:shadow-2xl hover:-translate-y-0.5;
   }
 
   /* Interactive Elements */
   .btn-cosmic {
-    @apply bg-indigo-600/90 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-indigo-900/20 active:scale-95 border border-indigo-400/20;
+    @apply bg-[#F5A623] hover:bg-[#D98E15] text-[#0B0F1A] px-6 py-3 rounded-xl font-medium transition-all duration-300 shadow-lg shadow-orange-900/20 active:scale-95 border border-orange-400/20;
   }
 
   .btn-glass {
-    @apply bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 px-6 py-3 rounded-xl font-medium transition-all duration-300 backdrop-blur-md active:scale-95;
+    @apply bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.08)] text-[#EDEFF5] px-6 py-3 rounded-xl font-medium transition-all duration-300 backdrop-blur-md active:scale-95;
   }
 
   /* Inputs */
   .input-glass {
-    @apply bg-slate-900/50 border border-slate-700 text-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 placeholder-slate-500 backdrop-blur-sm;
+    @apply bg-[#11162A] border border-[rgba(255,255,255,0.08)] text-[#EDEFF5] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#6D5DF6]/50 focus:border-[#6D5DF6]/50 placeholder-[#6F768A] backdrop-blur-sm;
   }
 }
 

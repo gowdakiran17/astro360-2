@@ -143,6 +143,8 @@ def get_routes():
             })
     return routes
 
+# Serve SPA for any other route (if frontend build exists)
+if frontend_dist.exists():
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
         file_path = frontend_dist / full_path

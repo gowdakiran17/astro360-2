@@ -2,16 +2,21 @@ export interface Planet {
   name: string;
   zodiac_sign: string;
   house: number;
+  kp_house?: number; // Added for Bhava Chalit
+  longitude: number;
+  is_retrograde?: boolean;
+  speed?: number;
 }
 
 export interface ChartData {
   ascendant: {
     zodiac_sign: string;
+    longitude: number;
   };
   planets: Planet[];
 }
 
-const NorthIndianChart = ({ data }: { data: ChartData | null }) => {
+const NorthIndianChart = ({ data, useBhava = false, transits = [] }: { data: ChartData | null, useBhava?: boolean, transits?: Planet[] }) => {
   if (!data) return null;
 
   // Planet Colors based on the image style
@@ -30,7 +35,8 @@ const NorthIndianChart = ({ data }: { data: ChartData | null }) => {
     "Pl": "#000000", // Black
   };
 
-  const getPlanetColor = (name: string) => {
+  const getPlanetColor = (name: string, isTransit = false) => {
+    if (isTransit) return "#2ED573"; // Green for Transits
     return planetColors[name] || "#000000";
   };
 
@@ -66,20 +72,38 @@ const NorthIndianChart = ({ data }: { data: ChartData | null }) => {
     12: { x: 300, y: 85 },  // Bottom of Top Right Triangle
   };
 
-  // Group planets by house
-  const planetsByHouse: Record<number, string[]> = {};
+  // Group planets by house (support Bhava Chalit via kp_house)
+  const planetsByHouse: Record<number, Array<{name: string, isTransit: boolean}>> = {};
+  
+  // Natal Planets
   data.planets.forEach(p => {
-    if (!planetsByHouse[p.house]) planetsByHouse[p.house] = [];
-    planetsByHouse[p.house].push(p.name.substring(0, 2));
+    const houseNum = (useBhava && p.kp_house) ? p.kp_house : p.house;
+    if (!planetsByHouse[houseNum]) planetsByHouse[houseNum] = [];
+    planetsByHouse[houseNum].push({ name: p.name.substring(0, 2), isTransit: false });
   });
 
+  // Transit Planets (if any)
+  // For transits, we typically map them by Sign relative to Natal Ascendant for basic overlay
+  // OR we calculate their exact house if we have transit ascendant (which we usually don't in simple overlay)
+  // Simple Overlay: Map Transit Sign -> Natal House
+  // Find natal house for transit sign
+  // House = (TransitSignIndex - AscSignIndex) + 1
   const zodiacOrder = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
   ];
-
   const ascSign = data?.ascendant?.zodiac_sign || "Aries";
   const ascIndex = zodiacOrder.findIndex(z => z.toLowerCase() === ascSign.toLowerCase());
+
+  transits.forEach(p => {
+    const signIndex = zodiacOrder.findIndex(z => z.toLowerCase() === p.zodiac_sign.toLowerCase());
+    let houseNum = (signIndex - ascIndex + 12) % 12 + 1; // 1-based house
+    
+    // If Bhava Chalit is on, Transits should probably still follow Rashi logic for simplicity unless we have dynamic cusps for transit time
+    // For now, map to Rashi house
+    if (!planetsByHouse[houseNum]) planetsByHouse[houseNum] = [];
+    planetsByHouse[houseNum].push({ name: p.name.substring(0, 2), isTransit: true });
+  });
 
   const getSignForHouse = (houseNum: number) => {
     const signIndex = (ascIndex + (houseNum - 1)) % 12;
@@ -134,14 +158,19 @@ const NorthIndianChart = ({ data }: { data: ChartData | null }) => {
               {/* Planets List */}
               {planets.map((p, i) => (
                 <text
-                  key={p}
+                  key={`${p.name}-${i}`}
                   x={coords.x}
                   y={coords.y + (i * 18)}
                   textAnchor="middle"
                   className="font-bold"
-                  style={{ fontSize: '16px', fill: getPlanetColor(p), stroke: 'none' }}
+                  style={{ 
+                    fontSize: p.isTransit ? '12px' : '16px', 
+                    fill: getPlanetColor(p.name, p.isTransit), 
+                    stroke: 'none',
+                    fontStyle: p.isTransit ? 'italic' : 'normal'
+                  }}
                 >
-                  {p}
+                  {p.name}{p.isTransit ? '*' : ''}
                 </text>
               ))}
             </g>

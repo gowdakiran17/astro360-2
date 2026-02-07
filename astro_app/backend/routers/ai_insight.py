@@ -569,6 +569,64 @@ async def get_horary_suggestions(query: str):
     return {"Status": "Pass", "Payload": ["Will I get the job?", "When will I get married?", "Is this a good time to invest?"]}
 
 
+class CompatibilityInsightRequest(BaseModel):
+    boy_chart: Dict[str, Any]
+    girl_chart: Dict[str, Any]
+    match_score: Dict[str, Any]
+
+@router.post("/compatibility-insight")
+async def get_compatibility_insight(request: CompatibilityInsightRequest):
+    """
+    Generate AI-powered compatibility analysis (verdict) based on match score.
+    """
+    try:
+        from astro_app.backend.services.ai_insights import generate_compatibility_insight
+        result = generate_compatibility_insight(request.boy_chart, request.girl_chart, request.match_score)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        logger.error(f"Compatibility insight error: {str(e)}")
+        return {
+            "status": "success", 
+            "data": {
+                "verdict_title": "Match Analysis Unavailable",
+                "summary": "AI analysis could not be generated at this time.",
+                "emotional_harmony": "N/A",
+                "long_term_potential": "N/A",
+                "challenges": "N/A",
+                "recommendation": "Please rely on the Guna Milan score.",
+                "ai_powered": False
+            }
+        }
+
+class DashaInsightRequest(BaseModel):
+    mahadasha: str
+    antardasha: str
+    chart_data: Dict[str, Any]
+
+@router.post("/dasha-insight")
+async def get_dasha_insight(request: DashaInsightRequest):
+    """
+    Generate AI-powered insight for specific Dasha period.
+    """
+    try:
+        from astro_app.backend.services.ai_insights import generate_dasha_insight
+        result = generate_dasha_insight(request.mahadasha, request.antardasha, request.chart_data)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        logger.error(f"Dasha insight error: {str(e)}")
+        return {
+            "status": "success", # Return success with fallback data to avoid UI break
+            "data": {
+                "insight": f"Planetary energies of {request.mahadasha} and {request.antardasha} are active.",
+                "energy_score": 50,
+                "key_themes": ["Transition", "Balance"],
+                "opportunity": "Stay open to new possibilities.",
+                "caution": "Avoid hasty decisions.",
+                "remedy": "Practice mindfulness.",
+                "ai_powered": False
+            }
+        }
+
 class DailyInsightRequest(BaseModel):
     chart_data: Dict[str, Any]
     panchang_data: Optional[Dict[str, Any]] = None

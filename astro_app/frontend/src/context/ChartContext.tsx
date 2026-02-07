@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import api from '../services/api';
 import { useAuth } from './AuthContext';
 
-type ChartStyle = 'NORTH_INDIAN' | 'SOUTH_INDIAN';
+type ChartStyle = 'NORTH_INDIAN' | 'SOUTH_INDIAN' | 'WESTERN_WHEEL';
 
 export interface UserProfile {
   name: string;
@@ -17,10 +17,19 @@ export interface UserProfile {
   raw?: any;
 }
 
+export interface CalculationSettings {
+  ayanamsa: 'LAHIRI' | 'RAMAN' | 'KP' | 'TROPICAL';
+  houseSystem: 'PLACIDUS' | 'WHOLE_SIGN' | 'EQUAL' | 'PORPHYRY' | 'KOCH' | 'REGIOMONTANUS' | 'CAMPANUS';
+}
+
 interface ChartContextType {
   chartStyle: ChartStyle;
   setChartStyle: (style: ChartStyle) => void;
   toggleChartStyle: () => void;
+
+  // Calculation Settings
+  settings: CalculationSettings;
+  updateSettings: (newSettings: Partial<CalculationSettings>) => void;
 
   // Profile Management
   currentProfile: UserProfile | null;
@@ -33,16 +42,6 @@ interface ChartContextType {
   deleteChart: (chartId: string) => Promise<void>;
   updateChart: (chartId: string, data: any) => Promise<void>;
 }
-
-const DEFAULT_PROFILE: UserProfile = {
-  name: 'Kiran Kumar',
-  date: '17/04/1990',
-  time: '05:06',
-  location: 'Malur, Karnataka',
-  latitude: 13.0037,
-  longitude: 77.9383,
-  timezone: '+05:30'
-};
 
 const ChartContext = createContext<ChartContextType | undefined>(undefined);
 
@@ -65,6 +64,30 @@ const normalizeProfile = (chart: any): UserProfile => {
 export const ChartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [chartStyle, setChartStyleState] = useState<ChartStyle>('NORTH_INDIAN');
+  const [settings, setSettings] = useState<CalculationSettings>({
+    ayanamsa: 'LAHIRI',
+    houseSystem: 'PLACIDUS'
+  });
+
+  // Load settings from localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('calcSettings');
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (e) {
+        console.error("Failed to parse settings", e);
+      }
+    }
+  }, []);
+
+  const updateSettings = (newSettings: Partial<CalculationSettings>) => {
+    setSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      localStorage.setItem('calcSettings', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   // Profile State - Initialize Synchronously
   const [currentProfile, setCurrentProfile] = useState<UserProfile | null>(() => {
@@ -77,7 +100,7 @@ export const ChartProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } catch (e) {
       console.error("Failed to parse saved chart", e);
     }
-    return DEFAULT_PROFILE;
+    return null;
   });
 
   const [availableProfiles, setAvailableProfiles] = useState<any[]>([]);
@@ -106,11 +129,18 @@ export const ChartProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const toggleChartStyle = () => {
-    const newStyle = chartStyle === 'NORTH_INDIAN' ? 'SOUTH_INDIAN' : 'NORTH_INDIAN';
-    setChartStyle(newStyle);
+    const styles: ChartStyle[] = ['NORTH_INDIAN', 'SOUTH_INDIAN', 'WESTERN_WHEEL'];
+    const currentIndex = styles.indexOf(chartStyle);
+    const nextStyle = styles[(currentIndex + 1) % styles.length];
+    setChartStyle(nextStyle);
   };
 
   const switchProfile = (chart: any) => {
+    if (!chart) {
+      setCurrentProfile(null);
+      localStorage.removeItem('lastViewedChart');
+      return;
+    }
     const profile = normalizeProfile(chart);
     setCurrentProfile(profile);
     localStorage.setItem('lastViewedChart', JSON.stringify(chart));
@@ -139,7 +169,7 @@ export const ChartProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         if (remaining.length > 0) {
           switchProfile(remaining[0]);
         } else {
-          setCurrentProfile(DEFAULT_PROFILE);
+          setCurrentProfile(null);
           localStorage.removeItem('lastViewedChart');
         }
       }
@@ -179,7 +209,9 @@ export const ChartProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       refreshProfiles,
       isLoadingProfiles,
       deleteChart,
-      updateChart
+      updateChart,
+      settings,
+      updateSettings
     }}>
       {children}
     </ChartContext.Provider>

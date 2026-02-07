@@ -279,28 +279,79 @@ def get_muhurata_data(jd, lat, lon):
         }
     }
 
-def find_muhurata(start_date, end_date, lat, lon, target_quality=["Excellent", "Good"]):
+def find_muhurata(start_date, end_date, lat, lon, activity="General"):
     """
-    Finds auspicious moments in a date range.
+    Finds auspicious moments in a date range based on Activity.
+    Activities: "General", "Business", "Marriage", "Travel", "Learning", "Health".
     """
-    start_dt = datetime.strptime(start_date, "%d/%m/%Y")
-    end_dt = datetime.strptime(end_date, "%d/%m/%Y")
+    start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+    end_dt = datetime.strptime(end_date, "%Y-%m-%d")
     current_dt = start_dt
+    
+    # Activity Preferences
+    # Map Activity -> Preferred Qualities or Specific Rulers
+    preferences = {
+        "General": {"qualities": ["Excellent", "Good"], "avoid": ["Rahu Kaal", "Yamaganda", "Udveg", "Rog", "Kaal"]},
+        "Business": {"qualities": ["Excellent", "Good"], "rulers": ["Mercury", "Jupiter", "Sun"], "avoid": ["Rahu Kaal"]},
+        "Marriage": {"qualities": ["Excellent"], "rulers": ["Venus", "Jupiter"], "avoid": ["Rahu Kaal", "Yamaganda"]},
+        "Travel": {"qualities": ["Excellent", "Good"], "rulers": ["Moon", "Mercury"], "avoid": ["Rahu Kaal", "Rog"]},
+        "Learning": {"qualities": ["Excellent", "Good"], "rulers": ["Mercury", "Jupiter"], "avoid": ["Rahu Kaal", "Udveg"]},
+        "Health": {"qualities": ["Excellent", "Good"], "rulers": ["Sun", "Mars"], "avoid": ["Rahu Kaal", "Rog"]}
+    }
+    
+    prefs = preferences.get(activity, preferences["General"])
+    target_qualities = prefs["qualities"]
+    target_rulers = prefs.get("rulers", [])
+    avoid_list = prefs.get("avoid", [])
     
     results = []
     
     while current_dt <= end_dt:
-        # Calculate for this day
-        # Assume approx timezone handling (using UTC JD)
-        jd = get_julian_day(current_dt.strftime("%d/%m/%Y"), "12:00", "+00:00")
-        day_data = get_muhurata_data(jd, lat, lon)
+        date_str = current_dt.strftime("%d/%m/%Y")
+        # Use simple 12:00 UTC as anchor for the day
+        jd = get_julian_day(date_str, "12:00", "+00:00")
         
-        for p in day_data["periods"]:
-            if p["quality"] in target_quality:
-                # Add date context
-                p["date"] = current_dt.strftime("%d/%m/%Y")
-                results.append(p)
+        try:
+            day_data = get_muhurata_data(jd, lat, lon)
+            
+            for p in day_data["periods"]:
+                # Check 1: Quality
+                is_quality_ok = p["quality"] in target_qualities
                 
+                # Check 2: Ruler (if specified)
+                is_ruler_ok = True
+                if target_rulers and "ruler" in p:
+                    is_ruler_ok = p["ruler"] in target_rulers
+                    
+                # Check 3: Avoid List (Strict)
+                is_avoided = False
+                if p["name"] in avoid_list or (p.get("quality") == "Avoid"):
+                    is_avoided = True
+                    
+                # Decision
+                # If Quality is Excellent, usually overrides Ruler unless strict?
+                # Let's say: (Quality OK OR Ruler OK) AND Not Avoided
+                if (is_quality_ok or is_ruler_ok) and not is_avoided:
+                    # Add context
+                    p_copy = p.copy()
+                    p_copy["date"] = current_dt.strftime("%Y-%m-%d")
+                    # Score the window (Excellent=3, Good=2, Ruler Match=+1)
+                    score = 0
+                    if p["quality"] == "Excellent": score += 3
+                    elif p["quality"] == "Good": score += 2
+                    
+                    if target_rulers and p.get("ruler") in target_rulers:
+                        score += 1
+                        
+                    p_copy["score"] = score
+                    results.append(p_copy)
+                    
+        except Exception as e:
+            print(f"Error calculating muhurata for {date_str}: {e}")
+            
         current_dt += timedelta(days=1)
         
+    # Sort by Score (Desc) then Date
+    results.sort(key=lambda x: (-x["score"], x["start"]))
+    
     return results

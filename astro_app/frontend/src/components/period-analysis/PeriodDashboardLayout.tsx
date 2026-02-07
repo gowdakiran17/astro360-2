@@ -47,14 +47,14 @@ const PeriodDashboardLayout = ({
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#6D5DF6]"></div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-rose-400">
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-[#E25555]">
                 <p className="text-xl font-bold mb-2">Analysis Failed</p>
                 <p>{error || "Unable to load data"}</p>
             </div>
@@ -79,12 +79,12 @@ const PeriodDashboardLayout = ({
                             className={`
                                 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap
                                 ${isActive
-                                    ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.3)] font-black tracking-wide'
-                                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/5 hover:border-amber-500/30'
+                                    ? 'bg-[#F5A623] text-[#0B0F1A] shadow-[0_0_20px_rgba(245,166,35,0.3)] font-black tracking-wide'
+                                    : 'bg-[#FFFFFF]/04 text-[#A9B0C2] hover:bg-[#FFFFFF]/06 hover:text-[#EDEFF5] border border-[#FFFFFF]/08 hover:border-[#F5A623]/30'
                                 }
                             `}
                         >
-                            <Icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-slate-500 group-hover:text-amber-500'}`} />
+                            <Icon className={`w-4 h-4 ${isActive ? 'text-[#0B0F1A]' : 'text-[#6F768A] group-hover:text-[#F5A623]'}`} />
                             {tab.label}
                         </button>
                     );

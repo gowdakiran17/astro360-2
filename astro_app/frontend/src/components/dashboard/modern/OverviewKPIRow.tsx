@@ -23,7 +23,7 @@ const Sparkline = ({ data = defaultSpark }: { data?: number[] }) => {
       {data.map((v, i) => (
         <div
           key={i}
-          className="w-1.5 rounded-t bg-gradient-to-t from-slate-700 to-slate-400"
+          className="w-1.5 rounded-t bg-gradient-to-t from-stone-700 to-stone-400"
           style={{ height: `${Math.max(4, Math.round((v / max) * 32))}px` }}
         />
       ))}
@@ -36,7 +36,7 @@ const toneClass = (t?: 'positive' | 'neutral' | 'negative') =>
     ? 'text-emerald-400'
     : t === 'negative'
     ? 'text-rose-400'
-    : 'text-slate-300';
+    : 'text-stone-300';
 
 const OverviewKPIRow: React.FC<OverviewKPIRowProps> = ({ kpis }) => {
   const items: KPI[] =
@@ -52,9 +52,9 @@ const OverviewKPIRow: React.FC<OverviewKPIRowProps> = ({ kpis }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {items.map((k, i) => (
-        <div key={i} className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <div key={i} className="rounded-xl border border-stone-800 bg-stone-900 p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{k.label}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">{k.label}</span>
             <span className={`flex items-center gap-1 ${toneClass(k.tone)}`}>{k.icon}</span>
           </div>
           <div className="flex items-baseline gap-2">

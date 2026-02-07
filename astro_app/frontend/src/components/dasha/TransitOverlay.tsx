@@ -16,15 +16,15 @@ interface TransitOverlayProps {
 }
 
 const PLANET_UI_CLASSES: Record<string, string> = {
-    Sun: 'text-orange-100 bg-orange-500/20 border-orange-400/50 shadow-orange-500/20',
-    Moon: 'text-blue-100 bg-blue-500/20 border-blue-400/50 shadow-blue-500/20',
-    Mars: 'text-red-100 bg-red-600/20 border-red-500/50 shadow-red-600/20',
-    Mercury: 'text-emerald-100 bg-emerald-500/20 border-emerald-400/50 shadow-emerald-500/20',
-    Jupiter: 'text-yellow-100 bg-yellow-400/20 border-yellow-400/50 shadow-yellow-500/20',
-    Venus: 'text-pink-100 bg-pink-400/20 border-pink-400/50 shadow-pink-500/20',
-    Saturn: 'text-indigo-100 bg-indigo-600/20 border-indigo-500/50 shadow-indigo-600/20',
-    Rahu: 'text-slate-100 bg-slate-600/20 border-slate-500/50 shadow-slate-600/20',
-    Ketu: 'text-orange-200 bg-orange-800/20 border-orange-700/50 shadow-orange-800/20'
+    Sun: 'text-[#F5A623] bg-[#F5A623]/20 border-[#F5A623]/50 shadow-[#F5A623]/20',
+    Moon: 'text-[#A9B0C2] bg-[#A9B0C2]/20 border-[#A9B0C2]/50 shadow-[#A9B0C2]/20',
+    Mars: 'text-[#E25555] bg-[#E25555]/20 border-[#E25555]/50 shadow-[#E25555]/20',
+    Mercury: 'text-[#2ED573] bg-[#2ED573]/20 border-[#2ED573]/50 shadow-[#2ED573]/20',
+    Jupiter: 'text-[#F5A623] bg-[#F5A623]/20 border-[#F5A623]/50 shadow-[#F5A623]/20',
+    Venus: 'text-[#EDEFF5] bg-[#EDEFF5]/20 border-[#EDEFF5]/50 shadow-[#EDEFF5]/20',
+    Saturn: 'text-[#6D5DF6] bg-[#6D5DF6]/20 border-[#6D5DF6]/50 shadow-[#6D5DF6]/20',
+    Rahu: 'text-[#6F768A] bg-[#6F768A]/20 border-[#6F768A]/50 shadow-[#6F768A]/20',
+    Ketu: 'text-[#6F768A] bg-[#6F768A]/20 border-[#6F768A]/50 shadow-[#6F768A]/20'
 };
 
 interface TransitPlanet {
@@ -100,22 +100,22 @@ const TransitOverlay: React.FC<TransitOverlayProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B0F1A]/80 backdrop-blur-sm">
+            <div className="bg-[#11162A] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
 
                 {/* Header */}
-                <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <div className="p-4 border-b border-[#FFFFFF]/08 flex justify-between items-center bg-[#FFFFFF]/02">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                        <div className="p-2 bg-[#6D5DF6]/10 text-[#6D5DF6] rounded-lg">
                             <Globe className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-slate-800">Transit Analysis</h2>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <h2 className="text-lg font-bold text-[#EDEFF5]">Transit Analysis</h2>
+                            <div className="flex items-center gap-2 text-xs text-[#A9B0C2]">
                                 <Calendar className="w-3 h-3" />
                                 <span>{targetDate}</span>
-                                <span className="text-slate-300">|</span>
-                                <span className="font-medium text-indigo-600">
+                                <span className="text-[#6F768A]">|</span>
+                                <span className="font-medium text-[#6D5DF6]">
                                     {dashaPeriod.md} - {dashaPeriod.ad} - {dashaPeriod.pd}
                                 </span>
                             </div>
@@ -123,26 +123,26 @@ const TransitOverlay: React.FC<TransitOverlayProps> = ({
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-slate-200 rounded-full text-slate-500 transition-colors"
+                        className="p-2 hover:bg-[#FFFFFF]/10 rounded-full text-[#A9B0C2] transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-0 bg-slate-50/50">
+                <div className="flex-1 overflow-y-auto p-0 bg-[#0B0F1A]/50">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
-                            <p className="text-slate-500 text-sm animate-pulse">Calculating planetary positions...</p>
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6D5DF6]"></div>
+                            <p className="text-[#6F768A] text-sm animate-pulse">Calculating planetary positions...</p>
                         </div>
                     ) : error ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-red-500 space-y-2">
+                        <div className="flex flex-col items-center justify-center h-64 text-[#E25555] space-y-2">
                             <AlertCircle className="w-8 h-8" />
                             <p>{error}</p>
                             <button
                                 onClick={fetchTransitAnalysis}
-                                className="text-xs bg-red-50 px-3 py-1 rounded-full hover:bg-red-100"
+                                className="text-xs bg-[#E25555]/10 px-3 py-1 rounded-full hover:bg-[#E25555]/20"
                             >
                                 Retry
                             </button>
@@ -150,12 +150,12 @@ const TransitOverlay: React.FC<TransitOverlayProps> = ({
                     ) : data ? (
                         <div className="flex flex-col h-full">
                             {/* Tabs */}
-                            <div className="flex border-b border-slate-200 bg-white px-4">
+                            <div className="flex border-b border-[#FFFFFF]/08 bg-[#11162A] px-4">
                                 <button
                                     onClick={() => setActiveTab('positions')}
                                     className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'positions'
-                                        ? 'border-indigo-600 text-indigo-600'
-                                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                                        ? 'border-[#6D5DF6] text-[#6D5DF6]'
+                                        : 'border-transparent text-[#A9B0C2] hover:text-[#EDEFF5]'
                                         }`}
                                 >
                                     Planetary Positions
@@ -163,8 +163,8 @@ const TransitOverlay: React.FC<TransitOverlayProps> = ({
                                 <button
                                     onClick={() => setActiveTab('aspects')}
                                     className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'aspects'
-                                        ? 'border-indigo-600 text-indigo-600'
-                                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                                        ? 'border-[#6D5DF6] text-[#6D5DF6]'
+                                        : 'border-transparent text-[#A9B0C2] hover:text-[#EDEFF5]'
                                         }`}
                                 >
                                     Aspects & Influences
@@ -172,8 +172,8 @@ const TransitOverlay: React.FC<TransitOverlayProps> = ({
                                 <button
                                     onClick={() => setActiveTab('predictions')}
                                     className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'predictions'
-                                        ? 'border-indigo-600 text-indigo-600'
-                                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                                        ? 'border-[#6D5DF6] text-[#6D5DF6]'
+                                        : 'border-transparent text-[#A9B0C2] hover:text-[#EDEFF5]'
                                         }`}
                                 >
                                     AI Insights
@@ -184,19 +184,19 @@ const TransitOverlay: React.FC<TransitOverlayProps> = ({
                                 {activeTab === 'positions' && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {data.transit_info?.map((planet, idx) => {
-                                            const uiClass = PLANET_UI_CLASSES[planet.name] || 'bg-slate-800/50 border-slate-700/50 text-white shadow-slate-900/50';
+                                            const uiClass = PLANET_UI_CLASSES[planet.name] || 'bg-[#11162A] border-[#FFFFFF]/08 text-[#EDEFF5] shadow-sm';
                                             const isDashaLord = [dashaPeriod.md, dashaPeriod.ad].includes(planet.name);
 
                                             return (
                                                 <div
                                                     key={idx}
                                                     className={`relative p-4 rounded-xl border ${isDashaLord
-                                                        ? 'ring-2 ring-indigo-500 ring-offset-2'
+                                                        ? 'ring-2 ring-[#6D5DF6] ring-offset-2 ring-offset-[#0B0F1A]'
                                                         : ''
-                                                        } bg-white shadow-sm hover:shadow-md transition-shadow`}
+                                                        } bg-[#11162A] shadow-sm hover:shadow-md transition-shadow`}
                                                 >
                                                     {isDashaLord && (
-                                                        <div className="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm font-bold uppercase">
+                                                        <div className="absolute -top-2 -right-2 bg-[#6D5DF6] text-[#EDEFF5] text-[10px] px-2 py-0.5 rounded-full shadow-sm font-bold uppercase">
                                                             Dasha Lord
                                                         </div>
                                                     )}

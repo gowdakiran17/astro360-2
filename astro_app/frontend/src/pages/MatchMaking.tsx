@@ -3,6 +3,7 @@ import api from '../services/api';
 import { Heart } from 'lucide-react';
 import CitySearch from '../components/CitySearch';
 import MainLayout from '../components/layout/MainLayout';
+import CompatibilityInsightCard from '../components/matching/CompatibilityInsightCard';
 
 const MatchMaking = () => {
   const [boyData, setBoyData] = useState({
@@ -13,6 +14,7 @@ const MatchMaking = () => {
   });
   
   const [matchResult, setMatchResult] = useState<any>(null);
+  const [charts, setCharts] = useState<{boy: any, girl: any} | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -60,15 +62,33 @@ const MatchMaking = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setMatchResult(null);
+    setCharts(null);
     
     try {
+      const boyPayload = formatPayload(boyData);
+      const girlPayload = formatPayload(girlData);
+      
       const payload = {
-        boy: formatPayload(boyData),
-        girl: formatPayload(girlData)
+        boy: boyPayload,
+        girl: girlPayload
       };
 
+      // 1. Get Match Score
       const response = await api.post('match/ashtakoot', payload);
       setMatchResult(response.data);
+
+      // 2. Fetch Individual Charts (for AI Context)
+      // Note: In a production app, the match endpoint might return these to save calls
+      const [boyRes, girlRes] = await Promise.all([
+        api.post('/chart/birth', boyPayload),
+        api.post('/chart/birth', girlPayload)
+      ]);
+      setCharts({
+          boy: boyRes.data,
+          girl: girlRes.data
+      });
+
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.detail || 'Failed to calculate match');
@@ -82,7 +102,7 @@ const MatchMaking = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Input Form */}
         <div className="lg:col-span-2">
-          <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-6">
+          <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-6 mb-6">
             <h2 className="text-lg font-bold mb-6 text-slate-900">Enter Birth Details</h2>
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -145,6 +165,16 @@ const MatchMaking = () => {
               </div>
             </form>
           </div>
+
+          {/* AI Verdict */}
+          {matchResult && charts && (
+              <CompatibilityInsightCard 
+                  boyChart={charts.boy}
+                  girlChart={charts.girl}
+                  matchScore={matchResult}
+              />
+          )}
+
         </div>
 
         {/* Results Display */}

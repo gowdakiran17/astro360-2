@@ -1,453 +1,651 @@
-import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Plus, 
+  LayoutDashboard, Calendar, Activity, 
+  Sparkles, BarChart2, MapPin, 
+  Search, 
+  Moon, Clock, Globe, Grid, 
+  Gem, Grid3X3, 
+  Sun, TrendingUp, Star, RefreshCw, Compass, Crown, Navigation,
+  FileText, Heart, Briefcase, Layers, ChevronDown, ChevronUp, UserCheck, Briefcase as BriefcaseIcon,
+  AlertTriangle, Shield
+} from 'lucide-react';
 import MainLayout from '../components/layout/MainLayout';
-import { MENU_ITEMS } from '../data/navigation';
-import { Plus, Search, MapPin, Edit2, Trash2, Star, ShieldCheck, Activity } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import { useChartSettings } from '../context/ChartContext';
-import HomeHeader from '../components/dashboard/modern/HomeHeader';
 import CreateChartModal from '../components/CreateChartModal';
-import DeleteChartModal from '../components/DeleteChartModal';
-import EditChartModal from '../components/EditChartModal';
+import MobileHeader from '../components/dashboard/mobile-first/MobileHeader';
 
-const ZODIAC_SYMBOLS: Record<number, string> = {
-    1: '♈', 2: '♉', 3: '♊', 4: '♋', 5: '♌', 6: '♍',
-    7: '♎', 8: '♏', 9: '♐', 10: '♑', 11: '♒', 12: '♓'
+// --- COLOR SYSTEM & THEME ---
+const THEME = {
+  bg: 'bg-[#0B0F1A]',
+  cardBg: 'bg-[rgba(255,255,255,0.04)]',
+  cardBorder: 'border-[rgba(255,255,255,0.08)]',
+  primary: 'text-[#F5A623]',
+  primaryBg: 'bg-[#F5A623]',
+  secondary: 'text-[#6D5DF6]',
+  danger: 'text-[#E25555]',
+  textMain: 'text-[#EDEFF5]',
+  textSecondary: 'text-[#A9B0C2]',
+  textMuted: 'text-[#6F768A]',
 };
 
-const StarField = () => {
-    // Reduced star count significantly for performance
-    const stars = Array.from({ length: 50 }).map((_, i) => ({
-        id: i,
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-        size: Math.random() * 2 + 1,
-        // Use CSS animation delay instead of JS motion
-        animationDelay: `${Math.random() * 5}s`,
-        animationDuration: `${Math.random() * 3 + 2}s`
-    }));
+// --- BENTO CARD COMPONENT ---
+const BentoCard = ({ 
+  to, 
+  title, 
+  icon: Icon, 
+  badge,
+  span = "col-span-1",
+  variant = "default",
+  description,
+  layout = "default",
+  onClick
+}: { 
+  to: string, 
+  title: string, 
+  icon: any, 
+  badge?: string,
+  span?: string,
+  variant?: "default" | "primary" | "secondary" | "accent" | "pro",
+  description?: string,
+  layout?: "default" | "horizontal" | "vertical" | "compact" | "minimal",
+  onClick?: () => void
+}) => {
+  const navigate = useNavigate();
+  
+  // Dynamic styles based on variant
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "primary": // Dashboard - Gold/Orange
+        return "bg-[#F5A623]/10 border-[#F5A623]/20 hover:bg-[#F5A623]/20 hover:border-[#F5A623]/40";
+      case "secondary": // AI - Purple
+        return "bg-[#6D5DF6]/10 border-[#6D5DF6]/20 hover:bg-[#6D5DF6]/20 hover:border-[#6D5DF6]/40";
+      case "accent": // My Charts - Red/Pink
+        return "bg-[#E25555]/10 border-[#E25555]/20 hover:bg-[#E25555]/20 hover:border-[#E25555]/40";
+      case "pro": // Financial - Emerald
+        return "bg-[#10B981]/10 border-[#10B981]/20 hover:bg-[#10B981]/20 hover:border-[#10B981]/40";
+      default:
+        return "bg-[#161B2C] border-white/5 hover:bg-[#1C2237] hover:border-white/10";
+    }
+  };
 
-    return (
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-            {stars.map((star) => (
-                <div
-                    key={star.id}
-                    className="absolute bg-white rounded-full opacity-20 animate-pulse"
-                    style={{
-                        top: star.top,
-                        left: star.left,
-                        width: star.size,
-                        height: star.size,
-                        animationDelay: star.animationDelay,
-                        animationDuration: star.animationDuration
-                    }}
-                />
-            ))}
-        </div>
-    );
+  const getIconColor = () => {
+    switch (variant) {
+      case "primary": return "text-[#F5A623]";
+      case "secondary": return "text-[#6D5DF6]";
+      case "accent": return "text-[#E25555]";
+      case "pro": return "text-[#10B981]";
+      default: return "text-slate-400 group-hover:text-white";
+    }
+  };
+
+  // Layout content logic
+  const renderContent = () => {
+    switch (layout) {
+      case "horizontal": // Wide cards (Icon right, text left)
+        return (
+          <div className="flex flex-row items-center justify-between h-full gap-4 relative z-10">
+            <div className="flex flex-col justify-center flex-1">
+              <h3 className={`font-bold text-lg leading-tight mb-2 ${variant === 'default' ? 'text-slate-200' : 'text-white'}`}>{title}</h3>
+              {description && <p className="text-xs text-slate-400 font-medium leading-relaxed opacity-80">{description}</p>}
+            </div>
+            <div className={`p-4 rounded-2xl ${variant === 'default' ? 'bg-white/5' : 'bg-white/10'} ${getIconColor()}`}>
+              <Icon className="w-8 h-8" />
+            </div>
+          </div>
+        );
+      case "vertical": // Tall cards (Icon bottom large, text top)
+        return (
+          <div className="flex flex-col h-full relative z-10">
+            <div className="mb-auto">
+               <h3 className={`font-bold text-xl leading-tight mb-2 ${variant === 'default' ? 'text-slate-200' : 'text-white'}`}>{title}</h3>
+               {description && <p className="text-sm text-slate-400 font-medium leading-relaxed opacity-80">{description}</p>}
+            </div>
+            <div className={`mt-4 self-end p-4 rounded-3xl ${variant === 'default' ? 'bg-white/5' : 'bg-white/10'} ${getIconColor()} transform transition-transform group-hover:scale-110 duration-300`}>
+               <Icon className="w-10 h-10" />
+            </div>
+          </div>
+        );
+      case "compact": // Small square cards
+         return (
+           <div className="flex flex-col h-full justify-between relative z-10">
+             <div className={`${getIconColor()} mb-2`}>
+                <Icon className="w-6 h-6" />
+             </div>
+             <div>
+                <h3 className={`font-bold text-sm leading-tight ${variant === 'default' ? 'text-slate-200' : 'text-white'}`}>{title}</h3>
+             </div>
+           </div>
+         );
+      case "minimal": // Text only with small icon
+        return (
+            <div className="flex items-center gap-3 h-full relative z-10">
+                <Icon className={`w-5 h-5 ${getIconColor()}`} />
+                <h3 className={`font-medium text-sm ${variant === 'default' ? 'text-slate-300' : 'text-white'}`}>{title}</h3>
+            </div>
+        );
+      default: // Default (Standard Bento)
+        return (
+          <div className="flex flex-col h-full relative z-10">
+            <div className={`mb-4 p-2.5 rounded-xl w-fit ${variant === 'default' ? 'bg-white/5' : 'bg-white/10'} ${getIconColor()}`}>
+              <Icon className="w-6 h-6" />
+            </div>
+            <div className="mt-auto">
+              <h3 className={`font-bold text-base leading-tight mb-1 ${variant === 'default' ? 'text-slate-200' : 'text-white'}`}>{title}</h3>
+              {description && <p className="text-[10px] text-slate-500 font-medium line-clamp-2">{description}</p>}
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <button 
+      onClick={() => {
+        if (onClick) onClick();
+        else navigate(to);
+      }}
+      className={`
+        ${span} w-full relative p-5 rounded-[2rem] border transition-all duration-300 group overflow-hidden h-full text-left shadow-sm
+        ${getVariantStyles()}
+        hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20
+      `}
+    >
+      {/* Subtle Background Gradient for Depth */}
+      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none`} />
+      
+      {badge && (
+        <span className={`absolute top-4 right-4 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-md z-20 shadow-sm
+            ${variant === 'pro' ? 'bg-[#10B981] text-[#0B0F1A]' : 'bg-white text-black'}
+        `}>
+          {badge}
+        </span>
+      )}
+      
+      {renderContent()}
+      
+      {/* Decorative Circle */}
+      <div className={`absolute -right-12 -bottom-12 w-40 h-40 rounded-full blur-3xl opacity-[0.08] pointer-events-none
+         ${variant === 'primary' ? 'bg-[#F5A623]' : 
+           variant === 'secondary' ? 'bg-[#6D5DF6]' : 
+           variant === 'accent' ? 'bg-[#E25555]' : 
+           variant === 'pro' ? 'bg-[#10B981]' : 
+           'bg-white'}`} 
+       />
+    </button>
+  );
 };
+
+const ProfileCard = ({ profile, isActive, onClick }: { profile: any, isActive: boolean, onClick: () => void }) => {
+  const displayName = profile.name || (profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : 'Unnamed Chart');
+  const locationName = profile.location_name || profile.location || 'Unknown Location';
+  
+  return (
+    <button 
+    onClick={onClick}
+    className={`w-full p-4 rounded-xl border transition-all duration-300 flex items-center gap-4 text-left
+      ${isActive 
+        ? 'bg-[#F5A623]/10 border-[#F5A623]/30 shadow-[0_0_15px_rgba(245,166,35,0.1)]' 
+        : 'bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.08)] hover:border-white/20'
+      }
+    `}
+  >
+    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg
+      ${isActive ? 'bg-[#F5A623] text-black' : 'bg-slate-800 text-slate-400'}
+    `}>
+      {displayName.charAt(0)}
+    </div>
+    <div>
+      <h3 className={`font-bold ${isActive ? 'text-white' : 'text-slate-300'}`}>{displayName}</h3>
+      <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+        <MapPin className="w-3 h-3" />
+        {locationName.split(',')[0]}
+      </div>
+    </div>
+    {isActive && (
+      <div className="ml-auto">
+        <span className="w-3 h-3 block rounded-full bg-[#F5A623] shadow-[0_0_8px_#F5A623]" />
+      </div>
+    )}
+  </button>
+  );
+};
+
+// --- NORMAL USER CONFIG ---
+const NORMAL_MODULES = [
+    // LARGE CARDS (Top Priority)
+    { 
+        to: "/ai-astrologer", 
+        title: "Ask AI Astrologer", 
+        icon: Sparkles, 
+        badge: "AI",
+        span: "col-span-2 lg:col-span-2 row-span-2", 
+        variant: "secondary",
+        layout: "vertical",
+        description: "Ask about career, marriage, money, health."
+    },
+    { 
+        to: "/dashboard/main", 
+        title: "Today's Guidance", 
+        icon: Sun, 
+        span: "col-span-2 lg:col-span-2", 
+        variant: "primary",
+        layout: "horizontal",
+        description: "Daily planetary influence summary."
+    },
+    { 
+        to: "/dashboard/main?tab=visual", // Assuming tab param works or just links to dashboard
+        title: "My Birth Chart", 
+        icon: LayoutDashboard, 
+        span: "col-span-1 lg:col-span-1",
+        variant: "default",
+        layout: "default",
+        description: "Chart overview."
+    },
+    { 
+        to: "/calculations/vimshottari", 
+        title: "Dasha", 
+        icon: Clock, 
+        span: "col-span-1 lg:col-span-1",
+        variant: "default",
+        layout: "default",
+        description: "Current life phase."
+    },
+    
+    // DAILY & PRACTICAL
+    { 
+        to: "/global/panchang", 
+        title: "Panchang", 
+        icon: Calendar, 
+        span: "col-span-1", 
+        layout: "compact" 
+    },
+    { 
+        to: "/global/transits", 
+        title: "Transits", 
+        icon: Globe, 
+        span: "col-span-1", 
+        layout: "compact" 
+    },
+    { 
+        to: "/tools/period-analysis", 
+        title: "Life Events", 
+        icon: Star, 
+        span: "col-span-1", 
+        layout: "compact" 
+    },
+    { 
+        to: "/dashboard/remedies", 
+        title: "Remedies", 
+        icon: Gem, 
+        span: "col-span-1", 
+        layout: "compact" 
+    },
+
+    // LIFE TOPICS
+    { 
+        to: "/global/matching", 
+        title: "Love & Marriage", 
+        icon: Heart, 
+        span: "col-span-1", 
+        layout: "compact" 
+    },
+    { 
+        to: "/ai-astrologer?topic=career", 
+        title: "Career & Money", 
+        icon: Briefcase, 
+        span: "col-span-1", 
+        layout: "compact" 
+    },
+    { 
+        to: "/calculations/solar-return", 
+        title: "Yearly Forecast", 
+        icon: RefreshCw, 
+        span: "col-span-1", 
+        layout: "compact" 
+    },
+    { 
+        to: "/reports", // Placeholder
+        title: "Full Reports", 
+        icon: FileText, 
+        span: "col-span-1", 
+        layout: "compact" 
+    },
+];
+
+// --- ASTROLOGER USER CONFIG ---
+const ASTRO_GROUPS = [
+    {
+        id: "primary",
+        title: "Primary Tools",
+        modules: [
+            { to: "/ai-astrologer", title: "AI Oracle Pro", icon: Sparkles, badge: "PRO", span: "col-span-2 lg:col-span-2", variant: "secondary", layout: "horizontal", description: "Deep analysis of logic, yogas, & timing." },
+            { to: "/dashboard/main", title: "Dashboard", icon: LayoutDashboard, span: "col-span-2 lg:col-span-1", variant: "primary", layout: "default", description: "Overview." },
+            { to: "/dashboard/main?tab=visual", title: "Charts Hub", icon: Grid, span: "col-span-1", variant: "default", layout: "default", description: "D1-D60." },
+            { to: "/calculations/vimshottari", title: "Running Dasha", icon: Clock, span: "col-span-1", variant: "default", layout: "default" },
+        ]
+    },
+    {
+        id: "core",
+        title: "Core Analysis",
+        modules: [
+            { to: "/dashboard/main?tab=chart", title: "Planetary Analysis", icon: Activity, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/shodashvarga", title: "Divisional Charts", icon: Layers, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/shadbala", title: "Balas & Strength", icon: BarChart2, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/yogas", title: "Yogas", icon: Crown, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/nakshatra", title: "Nakshatra Explorer", icon: Star, span: "col-span-2", layout: "horizontal", description: "Detailed star analysis." },
+            { to: "/calculations/doshas", title: "Doshas", icon: AlertTriangle, span: "col-span-1", layout: "compact" },
+            { to: "/dashboard/remedies", title: "Remedies", icon: Shield, span: "col-span-1", layout: "compact" },
+        ]
+    },
+    {
+        id: "systems",
+        title: "Specialized Systems",
+        modules: [
+            { to: "/kp/dashboard", title: "KP System", icon: Grid3X3, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/jaimini", title: "Jaimini", icon: Compass, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/ashtakvarga", title: "Ashtakavarga", icon: Grid, span: "col-span-1", layout: "compact" },
+            { to: "/tools/shadow-planets", title: "Shadow Planets", icon: Moon, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/sarvatobhadra", title: "Sarvatobhadra", icon: Grid, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/panchapakshi", title: "Panchapakshi", icon: Moon, span: "col-span-1", layout: "compact" },
+            { to: "/cosmic/market-timing", title: "Financial Astro", icon: TrendingUp, span: "col-span-2", variant: "pro", layout: "horizontal", description: "Market & Crypto Timing." },
+        ]
+    },
+    {
+        id: "timing",
+        title: "Timing & Utilities",
+        modules: [
+            { to: "/global/transits", title: "Transits", icon: Globe, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/transits", title: "Adv. Transits", icon: Navigation, span: "col-span-1", layout: "compact" },
+            { to: "/tools/period-analysis", title: "Events", icon: Calendar, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/solar-return", title: "Solar Return", icon: RefreshCw, span: "col-span-1", layout: "compact" },
+            { to: "/calculations/tithi-pravesh", title: "Tithi Pravesh", icon: Moon, span: "col-span-1", layout: "compact" },
+            { to: "/global/panchang", title: "Panchang", icon: Sun, span: "col-span-1", layout: "compact" },
+            { to: "/global/muhurata", title: "Muhurtas", icon: Clock, span: "col-span-1", layout: "compact" },
+            { to: "/global/matching", title: "Matching", icon: Heart, span: "col-span-1", layout: "compact" },
+            { to: "/reports", title: "Reports", icon: FileText, span: "col-span-1", layout: "compact" },
+        ]
+    }
+];
 
 const Hub = () => {
-    const { user } = useAuth();
-    const {
-        availableProfiles,
-        isLoadingProfiles,
-        refreshProfiles,
-        switchProfile,
-        deleteChart,
-        updateChart,
-        currentProfile
-    } = useChartSettings();
+  // const { user } = useAuth(); // Unused
+  const { currentProfile, switchProfile, availableProfiles, refreshProfiles, isLoadingProfiles } = useChartSettings();
+  // const navigate = useNavigate(); // Unused in this component scope
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [moduleSearch, setModuleSearch] = useState('');
+  
+  // ROLE STATE
+  const [userRole, setUserRole] = useState<'normal' | 'astrologer'>('normal');
+  const [showHiddenNormal, setShowHiddenNormal] = useState(false);
 
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedChart, setSelectedChart] = useState<any>(null);
-    const [searchQuery, setSearchQuery] = useState('');
+  // Helper to get display name safely
+  const getDisplayName = (p: any) => {
+    if (p.name) return p.name;
+    if (p.first_name) return `${p.first_name} ${p.last_name || ''}`.trim();
+    return 'Unnamed Chart';
+  };
 
-    const containerRef = useRef(null);
-    // Removed unused useScroll/useTransform for performance
+  // Filter profiles
+  const filteredProfiles = availableProfiles.filter(p => 
+    getDisplayName(p).toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-    const handleSwitch = (chart: any) => {
-        switchProfile(chart);
-    };
-
-    const handleDelete = (chart: any) => {
-        setSelectedChart(chart);
-        setIsDeleteModalOpen(true);
-    };
-
-    const handleEdit = (chart: any) => {
-        setSelectedChart(chart);
-        setIsEditModalOpen(true);
-    };
-
-    const filteredCharts = availableProfiles.filter(chart => {
-        const query = searchQuery.toLowerCase();
-        const fullName = `${chart.first_name} ${chart.last_name}`.toLowerCase();
-        const location = (chart.location_name || '').toLowerCase();
-        return fullName.includes(query) || location.includes(query);
-    });
-
-    const getZodiacSign = (chart: any) => {
-        const month = parseInt(chart.date_str?.split('/')[1] || '1');
-        return ZODIAC_SYMBOLS[month] || '♈';
-    };
-
+  // --- RENDER: NO CHART SELECTED ---
+  if (!currentProfile) {
     return (
-        <MainLayout
-            title="Celestial Hub"
-            showHeader={true}
-            disableContentPadding={true}
-        >
-            <div ref={containerRef} className="min-h-screen bg-[#050816] relative overflow-hidden pb-32">
-                <StarField />
+      <MainLayout showHeader={false} disableContentPadding={true}>
+        <div className={`min-h-screen ${THEME.bg} p-6 flex flex-col justify-center max-w-md mx-auto`}>
+          <div className="mb-8 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#F5A623] to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-500/20">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Welcome to Bhava360</h1>
+            <p className="text-slate-400">Select a chart to begin your cosmic journey.</p>
+          </div>
 
-                <div className="fixed inset-0 pointer-events-none">
-                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-900/10 blur-[120px] rounded-full" />
-                    <div className="absolute bottom-[10%] right-[-10%] w-[50%] h-[50%] bg-amber-900/10 blur-[100px] rounded-full" />
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <input 
+              type="text"
+              placeholder="Search charts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#151926] border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#F5A623] transition-colors"
+            />
+          </div>
+
+          {/* Chart List */}
+          <div className="space-y-3 mb-6 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
+            {isLoadingProfiles ? (
+              <div className="text-center py-8 text-slate-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F5A623] mx-auto mb-2"></div>
+                <p>Loading charts...</p>
+              </div>
+            ) : filteredProfiles.length > 0 ? (
+              filteredProfiles.map(profile => (
+                <ProfileCard 
+                  key={profile.id} 
+                  profile={profile} 
+                  isActive={false} 
+                  onClick={() => switchProfile(profile)} 
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-slate-500 bg-[#161B2C]/50 rounded-xl border border-dashed border-slate-700">
+                <p>No charts found.</p>
+                <p className="text-xs mt-1 text-slate-600">Create your first chart to get started</p>
+              </div>
+            )}
+          </div>
+
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="w-full py-4 bg-[#F5A623] hover:bg-[#E09612] text-black font-bold rounded-xl shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+          >
+            <Plus className="w-5 h-5" />
+            Create New Chart
+          </button>
+        </div>
+
+        <CreateChartModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onChartCreated={refreshProfiles}
+        />
+      </MainLayout>
+    );
+  }
+
+  // --- RENDER: MAIN HUB ---
+  return (
+    <MainLayout showHeader={true} disableContentPadding={true}>
+      <div className={`min-h-screen ${THEME.bg} flex flex-col`}>
+        
+        {/* MAIN CONTENT AREA */}
+        <div className="flex-1 overflow-y-auto pb-24">
+          
+          {/* MOBILE TOP NAV */}
+          <div className="lg:hidden">
+            <MobileHeader 
+              userName={getDisplayName(currentProfile)}
+              location={(currentProfile as any).location_name || (currentProfile as any).location || 'Unknown Location'}
+              onMenuToggle={() => setIsMobileSidebarOpen(true)}
+              isMenuOpen={isMobileSidebarOpen}
+            />
+          </div>
+
+          {/* HERO HEADER */}
+          <div className="relative overflow-hidden bg-[#0B0F1A] border-b border-[rgba(255,255,255,0.08)] pb-8 pt-10 px-6 md:px-8">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#F5A623]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#F5A623]/10 border border-[#F5A623]/20 w-fit mb-4">
+                    <div className="w-2 h-2 rounded-full bg-[#F5A623] animate-pulse" />
+                    <span className="text-[10px] font-bold text-[#F5A623] tracking-wide uppercase">Celestial Sync Active</span>
+                  </div>
+                  
+                  <h1 className="text-3xl md:text-5xl font-black text-[#EDEFF5] mb-2 tracking-tighter leading-none">
+                    HELLO, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EDEFF5] via-[#A9B0C2] to-[#6F768A]">{currentProfile.name.toUpperCase()}</span>
+                  </h1>
+                  
+                  <div className="inline-flex items-center gap-3 text-[#A9B0C2] text-sm">
+                    <MapPin className="w-4 h-4 text-[#F5A623]" />
+                    <span className="font-medium">{(currentProfile as any).location_name || (currentProfile as any).location || 'Unknown Location'}</span>
+                  </div>
                 </div>
 
-                <div className="relative z-10 max-w-[1600px] mx-auto pt-10 px-6 md:px-12 lg:px-16">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+                {/* Role Switcher & Search */}
+                <div className="flex flex-col gap-3 w-full md:w-auto items-end">
+                    <div className="bg-[#11162A] p-1 rounded-lg border border-[rgba(255,255,255,0.08)] flex items-center">
+                        <button 
+                            onClick={() => setUserRole('normal')}
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${userRole === 'normal' ? 'bg-white text-black shadow-md' : 'text-[#6F768A] hover:text-white'}`}
+                        >
+                            <UserCheck className="w-3 h-3" /> Personal
+                        </button>
+                        <button 
+                            onClick={() => setUserRole('astrologer')}
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${userRole === 'astrologer' ? 'bg-[#6D5DF6] text-white shadow-md' : 'text-[#6F768A] hover:text-white'}`}
+                        >
+                            <BriefcaseIcon className="w-3 h-3" /> Astrologer
+                        </button>
+                    </div>
 
-                        {/* LEFT COLUMN: Celestial Belt */}
-                        <div className="lg:col-span-4 xl:col-span-3">
-                            <motion.div
-                                initial={{ x: -50, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                transition={{ duration: 0.8, ease: "easeOut" }}
-                                className="flex flex-col gap-8 lg:sticky lg:top-32"
+                    <div className="relative w-full md:w-80">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6F768A]" />
+                        <input 
+                            type="text"
+                            placeholder={userRole === 'normal' ? "Ask AI about your future..." : "Find chart tool..."}
+                            value={moduleSearch}
+                            onChange={(e) => setModuleSearch(e.target.value)}
+                            className="w-full bg-[#11162A] border border-[rgba(255,255,255,0.08)] rounded-xl py-3 pl-10 pr-4 text-sm text-[#EDEFF5] placeholder:text-[#6F768A] focus:outline-none focus:border-[#F5A623] transition-colors shadow-lg"
+                        />
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CONTENT LAYOUT */}
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-12">
+            
+            {userRole === 'normal' ? (
+                // --- NORMAL USER LAYOUT ---
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 mb-8">
+                        {NORMAL_MODULES.map((module: any, idx) => (
+                             <motion.div
+                                key={module.title}
+                                className={module.span}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.05 }}
                             >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex flex-col gap-1">
-                                        <h2 className="text-2xl font-black text-white tracking-tighter flex items-center gap-3">
-                                            <div className="relative">
-                                                <Star className="w-6 h-6 text-amber-500 fill-amber-500/20" />
-                                                <motion.div
-                                                    animate={{ opacity: [1, 0.4, 1] }}
-                                                    transition={{ duration: 2, repeat: Infinity }}
-                                                    className="absolute inset-0 bg-amber-500 blur-md opacity-50"
-                                                />
-                                            </div>
-                                            Celestial Belt
-                                        </h2>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500/60" />
-                                            <p className="text-xs font-black text-white/50 uppercase tracking-[0.4em]">Personal Souls</p>
-                                        </div>
-                                    </div>
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setIsCreateModalOpen(true)}
-                                        className="h-12 w-12 bg-gradient-to-br from-amber-400 to-orange-600 text-[#050816] rounded-2xl flex items-center justify-center shadow-[0_10px_20px_rgba(245,158,11,0.2)] border border-white/20"
-                                    >
-                                        <Plus className="w-5 h-5" />
-                                    </motion.button>
-                                </div>
-
-                                <div className="relative group/search">
-                                    <input
-                                        type="text"
-                                        placeholder="Invoke soul by name..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-4 bg-white/[0.03] border border-white/10 focus:border-amber-500/40 rounded-2xl text-xs text-white placeholder-white/20 focus:outline-none backdrop-blur-3xl transition-all font-medium shadow-inner"
-                                    />
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/30 group-focus-within/search:text-amber-500 transition-colors" />
-                                </div>
-
-                                <div className="space-y-4 lg:max-h-[calc(100vh-350px)] lg:overflow-y-auto pr-2 custom-scrollbar contents-fade">
-                                    {isLoadingProfiles ? (
-                                        <div className="h-44 flex items-center justify-center">
-                                            <div className="w-10 h-10 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-                                        </div>
-                                    ) : (
-                                        <AnimatePresence mode="popLayout">
-                                            {filteredCharts.map((chart, idx) => {
-                                                const isActive = currentProfile?.raw?.id === chart.id;
-                                                return (
-                                                    <motion.div
-                                                        layout
-                                                        key={chart.id}
-                                                        initial={{ opacity: 0, scale: 0.95 }}
-                                                        animate={{ opacity: 1, scale: 1 }}
-                                                        transition={{ delay: idx * 0.05 }}
-                                                        onClick={() => handleSwitch(chart)}
-                                                        className={`w-full p-4 rounded-3xl border transition-all duration-500 cursor-pointer relative overflow-hidden group/chart flex items-center gap-4 ${isActive
-                                                            ? 'bg-amber-500/[0.08] border-amber-500/30 shadow-[0_15px_30px_rgba(0,0,0,0.4)]'
-                                                            : 'bg-white/[0.02] border-white/5 hover:border-amber-500/20 hover:bg-white/[0.05]'
-                                                            }`}
-                                                    >
-                                                        <div className={`w-14 h-14 flex-shrink-0 rounded-2xl flex items-center justify-center text-3xl transition-all duration-700 relative z-10 ${isActive
-                                                            ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-[#050816] shadow-lg shadow-amber-500/20'
-                                                            : 'bg-white/10 text-amber-500/60 border border-white/20'
-                                                            }`}>
-                                                            {getZodiacSign(chart)}
-                                                            {isActive && (
-                                                                <motion.div
-                                                                    layoutId="aura"
-                                                                    className="absolute -inset-1 bg-amber-500/20 blur-md rounded-full -z-10"
-                                                                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-                                                                    transition={{ duration: 3, repeat: Infinity }}
-                                                                />
-                                                            )}
-                                                        </div>
-
-                                                        <div className="flex-1 min-w-0">
-                                                            <h3 className={`text-sm font-black tracking-tight truncate ${isActive ? 'text-amber-400' : 'text-white'}`}>
-                                                                {chart.first_name} {chart.last_name || ''}
-                                                            </h3>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <MapPin className="w-3.5 h-3.5 text-white/40" />
-                                                                <p className="text-xs text-white/60 font-bold tracking-wider truncate">
-                                                                    {chart.location_name?.split(',')[0] || 'Unknown Origin'}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex gap-2 opacity-0 group-hover/chart:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); handleEdit(chart); }}
-                                                                className="p-2 hover:bg-amber-500/10 rounded-xl text-white/20 hover:text-amber-400 transition-all border border-transparent hover:border-amber-500/20"
-                                                            >
-                                                                <Edit2 className="w-3.5 h-3.5" />
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); handleDelete(chart); }}
-                                                                className="p-2 hover:bg-red-500/10 rounded-xl text-white/20 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20"
-                                                            >
-                                                                <Trash2 className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </div>
-                                                    </motion.div>
-                                                );
-                                            })}
-                                        </AnimatePresence>
-                                    )}
-                                </div>
+                                <BentoCard 
+                                    to={module.to}
+                                    title={module.title}
+                                    icon={module.icon}
+                                    badge={module.badge}
+                                    span={module.span}
+                                    variant={module.variant as any}
+                                    layout={module.layout}
+                                    description={module.description}
+                                />
                             </motion.div>
-                        </div>
+                        ))}
+                    </div>
 
-                        {/* RIGHT COLUMN: Content Universe */}
-                        <div className="lg:col-span-8 xl:col-span-9 space-y-20">
-                            {/* Celestial Header */}
-                            <motion.div
-                                initial={{ y: -30, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 1 }}
-                                className="flex flex-col md:flex-row md:items-center justify-between gap-10"
-                            >
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-px bg-amber-500" />
-                                        <span className="text-xs font-black tracking-[0.5em] text-amber-500 uppercase">Celestial Odyssey</span>
-                                    </div>
-                                    <HomeHeader
-                                        userName={currentProfile?.name || (user as any)?.name || 'Astral Soul'}
-                                        location={currentProfile?.location}
-                                        showActions={false}
-                                    />
-                                </div>
-
-
-                            </motion.div>
-
-                            {/* Main Navigation Modules */}
-                            <div className="space-y-24">
-                                {MENU_ITEMS.map((section, sectionIdx) => (
+                    {/* Hidden Advanced Tools */}
+                    <div className="border-t border-white/5 pt-4">
+                        <button 
+                            onClick={() => setShowHiddenNormal(!showHiddenNormal)}
+                            className="w-full py-3 flex items-center justify-center gap-2 text-[#6F768A] hover:text-[#EDEFF5] text-sm font-medium transition-colors"
+                        >
+                            {showHiddenNormal ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            {showHiddenNormal ? "Hide Advanced Tools" : "Show Advanced Tools (KP, Jaimini, etc.)"}
+                        </button>
+                        
+                        <AnimatePresence>
+                            {showHiddenNormal && (
+                                <motion.div 
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 overflow-hidden"
+                                >
+                                    {[
+                                        { to: "/kp/dashboard", title: "KP System", icon: Grid3X3 },
+                                        { to: "/calculations/jaimini", title: "Jaimini", icon: Compass },
+                                        { to: "/calculations/ashtakvarga", title: "Ashtakavarga", icon: Grid },
+                                        { to: "/calculations/shadbala", title: "Shadbala", icon: BarChart2 },
+                                    ].map((m) => (
+                                        <BentoCard key={m.title} to={m.to} title={m.title} icon={m.icon} layout="minimal" />
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+            ) : (
+                // --- ASTROLOGER LAYOUT ---
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-10">
+                    {ASTRO_GROUPS.map((group) => (
+                        <div key={group.id} className="space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#6D5DF6]/20 to-transparent opacity-50"></div>
+                                <h2 className="text-xs font-black text-[#6D5DF6] uppercase tracking-[0.2em]">{group.title}</h2>
+                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#6D5DF6]/20 to-transparent opacity-50"></div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                                {group.modules.map((module: any, idx) => (
                                     <motion.div
-                                        key={sectionIdx}
-                                        initial={{ opacity: 0, y: 30 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: sectionIdx * 0.1, duration: 0.8 }}
-                                        className="space-y-12"
+                                        key={module.title}
+                                        className={module.span || "col-span-1"}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.05 }}
                                     >
-                                        <div className="flex items-center gap-8 group/title">
-                                            <div className="flex flex-col">
-                                                <h2 className="text-xl font-black text-amber-500 tracking-[0.2em] uppercase whitespace-nowrap group-hover/title:text-amber-400 transition-colors duration-500 shadow-amber-500/20 drop-shadow-sm">
-                                                    {section.section}
-                                                </h2>
-                                                <div className="h-1 w-12 bg-gradient-to-r from-amber-500 to-transparent mt-2 rounded-full" />
-                                            </div>
-                                            <div className="h-px w-full bg-gradient-to-r from-white/10 to-transparent mt-2" />
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-                                            {section.items.map((item: any, itemIdx: number) => {
-                                                // Determine span based on content density
-                                                const isRichContent = !!item.purpose;
-                                                const spanClass = isRichContent ? 'lg:col-span-2 xl:col-span-2' : 'col-span-1';
-
-                                                return (
-                                                    <Link
-                                                        key={itemIdx}
-                                                        to={item.to}
-                                                        className={`group relative flex flex-col p-6 lg:p-10 bg-[#0A0E1F]/80 backdrop-blur-2xl border border-white/10 rounded-[2rem] hover:bg-[#0F1429] hover:border-amber-500/50 transition-all duration-300 shadow-2xl hover:shadow-[0_20px_40px_rgba(245,158,11,0.1)] overflow-hidden hover:-translate-y-2 ${spanClass}`}
-                                                    >
-                                                        {/* Background Glow */}
-                                                        <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 blur-[100px] rounded-full group-hover:bg-amber-500/10 transition-all" />
-
-                                                        {/* Refraction Overlay */}
-                                                        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
-
-                                                        <div className="relative z-10 flex flex-col h-full gap-6 lg:gap-8">
-                                                            {/* Header */}
-                                                            <div className="flex items-start justify-between">
-                                                                <div className="flex items-center gap-5">
-                                                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-slate-900 to-black border border-white/10 flex items-center justify-center relative shadow-lg group-hover:border-amber-500/50 transition-all duration-700">
-                                                                        <item.icon className="w-8 h-8 text-amber-500 group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
-                                                                    </div>
-                                                                    <div className="space-y-1.5">
-                                                                        <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors tracking-tight leading-none font-sans">
-                                                                            {item.label}
-                                                                        </h3>
-                                                                        {item.badge && (
-                                                                            <span className={`inline-block text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg tracking-widest leading-none ${item.badge === 'NEW' ? 'bg-amber-500 text-black' : 'bg-white/10 text-white border border-white/20'}`}>
-                                                                                {item.badge}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Content Body */}
-                                                            <div className="space-y-5 flex-grow">
-                                                                {item.purpose ? (
-                                                                    // Rich Content Layout (Intelligence Cards)
-                                                                    <>
-                                                                        <div className="space-y-2">
-                                                                            <p className="text-[11px] font-black text-amber-500/80 uppercase tracking-widest flex items-center gap-2">
-                                                                                <Activity className="w-3.5 h-3.5" />
-                                                                                Purpose
-                                                                            </p>
-                                                                            <p className="text-base text-white/90 font-medium leading-relaxed">
-                                                                                {item.purpose}
-                                                                            </p>
-                                                                        </div>
-
-                                                                        <div className="grid grid-cols-2 gap-6 pt-2 border-t border-white/5 mt-2">
-                                                                            <div className="space-y-3">
-                                                                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Uses</p>
-                                                                                <div className="space-y-2">
-                                                                                    {item.uses?.map((use: string, i: number) => (
-                                                                                        <div key={i} className="flex items-center gap-2">
-                                                                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                                                                            <span className="text-xs text-slate-300 font-semibold tracking-wide">{use}</span>
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="space-y-3">
-                                                                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Output</p>
-                                                                                <div className="space-y-2">
-                                                                                    {item.output?.map((out: string, i: number) => (
-                                                                                        <div key={i} className="flex items-center gap-2">
-                                                                                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                                                                                            <span className="text-xs text-emerald-100/80 font-semibold tracking-wide">{out}</span>
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </>
-                                                                ) : (
-                                                                    // Standard Content Layout
-                                                                    <div className="space-y-3">
-                                                                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -translate-y-2 group-hover:translate-y-0">
-                                                                            Overview
-                                                                        </p>
-                                                                        <p className="text-lg text-white/80 font-medium leading-relaxed group-hover:text-white transition-colors">
-                                                                            {item.description}
-                                                                        </p>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Action Button Footer */}
-                                                            <div className="w-full py-4 bg-white/5 border border-white/10 group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 text-center flex items-center justify-center gap-2 mt-auto shadow-lg hover:shadow-amber-500/25">
-                                                                Access Module
-                                                                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" />
-                                                            </div>
-                                                        </div>
-                                                    </Link>
-                                                );
-                                            })}
-                                        </div>
+                                        <BentoCard 
+                                            to={module.to}
+                                            title={module.title}
+                                            icon={module.icon}
+                                            badge={module.badge}
+                                            span="col-span-1" // Override span for wrapper, pass logic to card or handle here? 
+                                            // BentoCard has 'span' prop which applies class to button. 
+                                            // If I wrap in div, the div needs the span class.
+                                            // module.span contains "col-span-X".
+                                            variant={module.variant as any}
+                                            layout={module.layout}
+                                            description={module.description}
+                                        />
                                     </motion.div>
                                 ))}
                             </div>
-
-                            {/* Utility Sections */}
-                            {/* Utility Sections - Hidden as per request */}
-                            {/* <motion.div
-                                initial={{ opacity: 0 }}
-                                whileInView={{ opacity: 1 }}
-                                transition={{ duration: 1.5 }}
-                                className="grid grid-cols-1 md:grid-cols-2 gap-10 pb-32"
-                            >
-                                <div className="group relative p-12 rounded-[4rem] bg-gradient-to-br from-white/[0.03] to-purple-950/10 border border-white/5 overflow-hidden shadow-2xl transition-all hover:bg-white/[0.05] hover:border-white/10">
-                                    <div className="relative z-10 flex flex-col gap-10">
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                                                <h3 className="text-3xl font-black text-white tracking-tighter">Oracle Support</h3>
-                                            </div>
-                                            <p className="text-sm text-white/60 font-bold leading-loose max-w-sm tracking-tight">Connect with high-tier celestial experts for deeply personalized karmic guidance.</p>
-                                        </div>
-                                        <button className="w-max px-12 py-5 bg-amber-500 hover:bg-amber-400 text-[#050816] text-xs font-black uppercase tracking-[0.3em] rounded-2xl transition-all active:scale-95 shadow-[0_15px_30px_rgba(245,158,11,0.25)] border border-white/20">
-                                            Invoke Expert
-                                        </button>
-                                    </div>
-                                    <Star className="absolute -bottom-10 -right-10 w-48 h-48 text-white/5 rotate-12 group-hover:rotate-[30deg] transition-transform duration-1000" />
-                                </div>
-
-                                <div className="group relative p-12 rounded-[4rem] bg-gradient-to-br from-white/[0.03] to-amber-950/10 border border-white/5 overflow-hidden shadow-2xl transition-all hover:bg-white/[0.05] hover:border-white/10">
-                                    <div className="relative z-10 flex flex-col gap-10">
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <div className="w-2 h-2 rounded-full bg-amber-500/40" />
-                                                <h3 className="text-3xl font-black text-white tracking-tighter">Universe Settings</h3>
-                                            </div>
-                                            <p className="text-sm text-white/60 font-bold leading-loose max-w-sm tracking-tight">Fine-tune your cosmic connection, subscription paths, and notification frequency.</p>
-                                        </div>
-                                        <button className="w-max px-12 py-5 bg-white/5 hover:bg-white/10 text-white text-xs font-black uppercase tracking-[0.3em] rounded-2xl transition-all border border-white/20 active:scale-95 shadow-2xl">
-                                            Manage Path
-                                        </button>
-                                    </div>
-                                    <ShieldCheck className="absolute -bottom-10 -right-10 w-48 h-48 text-white/5 -rotate-12 group-hover:-rotate-[25deg] transition-transform duration-1000" />
-                                </div>
-                            </motion.div> */}
                         </div>
-                    </div>
+                    ))}
                 </div>
-            </div>
+            )}
+            
+          </div>
+        </div>
+      </div>
 
-            {/* Premium Modals */}
-            <CreateChartModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onChartCreated={refreshProfiles}
-            />
-
-            <DeleteChartModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                chart={selectedChart}
-                onConfirmDelete={deleteChart}
-            />
-
-            <EditChartModal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                chart={selectedChart}
-                onSave={updateChart}
-            />
-        </MainLayout>
-    );
+      <CreateChartModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onChartCreated={refreshProfiles}
+      />
+    </MainLayout>
+  );
 };
 
 export default Hub;

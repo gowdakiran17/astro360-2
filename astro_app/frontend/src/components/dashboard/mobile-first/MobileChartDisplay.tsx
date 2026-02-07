@@ -35,7 +35,10 @@ const MobileChartDisplay = ({ chartData, title = "Birth Chart" }: MobileChartDis
       'Venus': 'text-pink-600',
       'Saturn': 'text-gray-600',
       'Rahu': 'text-purple-600',
-      'Ketu': 'text-indigo-600'
+      'Ketu': 'text-indigo-600',
+      'Uranus': 'text-cyan-600',
+      'Neptune': 'text-blue-600',
+      'Pluto': 'text-slate-700'
     };
     return colors[planetName] || 'text-slate-600';
   };

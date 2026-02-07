@@ -114,13 +114,13 @@ const RemediesPage: React.FC = () => {
             showHeader={true}
             disableContentPadding={true}
         >
-            <div className="min-h-screen bg-[#050816] relative overflow-hidden font-sans pb-32">
+            <div className="min-h-screen bg-[#0B0F1A] relative overflow-hidden font-sans pb-32">
                 <StarField />
 
                 {/* Background Universe */}
                 <div className="fixed inset-0 pointer-events-none">
-                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-900/10 blur-[120px] rounded-full opacity-20" />
-                    <div className="absolute bottom-[10%] right-[-10%] w-[50%] h-[50%] bg-amber-900/10 blur-[100px] rounded-full opacity-20" />
+                    <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#6D5DF6]/10 blur-[120px] rounded-full opacity-20" />
+                    <div className="absolute bottom-[10%] right-[-10%] w-[50%] h-[50%] bg-[#F5A623]/10 blur-[100px] rounded-full opacity-20" />
                 </div>
 
                 <div className="relative z-10 mx-auto max-w-7xl pt-16 px-6 md:px-10 space-y-24">
@@ -133,22 +133,22 @@ const RemediesPage: React.FC = () => {
                             className="space-y-8"
                         >
                             <div className="flex items-center justify-center gap-4">
-                                <div className="h-px w-16 bg-amber-500/40" />
-                                <span className="text-xs font-black text-amber-400 uppercase tracking-[0.5em] drop-shadow-[0_0_10px_rgba(251,191,36,0.2)]">Celestial Alignment</span>
-                                <div className="h-px w-16 bg-amber-500/40" />
+                                <div className="h-px w-16 bg-[#F5A623]/40" />
+                                <span className="text-xs font-black text-[#F5A623] uppercase tracking-[0.5em] drop-shadow-[0_0_10px_rgba(245,166,35,0.2)]">Celestial Alignment</span>
+                                <div className="h-px w-16 bg-[#F5A623]/40" />
                             </div>
 
-                            <h1 className="text-6xl md:text-8xl font-serif text-white tracking-tight leading-none mb-8">
-                                Cosmic <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-400 to-amber-600 drop-shadow-[0_0_20px_rgba(245,158,11,0.4)]">Toolkit</span>
+                            <h1 className="text-6xl md:text-8xl font-serif text-[#EDEFF5] tracking-tight leading-none mb-8">
+                                Cosmic <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F5A623] via-[#D98E15] to-[#F5A623] drop-shadow-[0_0_20px_rgba(245,158,11,0.4)]">Toolkit</span>
                             </h1>
 
-                            <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light italic opacity-80">
+                            <p className="text-[#A9B0C2] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light italic opacity-80">
                                 Harmonize your planetary field through targeted artifacts, karmic realignment, and situational success triggers.
                             </p>
                         </motion.div>
 
                         <div className="mt-16 relative">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 blur-[100px] rounded-full" />
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#F5A623]/10 blur-[100px] rounded-full" />
                             <motion.img
                                 animate={{ y: [0, -15, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -178,9 +178,9 @@ const RemediesPage: React.FC = () => {
                                 panchangData={panchangData}
                             />
                         ) : (
-                            <div className="p-24 text-center bg-[#0A0E1F]/60 rounded-[3rem] border border-white/5 backdrop-blur-xl">
-                                <BrainCircuit className="w-12 h-12 text-slate-700 mx-auto mb-6 animate-pulse" />
-                                <p className="text-slate-500 font-black uppercase tracking-widest text-xs">Synchronizing Planetary Frequencies...</p>
+                            <div className="p-24 text-center bg-[#11162A]/60 rounded-[3rem] border border-[rgba(255,255,255,0.08)] backdrop-blur-xl">
+                                <BrainCircuit className="w-12 h-12 text-[#6F768A] mx-auto mb-6 animate-pulse" />
+                                <p className="text-[#A9B0C2] font-black uppercase tracking-widest text-xs">Synchronizing Planetary Frequencies...</p>
                             </div>
                         )}
                     </div>
@@ -189,8 +189,8 @@ const RemediesPage: React.FC = () => {
 
                     {/* Background Research Mention */}
                     <div className="text-center pb-12 pt-10">
-                        <div className="h-px w-24 bg-white/10 mx-auto mb-6" />
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] font-sans">
+                        <div className="h-px w-24 bg-[rgba(255,255,255,0.08)] mx-auto mb-6" />
+                        <p className="text-[#6F768A] text-[10px] font-black uppercase tracking-[0.3em] font-sans">
                             Sourced via Lal Kitab & Bio-energy Science
                         </p>
                     </div>

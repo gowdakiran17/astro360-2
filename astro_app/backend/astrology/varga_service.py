@@ -5,6 +5,19 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Import calculation functions from divisional.py to avoid duplication/circular deps
+# Actually, varga_service IS the main service now.
+# But shadbala.py calls get_all_shodashvargas.
+# And divisional.py imports from utils.
+# Let's just define them here or import them properly.
+# To ensure consistency, we should import from divisional.py where defined,
+# OR move everything here.
+# Given divisional.py exists and has D9/D16, let's use them.
+# But varga_service defines D2, D3 etc. locally.
+# Let's keep using local definitions for D2-D60 here, and import D9/D16.
+
+from astro_app.backend.astrology.divisional import calculate_d9_navamsa, calculate_d16_shodashamsa
+
 def get_varga_sign_index(lon: float, division: int) -> int:
     """
     Standard formula for most divisional charts:
@@ -199,7 +212,8 @@ def calculate_shastyamsa_d60(longitude: float) -> dict:
     return { "chart": "D60", "zodiac_sign": get_zodiac_sign(v_sign_idx * 30) }
 
 # Import existing ones from divisional.py if needed or rewrite for consistency
-from astro_app.backend.astrology.divisional import calculate_d9_navamsa, calculate_d16_shodashamsa
+# from astro_app.backend.astrology.divisional import calculate_d9_navamsa, calculate_d16_shodashamsa
+# Already imported at top
 
 async def get_all_shodashvargas(planets_d1: list, birth_details: Optional[Dict[str, Any]] = None) -> dict:
     """

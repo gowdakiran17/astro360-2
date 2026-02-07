@@ -26,6 +26,78 @@ try:
 except Exception as e:
     logger.warning(f"GeminiService initialization failed: {e}")
 
+def generate_compatibility_insight(boy_chart: Dict[str, Any], girl_chart: Dict[str, Any], match_score: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate AI-powered compatibility insight (Verdict) based on charts and score."""
+    
+    boy_asc = boy_chart.get("ascendant", {}).get("sign", "Unknown")
+    boy_moon = next((p for p in boy_chart.get("planets", []) if p.get("name") == "Moon"), {})
+    
+    girl_asc = girl_chart.get("ascendant", {}).get("sign", "Unknown")
+    girl_moon = next((p for p in girl_chart.get("planets", []) if p.get("name") == "Moon"), {})
+    
+    score = match_score.get("total_score", 0)
+    manglik_boy = match_score.get("manglik", {}).get("boy", False)
+    manglik_girl = match_score.get("manglik", {}).get("girl", False)
+    
+    prompt = f"""You are VedaAI, an expert Vedic astrologer specializing in Relationship Matching (Synastry). Analyze this match.
+
+Boy: Ascendant {boy_asc}, Moon in {boy_moon.get('sign', 'Unknown')}. Manglik: {manglik_boy}
+Girl: Ascendant {girl_asc}, Moon in {girl_moon.get('sign', 'Unknown')}. Manglik: {manglik_girl}
+Guna Milan Score: {score}/36
+
+Provide a structured verdict in this exact JSON format (NO OTHER TEXT):
+{{
+    "verdict_title": "A short 3-5 word title (e.g., 'Karmic Soulmate Connection')",
+    "summary": "A 2-3 sentence executive summary of the relationship potential.",
+    "emotional_harmony": "Analysis of Moon-Moon connection (Mental compatibility)",
+    "long_term_potential": "Analysis of longevity and stability",
+    "challenges": "Key friction points to watch out for",
+    "recommendation": "Final advice (Proceed / Proceed with Caution / Avoid)"
+}}
+
+Be honest but constructive. If the score is low (<18), explain why but offer remedies if applicable. If high, highlight the strengths."""
+
+    # Try OpenAI first
+    if openai_client:
+        try:
+            response = openai_client.chat.completions.create(
+                model="gpt-5", 
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+                max_completion_tokens=500
+            )
+            result = json.loads(response.choices[0].message.content or "{}")
+            result["ai_powered"] = True
+            return result
+        except Exception as e:
+            logger.error(f"OpenAI compatibility insight error: {e}")
+
+    # Fallback to Gemini
+    if gemini_service:
+        try:
+            gemini_prompt = prompt + "\n\nCRITICAL: Return ONLY valid raw JSON without markdown code blocks."
+            response_text = gemini_service.generate_chat_response(
+                user_query=gemini_prompt,
+                system_prompt="You are VedaAI, an expert Vedic astrologer returning structured JSON."
+            )
+            clean_json = response_text.replace("```json", "").replace("```", "").strip()
+            result = json.loads(clean_json)
+            result["ai_powered"] = True
+            return result
+        except Exception as e:
+            logger.error(f"Gemini compatibility insight error: {e}")
+
+    # Final fallback
+    return {
+        "verdict_title": "Standard Compatibility Analysis",
+        "summary": f"With a score of {score}/36, this match shows {'good' if score > 18 else 'challenging'} potential.",
+        "emotional_harmony": "Moon signs indicate the level of mental rapport.",
+        "long_term_potential": "Stability depends on mutual understanding and effort.",
+        "challenges": "Differences in temperament may require adjustment.",
+        "recommendation": "Proceed with standard astrological consultation.",
+        "ai_powered": False
+    }
+
 def generate_daily_insight(chart_data: Dict[str, Any], panchang_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Generate AI-powered daily astrological insight based on chart data."""
     
@@ -98,6 +170,79 @@ Be warm, encouraging, and insightful. Focus on the positive potential."""
         "ai_powered": False
     }
 
+
+def generate_dasha_insight(mahadasha: str, antardasha: str, chart_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate AI-powered insight for a specific Dasha period."""
+    
+    ascendant = chart_data.get("ascendant", {})
+    planets = chart_data.get("planets", [])
+    
+    # Find positions of MD and AD lords
+    md_planet = next((p for p in planets if p.get("name") == mahadasha), None)
+    ad_planet = next((p for p in planets if p.get("name") == antardasha), None)
+    
+    md_info = f"{mahadasha} in {md_planet.get('sign', 'Unknown')} (House {md_planet.get('house', 'Unknown')})" if md_planet else mahadasha
+    ad_info = f"{antardasha} in {ad_planet.get('sign', 'Unknown')} (House {ad_planet.get('house', 'Unknown')})" if ad_planet else antardasha
+    
+    prompt = f"""You are VedaAI, an expert Vedic astrologer. Analyze the current Vimshottari Dasha period for this user.
+
+Context:
+- Ascendant: {ascendant.get('sign', 'Unknown')}
+- Mahadasha (MD): {md_info}
+- Antardasha (AD): {ad_info}
+
+Provide a structured insight in this exact JSON format (NO OTHER TEXT):
+{{
+    "insight": "A 2-3 sentence analysis of how these two planetary energies interact for this person.",
+    "energy_score": 75,
+    "key_themes": ["Theme 1", "Theme 2", "Theme 3"],
+    "opportunity": "One specific opportunity to look out for",
+    "caution": "One specific caution or risk to manage",
+    "remedy": "A simple practical or spiritual remedy"
+}}
+
+Focus on the specific interaction between {mahadasha} and {antardasha} relative to the Ascendant."""
+
+    # Try OpenAI first
+    if openai_client:
+        try:
+            response = openai_client.chat.completions.create(
+                model="gpt-5", 
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+                max_completion_tokens=500
+            )
+            result = json.loads(response.choices[0].message.content or "{}")
+            result["ai_powered"] = True
+            return result
+        except Exception as e:
+            logger.error(f"OpenAI dasha insight error: {e}")
+
+    # Fallback to Gemini
+    if gemini_service:
+        try:
+            gemini_prompt = prompt + "\n\nCRITICAL: Return ONLY valid raw JSON without markdown code blocks."
+            response_text = gemini_service.generate_chat_response(
+                user_query=gemini_prompt,
+                system_prompt="You are VedaAI, an expert Vedic astrologer returning structured JSON."
+            )
+            clean_json = response_text.replace("```json", "").replace("```", "").strip()
+            result = json.loads(clean_json)
+            result["ai_powered"] = True
+            return result
+        except Exception as e:
+            logger.error(f"Gemini dasha insight error: {e}")
+
+    # Final fallback
+    return {
+        "insight": f"The combination of {mahadasha} and {antardasha} brings a mix of energies. {mahadasha} sets the broad stage while {antardasha} triggers specific events.",
+        "energy_score": 70,
+        "key_themes": ["Change", "Growth", "Reflection"],
+        "opportunity": "Growth in areas signified by the Antardasha lord.",
+        "caution": "Be mindful of impulsive decisions during transition periods.",
+        "remedy": f"Meditate on {mahadasha}'s day to align with the major flow.",
+        "ai_powered": False
+    }
 
 def generate_quick_predictions(chart_data: Dict[str, Any], dasha_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Generate AI-powered quick predictions for different life areas."""

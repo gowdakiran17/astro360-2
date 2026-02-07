@@ -10,12 +10,12 @@ const KPPlanetaryDetails: React.FC<KPPlanetaryDetailsProps> = ({ planets, houses
     if (!planets) return null;
 
     const Wrapper = ({ title, children }: { title: string, children: React.ReactNode }) => (
-        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl mb-8">
-            <div className="bg-[#523A1E] px-6 py-4 border-b border-white/10">
-                <h3 className="text-lg font-bold text-amber-200">{title}</h3>
+        <div className="overflow-hidden rounded-xl border border-[#FFFFFF]/08 bg-[#FFFFFF]/04 backdrop-blur-md shadow-2xl mb-8">
+            <div className="bg-[#F5A623]/20 px-6 py-4 border-b border-[#FFFFFF]/08">
+                <h3 className="text-lg font-bold text-[#F5A623]">{title}</h3>
             </div>
             <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-200">
+                <table className="w-full text-left text-sm text-[#A9B0C2]">
                     {children}
                 </table>
             </div>
@@ -23,13 +23,13 @@ const KPPlanetaryDetails: React.FC<KPPlanetaryDetailsProps> = ({ planets, houses
     );
 
     const Th = ({ children }: { children: React.ReactNode }) => (
-        <th className="px-4 py-3 bg-white/10 text-amber-100/90 font-bold border-b border-r border-white/10 whitespace-nowrap last:border-r-0">
+        <th className="px-4 py-3 bg-[#FFFFFF]/08 text-[#EDEFF5] font-bold border-b border-r border-[#FFFFFF]/08 whitespace-nowrap last:border-r-0">
             {children}
         </th>
     );
 
     const Td = ({ children, isHeaderCol }: { children: React.ReactNode, isHeaderCol?: boolean }) => (
-        <td className={`px-4 py-3 border-b border-r border-white/5 last:border-r-0 ${isHeaderCol ? 'font-medium text-amber-50 bg-white/5' : ''}`}>
+        <td className={`px-4 py-3 border-b border-r border-[#FFFFFF]/04 last:border-r-0 ${isHeaderCol ? 'font-medium text-[#EDEFF5] bg-[#FFFFFF]/04' : ''}`}>
             {children}
         </td>
     );
@@ -57,7 +57,7 @@ const KPPlanetaryDetails: React.FC<KPPlanetaryDetailsProps> = ({ planets, houses
                 </thead>
                 <tbody>
                     {planets.map((p) => (
-                        <tr key={p.planet} className="hover:bg-white/5">
+                        <tr key={p.planet} className="hover:bg-[#FFFFFF]/06">
                             <Td isHeaderCol>{p.planet}</Td>
                             <Td>{p.is_retro ? '(R)' : '-'}</Td>
                             <Td>{p.sign}</Td>
@@ -66,7 +66,7 @@ const KPPlanetaryDetails: React.FC<KPPlanetaryDetailsProps> = ({ planets, houses
                         </tr>
                     ))}
                     <tr>
-                        <td colSpan={5} className="px-4 py-2 text-xs text-center bg-white/5 border-t border-white/10">
+                        <td colSpan={5} className="px-4 py-2 text-xs text-center bg-[#FFFFFF]/04 border-t border-[#FFFFFF]/08">
                             (R) = Retrograde, (C) = Combust
                         </td>
                     </tr>
@@ -87,7 +87,7 @@ const KPPlanetaryDetails: React.FC<KPPlanetaryDetailsProps> = ({ planets, houses
                 </thead>
                 <tbody>
                     {planets.map((p) => (
-                        <tr key={p.planet} className="hover:bg-white/5">
+                        <tr key={p.planet} className="hover:bg-[#FFFFFF]/06">
                             <Td isHeaderCol>{p.planet}</Td>
                             <Td>{p.avastha || '-'}</Td>
                             <Td>{p.nature || '-'}</Td>
@@ -110,7 +110,7 @@ const KPPlanetaryDetails: React.FC<KPPlanetaryDetailsProps> = ({ planets, houses
                 </thead>
                 <tbody>
                     {houses.map((h) => (
-                        <tr key={h.house} className="hover:bg-white/5">
+                        <tr key={h.house} className="hover:bg-[#FFFFFF]/06">
                             <Td isHeaderCol>House {h.house}</Td>
                             <Td>{h.sign}</Td>
                             <Td>{formatDMS(h.degree_in_sign)}</Td>

@@ -44,10 +44,10 @@ const DailyEnergyChart = ({ muhuratas }: DailyEnergyChartProps) => {
     };
 
     const colorMap: Record<string, string> = {
-        'Excellent': '#10b981', // emerald-500
-        'Good': '#3b82f6', // blue-500
-        'Poor': '#f59e0b', // amber-500
-        'Avoid': '#ef4444' // red-500
+        'Excellent': '#2ED573', // emerald-500
+        'Good': '#6D5DF6', // blue-500 -> secondary accent
+        'Poor': '#F5A623', // amber-500
+        'Avoid': '#E25555' // red-500
     };
 
     const getTimeSortValue = (time: string) => {
@@ -112,9 +112,9 @@ const DailyEnergyChart = ({ muhuratas }: DailyEnergyChartProps) => {
             const d = payload[0].payload;
             const pureName = d.name;
             return (
-                <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700 p-4 rounded-xl shadow-2xl z-50 min-w-[200px]">
+                <div className="bg-[#0B0F1A]/95 backdrop-blur-md border border-[#FFFFFF]/08 p-4 rounded-xl shadow-2xl z-50 min-w-[200px]">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-white font-bold text-lg">{pureName}</span>
+                        <span className="text-[#EDEFF5] font-bold text-lg">{pureName}</span>
                         <span
                             className="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
                             style={{ backgroundColor: `${colorMap[d.quality]}22`, color: colorMap[d.quality] }}
@@ -122,10 +122,10 @@ const DailyEnergyChart = ({ muhuratas }: DailyEnergyChartProps) => {
                             {d.quality}
                         </span>
                     </div>
-                    <p className="text-xs text-slate-400 mb-3 flex items-center gap-1">
+                    <p className="text-xs text-[#A9B0C2] mb-3 flex items-center gap-1">
                         <Clock className="w-3 h-3" /> {d.startTime} — {d.endTime}
                     </p>
-                    <p className="text-xs text-slate-300 leading-relaxed italic border-t border-slate-800 pt-2">
+                    <p className="text-xs text-[#6F768A] leading-relaxed italic border-t border-[#FFFFFF]/08 pt-2">
                         "{CHOGHADIYA_ADVICE[pureName] || 'Follow standard precautions.'}"
                     </p>
                 </div>
@@ -143,20 +143,20 @@ const DailyEnergyChart = ({ muhuratas }: DailyEnergyChartProps) => {
         <div className="p-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-indigo-400" />
+                    <div className="w-10 h-10 rounded-xl bg-[#6D5DF6]/10 border border-[#6D5DF6]/30 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-[#6D5DF6]" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-white tracking-tight">
+                        <h3 className="text-lg font-bold text-[#EDEFF5] tracking-tight">
                             Daily Energy Flow
                         </h3>
-                        <p className="text-xs text-slate-500">Choghadiya muhurta analysis for today</p>
+                        <p className="text-xs text-[#6F768A]">Choghadiya muhurta analysis for today</p>
                     </div>
                 </div>
-                <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 bg-slate-800/20 p-2 rounded-lg border border-slate-700/50">
-                    <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Excellent</span>
-                    <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Good</span>
-                    <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-amber-500"></div> Mixed</span>
+                <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-[#6F768A] bg-[#FFFFFF]/04 p-2 rounded-lg border border-[#FFFFFF]/08">
+                    <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#2ED573]"></div> Excellent</span>
+                    <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#6D5DF6]"></div> Good</span>
+                    <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#F5A623]"></div> Mixed</span>
                 </div>
             </div>
 
@@ -165,26 +165,26 @@ const DailyEnergyChart = ({ muhuratas }: DailyEnergyChartProps) => {
                     <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                             <linearGradient id="energyGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#6D5DF6" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#6D5DF6" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
                         <XAxis
                             dataKey="time"
                             type="number"
                             domain={[6, 30]}
                             tickFormatter={formatDecimalHour}
-                            stroke="#64748b"
+                            stroke="#6F768A"
                             fontSize={10}
                             interval={3}
                         />
                         <YAxis domain={[0, 3.5]} hide />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#475569', strokeWidth: 1 }} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#6F768A', strokeWidth: 1 }} />
                         <Area
                             type="stepAfter"
                             dataKey="score"
-                            stroke="#818cf8"
+                            stroke="#6D5DF6"
                             fill="url(#energyGradient)"
                             strokeWidth={3}
                             animationDuration={1500}
@@ -205,8 +205,8 @@ const DailyEnergyChart = ({ muhuratas }: DailyEnergyChartProps) => {
 
             {/* Highlights List */}
             <div className="mt-8">
-                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                    <span className="w-8 h-px bg-slate-700"></span>
+                <h4 className="text-[10px] font-bold text-[#6F768A] uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                    <span className="w-8 h-px bg-[#FFFFFF]/08"></span>
                     Power Windows Today
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -216,23 +216,23 @@ const DailyEnergyChart = ({ muhuratas }: DailyEnergyChartProps) => {
                         const timeHour = timeParts[0]?.split(':')[0] || '';
                         const timeMeridiem = timeParts[1] || '';
                         return (
-                            <div key={i} className="flex items-center gap-4 bg-slate-800/40 border border-slate-700/50 p-3 rounded-xl hover:bg-slate-800/60 transition-colors group">
-                                <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center border ${p.quality === 'Excellent' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
-                                    <span className={`text-xs font-bold ${p.quality === 'Excellent' ? 'text-emerald-400' : 'text-blue-400'}`}>
+                            <div key={i} className="flex items-center gap-4 bg-[#FFFFFF]/04 border border-[#FFFFFF]/08 p-3 rounded-xl hover:bg-[#FFFFFF]/06 transition-colors group">
+                                <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center border ${p.quality === 'Excellent' ? 'bg-[#2ED573]/10 border-[#2ED573]/30' : 'bg-[#6D5DF6]/10 border-[#6D5DF6]/30'}`}>
+                                    <span className={`text-xs font-bold ${p.quality === 'Excellent' ? 'text-[#2ED573]' : 'text-[#6D5DF6]'}`}>
                                         {timeHour}
                                     </span>
-                                    <span className="text-[8px] text-slate-500 opacity-60 font-medium">
+                                    <span className="text-[8px] text-[#6F768A] opacity-60 font-medium">
                                         {timeMeridiem}
                                     </span>
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between mb-0.5">
-                                        <span className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">{pureName}</span>
-                                        <span className={`text-[10px] font-bold ${p.quality === 'Excellent' ? 'text-emerald-500' : 'text-blue-500'}`}>
+                                        <span className="text-sm font-bold text-[#EDEFF5] group-hover:text-[#6D5DF6] transition-colors">{pureName}</span>
+                                        <span className={`text-[10px] font-bold ${p.quality === 'Excellent' ? 'text-[#2ED573]' : 'text-[#6D5DF6]'}`}>
                                             {p.quality}
                                         </span>
                                     </div>
-                                    <p className="text-[10px] text-slate-500 line-clamp-1">{CHOGHADIYA_ADVICE[pureName]}</p>
+                                    <p className="text-[10px] text-[#6F768A] line-clamp-1">{CHOGHADIYA_ADVICE[pureName]}</p>
                                 </div>
                             </div>
                         );

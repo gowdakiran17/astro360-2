@@ -145,7 +145,7 @@ const PeriodAnalysisPage = () => {
 
   return (
     <MainLayout title="Period Analysis" breadcrumbs={['Home', 'Period Analysis']}>
-      <div className="min-h-screen bg-[#0A0E1F] pb-20 p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-[#0B0F1A] pb-20 p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           <PeriodDashboardLayout
             data={dashboardData}

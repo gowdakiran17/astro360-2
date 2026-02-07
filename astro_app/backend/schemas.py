@@ -9,11 +9,12 @@ class BirthDetails(BaseModel):
     timezone: str = Field(..., description="Timezone offset (+HH:MM or -HH:MM)", example="+08:00")
     latitude: float = Field(..., description="Latitude (-90 to 90)", example=35.65)
     longitude: float = Field(..., description="Longitude (-180 to 180)", example=139.83)
+    settings: Optional[Dict] = Field(None, description="Calculation settings (ayanamsa, house_system)", example={"ayanamsa": "LAHIRI", "house_system": "P"})
 
     @validator('date')
     def check_date(cls, v):
         if not validate_date(v):
-            raise ValueError('Invalid date format. Use DD/MM/YYYY')
+            raise ValueError('Invalid date format. Use DD/MM/YYYY or YYYY-MM-DD')
         return v
 
     @validator('time')
@@ -101,6 +102,14 @@ class TransitRequest(BaseModel):
     longitude: float
     location_name: Optional[str] = "Bengaluru, Karnataka, IN"
 
+class AdvancedTransitRequest(BaseModel):
+    birth_details: BirthDetails
+    transit_date: str = Field(..., description="Date in DD/MM/YYYY format")
+    transit_time: str = Field(..., description="Time in HH:MM format (24h)")
+    transit_timezone: str = Field(..., description="Timezone offset (+HH:MM or -HH:MM)")
+    transit_latitude: float
+    transit_longitude: float
+
 class PanchangRequest(BaseModel):
     date: str
     time: str
@@ -134,6 +143,7 @@ class MuhurataRequest(BaseModel):
 class MuhurtaSearchRequest(MuhurataRequest):
     end_date: str = Field(..., description="End date in DD/MM/YYYY format")
     target_quality: Optional[List[str]] = Field(["Excellent", "Good"], description="Quality levels to search")
+    activity: Optional[str] = Field("General", description="Activity type for specific Muhurta scoring")
 
 class IngressRequest(BaseModel):
     planet: str = Field(..., description="Planet name (e.g. Jupiter)")
@@ -166,6 +176,10 @@ class RectificationRequest(BaseModel):
     birth_details: BirthDetails
     gender: str = Field(..., description="male or female")
     events: Optional[List[LifeEvent]] = []
+
+class SolarReturnRequest(BaseModel):
+    birth_details: BirthDetails
+    target_year: int = Field(..., description="Target year for Solar Return chart", example=2024)
 
 class AIRequest(BaseModel):
     context: str = Field(..., description="Context of the report (e.g. 'period', 'dasha', 'general')")

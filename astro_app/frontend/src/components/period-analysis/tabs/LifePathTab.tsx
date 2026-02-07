@@ -59,20 +59,20 @@ const LifePathTab = ({ data: _overviewData }: LifePathTabProps) => {
         if (active && payload && payload.length) {
             const d = payload[0].payload;
             return (
-                <div className="bg-slate-900 border border-slate-700 p-4 rounded-lg shadow-xl z-50 max-w-xs">
-                    <p className="text-white font-bold text-lg mb-1">{d.year}</p>
+                <div className="bg-[#0B0F1A] border border-[#FFFFFF]/08 p-4 rounded-lg shadow-xl z-50 max-w-xs">
+                    <p className="text-[#EDEFF5] font-bold text-lg mb-1">{d.year}</p>
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-slate-400">Life Score:</span>
-                            <span className={`font-bold ${d.score > 60 ? 'text-emerald-400' : 'text-amber-400'}`}>{d.score}/100</span>
+                            <span className="text-[#A9B0C2]">Life Score:</span>
+                            <span className={`font-bold ${d.score > 60 ? 'text-[#2ED573]' : 'text-[#F5A623]'}`}>{d.score}/100</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-slate-400">Dasha Ruler:</span>
-                            <span className="text-indigo-300">{d.dasha}</span>
+                            <span className="text-[#A9B0C2]">Dasha Ruler:</span>
+                            <span className="text-[#6D5DF6]">{d.dasha}</span>
                         </div>
-                        <div className="pt-2 border-t border-slate-800 mt-2">
-                            <span className="text-xs text-slate-500 block mb-1">Key Transits</span>
-                            <span className="text-slate-300 text-xs italic">{d.transit}</span>
+                        <div className="pt-2 border-t border-[#FFFFFF]/10 mt-2">
+                            <span className="text-xs text-[#6F768A] block mb-1">Key Transits</span>
+                            <span className="text-[#A9B0C2] text-xs italic">{d.transit}</span>
                         </div>
                     </div>
                 </div>
@@ -84,28 +84,28 @@ const LifePathTab = ({ data: _overviewData }: LifePathTabProps) => {
     return (
         <div className="space-y-6">
             {/* Header Section */}
-            <div className="bg-gradient-to-r from-indigo-900/40 to-purple-900/40 p-8 rounded-2xl border border-indigo-500/30 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-[#6D5DF6]/20 to-[#11162A] p-8 rounded-2xl border border-[#6D5DF6]/30 relative overflow-hidden">
                 <div className="relative z-10">
-                    <h2 className="text-3xl font-bold text-white mb-2">Your Cosmic Narrative</h2>
-                    <p className="text-indigo-200 text-lg max-w-3xl">
-                        "You are entering a chapter of <span className="text-white font-bold">Resilient Growth</span>.
+                    <h2 className="text-3xl font-bold text-[#EDEFF5] mb-2">Your Cosmic Narrative</h2>
+                    <p className="text-[#A9B0C2] text-lg max-w-3xl">
+                        "You are entering a chapter of <span className="text-[#EDEFF5] font-bold">Resilient Growth</span>.
                         While Saturn demands discipline in 2028, the upcoming Mercury period in 2032 signals a major breakthrough."
                     </p>
                 </div>
                 {/* Background decoration */}
-                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-[#6D5DF6]/20 rounded-full blur-3xl"></div>
             </div>
 
             {/* Timeline Chart */}
-            <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+            <div className="bg-[#FFFFFF]/04 p-6 rounded-xl border border-[#FFFFFF]/08">
                 <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <GitCommit className="w-5 h-5 text-indigo-400" />
+                    <h3 className="text-xl font-bold text-[#EDEFF5] flex items-center gap-2">
+                        <GitCommit className="w-5 h-5 text-[#6D5DF6]" />
                         Pro Life Path (5-Year Trend)
                     </h3>
                     <div className="flex gap-4 text-xs font-medium">
-                        <span className="flex items-center gap-1 text-emerald-400"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Peak Performance</span>
-                        <span className="flex items-center gap-1 text-amber-400"><div className="w-2 h-2 rounded-full bg-amber-500"></div> Challenge / Growth</span>
+                        <span className="flex items-center gap-1 text-[#2ED573]"><div className="w-2 h-2 rounded-full bg-[#2ED573]"></div> Peak Performance</span>
+                        <span className="flex items-center gap-1 text-[#F5A623]"><div className="w-2 h-2 rounded-full bg-[#F5A623]"></div> Challenge / Growth</span>
                     </div>
                 </div>
 
@@ -117,15 +117,15 @@ const LifePathTab = ({ data: _overviewData }: LifePathTabProps) => {
                         >
                             <defs>
                                 <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset={off} stopColor="#10b981" stopOpacity={0.3} />
-                                    <stop offset={off} stopColor="#f59e0b" stopOpacity={0.3} />
+                                    <stop offset={off} stopColor="#2ED573" stopOpacity={0.3} />
+                                    <stop offset={off} stopColor="#F5A623" stopOpacity={0.3} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
                             <XAxis
                                 dataKey="year"
-                                stroke="#64748b"
-                                tick={{ fill: '#64748b' }}
+                                stroke="#6F768A"
+                                tick={{ fill: '#6F768A' }}
                                 axisLine={false}
                                 tickLine={false}
                             />
@@ -133,20 +133,20 @@ const LifePathTab = ({ data: _overviewData }: LifePathTabProps) => {
                                 domain={[0, 100]}
                                 hide
                             />
-                            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '5 5' }} />
+                            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#6D5DF6', strokeWidth: 1, strokeDasharray: '5 5' }} />
 
                             <Area
                                 type="monotone"
                                 dataKey="score"
-                                stroke="#818cf8"
+                                stroke="#6D5DF6"
                                 fill="url(#splitColor)"
                                 strokeWidth={3}
                                 animationDuration={1500}
                             />
 
                             {/* Event Markers (Mock) */}
-                            <ReferenceLine x="2028" stroke="#f43f5e" strokeDasharray="3 3" label={{ position: 'top', value: 'Saturn Return', fill: '#f43f5e', fontSize: 12 }} />
-                            <ReferenceLine x="2032" stroke="#10b981" strokeDasharray="3 3" label={{ position: 'top', value: 'Career Peak', fill: '#10b981', fontSize: 12 }} />
+                            <ReferenceLine x="2028" stroke="#E25555" strokeDasharray="3 3" label={{ position: 'top', value: 'Saturn Return', fill: '#E25555', fontSize: 12 }} />
+                            <ReferenceLine x="2032" stroke="#2ED573" strokeDasharray="3 3" label={{ position: 'top', value: 'Career Peak', fill: '#2ED573', fontSize: 12 }} />
 
                         </AreaChart>
                     </ResponsiveContainer>
@@ -160,15 +160,15 @@ const LifePathTab = ({ data: _overviewData }: LifePathTabProps) => {
                     { title: "Relationships", prob: "Medium", date: "Mid 2029", desc: "Stability returns after a period of fluctuation." },
                     { title: "Relocation", prob: "Low", date: "2030", desc: "Minor travel indicated, but permanent move unlikely." }
                 ].map((card, i) => (
-                    <div key={i} className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-indigo-500/50 transition-all group">
+                    <div key={i} className="bg-[#FFFFFF]/04 p-6 rounded-xl border border-[#FFFFFF]/08 hover:border-[#6D5DF6]/50 transition-all group">
                         <div className="flex justify-between items-start mb-4">
-                            <h4 className="font-bold text-slate-200">{card.title}</h4>
+                            <h4 className="font-bold text-[#EDEFF5]">{card.title}</h4>
                             <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase
-                                ${card.prob === 'High' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}
+                                ${card.prob === 'High' ? 'bg-[#2ED573]/20 text-[#2ED573]' : 'bg-[#FFFFFF]/10 text-[#A9B0C2]'}
                             `}>{card.prob} Probability</span>
                         </div>
-                        <p className="text-2xl font-bold text-white mb-1">{card.date}</p>
-                        <p className="text-sm text-slate-400">{card.desc}</p>
+                        <p className="text-2xl font-bold text-[#EDEFF5] mb-1">{card.date}</p>
+                        <p className="text-sm text-[#A9B0C2]">{card.desc}</p>
                     </div>
                 ))}
             </div>

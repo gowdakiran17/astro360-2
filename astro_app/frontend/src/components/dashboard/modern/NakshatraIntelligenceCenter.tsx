@@ -74,45 +74,45 @@ const NakshatraIntelligenceCenter: React.FC<NakshatraIntelligenceCenterProps> = 
   const lagnaData = NAKSHATRA_FULL_DATA[lagNak] || NAKSHATRA_FULL_DATA['Ashwini'];
 
   const NakshatraCard = ({ title, subTitle, nakshatra, sign, pada, data, icon: Icon, colorClass }: any) => (
-    <div className="bg-slate-950 rounded-xl border border-slate-800 p-5 hover:border-slate-700 transition-all">
+    <div className="bg-stone-950 rounded-xl border border-stone-800 p-5 hover:border-stone-700 transition-all">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-lg ${colorClass} bg-opacity-10`}>
             <Icon className={`w-5 h-5 ${colorClass.replace('bg-', 'text-')}`} />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">{title}</h4>
-            <p className="text-xs text-slate-500">{subTitle}</p>
+            <h4 className="text-sm font-semibold text-stone-300 uppercase tracking-wide">{title}</h4>
+            <p className="text-xs text-stone-500">{subTitle}</p>
           </div>
         </div>
-        <span className="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700">
+        <span className="px-2 py-1 rounded text-[10px] font-bold uppercase bg-stone-800 text-stone-400 border border-stone-700">
             Pada {pada}
         </span>
       </div>
       
       <div className="mb-4">
-        <h3 className="text-2xl font-bold text-slate-100 mb-1">{nakshatra}</h3>
-        <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">{sign}</p>
+        <h3 className="text-2xl font-bold text-stone-100 mb-1">{nakshatra}</h3>
+        <p className="text-sm font-medium text-stone-400 uppercase tracking-wider">{sign}</p>
       </div>
 
-      <p className="text-sm text-slate-400 leading-relaxed mb-4 min-h-[60px]">
+      <p className="text-sm text-stone-400 leading-relaxed mb-4 min-h-[60px]">
         {data.description}
       </p>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs border-t border-slate-800 pt-3">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs border-t border-stone-800 pt-3">
         <div>
-            <span className="text-slate-500 block mb-0.5">Deity</span>
-            <span className="text-slate-300 font-medium">{data.deity}</span>
+            <span className="text-stone-500 block mb-0.5">Deity</span>
+            <span className="text-stone-300 font-medium">{data.deity}</span>
         </div>
         <div>
-            <span className="text-slate-500 block mb-0.5">Symbol</span>
-            <span className="text-slate-300 font-medium">{data.symbol}</span>
+            <span className="text-stone-500 block mb-0.5">Symbol</span>
+            <span className="text-stone-300 font-medium">{data.symbol}</span>
         </div>
         <div className="col-span-2 mt-1">
-            <span className="text-slate-500 block mb-0.5">Key Themes</span>
+            <span className="text-stone-500 block mb-0.5">Key Themes</span>
             <div className="flex flex-wrap gap-1.5">
                 {data.keyThemes.map((theme: string, i: number) => (
-                    <span key={i} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                    <span key={i} className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-400 border border-stone-700">
                         {theme}
                     </span>
                 ))}
@@ -129,11 +129,11 @@ const NakshatraIntelligenceCenter: React.FC<NakshatraIntelligenceCenterProps> = 
             <div className="p-2 bg-purple-500/10 rounded-lg">
                 <Sparkles className="w-5 h-5 text-purple-400" />
             </div>
-            <h3 className="text-lg font-bold text-slate-200">Nakshatra Intelligence</h3>
+            <h3 className="text-lg font-bold text-stone-200">Nakshatra Intelligence</h3>
         </div>
         <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-slate-400 hover:text-slate-200 transition-colors"
+            className="text-stone-400 hover:text-stone-200 transition-colors"
         >
             {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
         </button>
@@ -149,7 +149,7 @@ const NakshatraIntelligenceCenter: React.FC<NakshatraIntelligenceCenterProps> = 
             pada={getPada(moon)}
             data={moonData}
             icon={Moon}
-            colorClass="bg-blue-500 text-blue-400"
+            colorClass="bg-amber-500 text-amber-400"
           />
           <NakshatraCard 
             title="Soul Purpose"

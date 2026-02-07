@@ -25,9 +25,9 @@ const KPPlanetTable: React.FC<KPPlanetTableProps> = ({ planets }) => {
     };
 
     return (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl">
-            <table className="w-full text-left text-sm text-slate-200">
-                <thead className="bg-white/10 text-xs font-bold uppercase text-white/50 tracking-wider">
+        <div className="overflow-x-auto rounded-xl border border-[#FFFFFF]/08 bg-[#FFFFFF]/04 backdrop-blur-md shadow-2xl">
+            <table className="w-full text-left text-sm text-[#A9B0C2]">
+                <thead className="bg-[#FFFFFF]/08 text-xs font-bold uppercase text-[#6F768A] tracking-wider">
                     <tr>
                         <th className="px-4 py-4">Planet</th>
                         <th className="px-4 py-4">Longitude</th>
@@ -38,16 +38,16 @@ const KPPlanetTable: React.FC<KPPlanetTableProps> = ({ planets }) => {
                         <th className="px-4 py-4">Sub-Sub Lord</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#FFFFFF]/04">
                     {planets.map((p) => (
-                        <tr key={p.planet} className="hover:bg-white/5 transition-colors">
-                            <td className="px-4 py-3.5 font-bold text-white">{p.planet}</td>
-                            <td className="px-4 py-3.5 font-mono text-white/70">{formatDegrees(p.degree_in_sign)}</td>
-                            <td className="px-4 py-3.5 text-white/90">{p.sign}</td>
-                            <td className="px-4 py-3.5 text-white/70">{p.nakshatra} <span className="text-white/40">({p.pada})</span></td>
-                            <td className="px-4 py-3.5 text-amber-400 font-medium">{p.star_lord}</td>
-                            <td className="px-4 py-3.5 text-indigo-400 font-medium">{p.sub_lord}</td>
-                            <td className="px-4 py-3.5 text-emerald-400 font-medium">{p.sub_sub_lord}</td>
+                        <tr key={p.planet} className="hover:bg-[#FFFFFF]/06 transition-colors">
+                            <td className="px-4 py-3.5 font-bold text-[#EDEFF5]">{p.planet}</td>
+                            <td className="px-4 py-3.5 font-mono text-[#A9B0C2]">{formatDegrees(p.degree_in_sign)}</td>
+                            <td className="px-4 py-3.5 text-[#EDEFF5]">{p.sign}</td>
+                            <td className="px-4 py-3.5 text-[#A9B0C2]">{p.nakshatra} <span className="text-[#6F768A]">({p.pada})</span></td>
+                            <td className="px-4 py-3.5 text-[#F5A623] font-medium">{p.star_lord}</td>
+                            <td className="px-4 py-3.5 text-[#6D5DF6] font-medium">{p.sub_lord}</td>
+                            <td className="px-4 py-3.5 text-[#2ED573] font-medium">{p.sub_sub_lord}</td>
                         </tr>
                     ))}
                 </tbody>

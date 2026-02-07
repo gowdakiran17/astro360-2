@@ -10,6 +10,7 @@ import MainLayout from './components/layout/MainLayout';
 import LoadingSpinner from './components/LoadingSpinner';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Hub from './pages/Hub';
 import MainDashboard from './pages/MainDashboard';
 import AstrologyHome from './pages/AstrologyHome';
@@ -24,7 +25,12 @@ import Shodashvarga from './pages/Shodashvarga';
 import AshtakvargaStrength from './pages/AshtakvargaStrength';
 import ShadbalaEnergy from './pages/ShadbalaEnergy';
 import VimshottariDasha from './pages/VimshottariDasha';
+import JaiminiDashboard from './pages/JaiminiDashboard';
+import SolarReturn from './pages/SolarReturn';
 import ShadowPlanets from './pages/ShadowPlanets';
+import NakshatraExplorer from './pages/NakshatraExplorer';
+import YogaAnalysis from './pages/YogaAnalysis';
+import TransitExplorer from './pages/TransitExplorer';
 import Transits from './pages/Transits';
 import LivePanchang from './pages/LivePanchang';
 import Muhurata from './pages/Muhurata';
@@ -105,6 +111,7 @@ function App() {
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
 
                 {/* Main App Routes */}
                 <Route path="/" element={<LandingPage />} />
@@ -261,7 +268,12 @@ function App() {
                 <Route path="/calculations/shadbala" element={<ProtectedRoute><ShadbalaEnergy /></ProtectedRoute>} />
 
                 <Route path="/calculations/vimshottari" element={<ProtectedRoute><VimshottariDasha /></ProtectedRoute>} />
+                <Route path="/calculations/jaimini" element={<ProtectedRoute><JaiminiDashboard /></ProtectedRoute>} />
+                <Route path="/calculations/solar-return" element={<ProtectedRoute><SolarReturn /></ProtectedRoute>} />
                 <Route path="/calculations/shadow-planets" element={<ProtectedRoute><ShadowPlanets /></ProtectedRoute>} />
+                <Route path="/calculations/nakshatra" element={<ProtectedRoute><NakshatraExplorer /></ProtectedRoute>} />
+                <Route path="/calculations/yogas" element={<ProtectedRoute><YogaAnalysis /></ProtectedRoute>} />
+                <Route path="/calculations/transits" element={<ProtectedRoute><TransitExplorer /></ProtectedRoute>} />
 
                 {/* Global Features */}
                 <Route path="/global/transits" element={<ProtectedRoute><Transits /></ProtectedRoute>} />

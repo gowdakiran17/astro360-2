@@ -6,10 +6,11 @@ import {
 } from 'lucide-react';
 import AIReportButton from '../components/ai/AIReportButton';
 import { useChartSettings } from '../context/ChartContext';
+// import { AnimatePresence, motion } from 'framer-motion';
 
 const ShadbalaEnergy = () => {
     // const navigate = useNavigate();
-    const { currentProfile } = useChartSettings();
+    const { currentProfile, settings } = useChartSettings();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [shadbalaData, setShadbalaData] = useState<any>(null);
@@ -20,7 +21,7 @@ const ShadbalaEnergy = () => {
         if (currentProfile) {
             fetchShadbala(currentProfile);
         }
-    }, [currentProfile]);
+    }, [currentProfile, settings]);
 
     const fetchShadbala = async (profile: any) => {
         setLoading(true);
@@ -33,7 +34,8 @@ const ShadbalaEnergy = () => {
                     time: profile.time,
                     timezone: profile.timezone,
                     latitude: profile.latitude,
-                    longitude: profile.longitude
+                    longitude: profile.longitude,
+                    settings: settings
                 }
             };
             const response = await api.post('chart/shadbala', payload);
@@ -371,7 +373,7 @@ const ShadbalaEnergy = () => {
                                             <div className="absolute left-0 bottom-[124px] text-[8px] font-bold text-slate-600 uppercase tracking-widest pl-4">Mean Requirement (8.0R)</div>
 
                                             {bhavaData.map((house: any) => {
-                                                const strength = house.strength || 0;
+                                                const strength = house.score || house.strength || 0;
                                                 const heightPct = Math.min((strength / 12) * 100, 100);
                                                 const isStrong = strength > 8;
                                                 return (

@@ -61,42 +61,42 @@ const DashaEnergyMeters: React.FC<DashaEnergyMetersProps> = ({ mahadasha, antard
     const blend = (key: keyof typeof mEnergy) => Math.round(mEnergy[key] * 0.7 + aEnergy[key] * 0.3);
 
     const metrics = [
-        { label: "Career & Status", value: blend('career'), icon: Briefcase, color: "text-amber-400", bar: "bg-amber-500" },
-        { label: "Wealth & Finance", value: blend('wealth'), icon: Coins, color: "text-yellow-400", bar: "bg-yellow-500" },
-        { label: "Business & Trade", value: blend('business'), icon: Building2, color: "text-blue-400", bar: "bg-blue-500" },
-        { label: "Love & Relations", value: blend('love'), icon: Heart, color: "text-pink-400", bar: "bg-pink-500" },
-        { label: "Health & Vitality", value: blend('health'), icon: Activity, color: "text-emerald-400", bar: "bg-emerald-500" },
-        { label: "Intellect & Learning", value: blend('intellect'), icon: Brain, color: "text-violet-400", bar: "bg-violet-500" },
-        { label: "Spirituality", value: blend('spirituality'), icon: Sparkles, color: "text-purple-300", bar: "bg-purple-500" },
+        { label: "Career & Status", value: blend('career'), icon: Briefcase, color: "text-[#F5A623]", bar: "bg-[#F5A623]" },
+        { label: "Wealth & Finance", value: blend('wealth'), icon: Coins, color: "text-[#F5A623]", bar: "bg-[#F5A623]" },
+        { label: "Business & Trade", value: blend('business'), icon: Building2, color: "text-[#6D5DF6]", bar: "bg-[#6D5DF6]" },
+        { label: "Love & Relations", value: blend('love'), icon: Heart, color: "text-[#E25555]", bar: "bg-[#E25555]" },
+        { label: "Health & Vitality", value: blend('health'), icon: Activity, color: "text-[#2ED573]", bar: "bg-[#2ED573]" },
+        { label: "Intellect & Learning", value: blend('intellect'), icon: Brain, color: "text-[#6D5DF6]", bar: "bg-[#6D5DF6]" },
+        { label: "Spirituality", value: blend('spirituality'), icon: Sparkles, color: "text-[#6F768A]", bar: "bg-[#6F768A]" },
     ];
 
     const getTrendIcon = (score: number) => {
-        if (score >= 70) return <TrendingUp className="w-3 h-3 text-emerald-400" />;
-        if (score <= 40) return <TrendingDown className="w-3 h-3 text-red-400" />;
-        return <Minus className="w-3 h-3 text-slate-400" />;
+        if (score >= 70) return <TrendingUp className="w-3 h-3 text-[#2ED573]" />;
+        if (score <= 40) return <TrendingDown className="w-3 h-3 text-[#E25555]" />;
+        return <Minus className="w-3 h-3 text-[#6F768A]" />;
     };
 
     return (
-        <div className="bg-[#0A0E1F]/50 backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 space-y-6">
-            <h3 className="text-lg font-black text-white flex items-center gap-2">
+        <div className="bg-[#11162A] border border-[#FFFFFF]/08 rounded-[2rem] p-6 space-y-6">
+            <h3 className="text-lg font-black text-[#EDEFF5] flex items-center gap-2">
                 Cosmic Energy Levels
-                <span className="px-2 py-0.5 rounded text-[10px] bg-white/5 text-slate-400 font-bold uppercase tracking-wider">Live</span>
+                <span className="px-2 py-0.5 rounded text-[10px] bg-[#FFFFFF]/05 text-[#6F768A] font-bold uppercase tracking-wider">Live</span>
             </h3>
 
             <div className="space-y-5">
                 {metrics.map((m, idx) => (
                     <div key={idx}>
                         <div className="flex justify-between items-center mb-2">
-                            <div className="flex items-center gap-2 text-slate-300 text-sm font-bold">
+                            <div className="flex items-center gap-2 text-[#A9B0C2] text-sm font-bold">
                                 <m.icon className={`w-4 h-4 ${m.color}`} />
                                 <span>{m.label}</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 {getTrendIcon(m.value)}
-                                <span className="text-white font-black">{m.value}%</span>
+                                <span className="text-[#EDEFF5] font-black">{m.value}%</span>
                             </div>
                         </div>
-                        <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-2 w-full bg-[#0B0F1A] rounded-full overflow-hidden">
                             <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${m.value}%` }}

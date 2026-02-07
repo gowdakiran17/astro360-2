@@ -20,7 +20,12 @@ const Muhurata = () => {
     const [mode, setMode] = useState<'Daily' | 'Finder'>('Daily');
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date(new Date().setDate(new Date().getDate() + 7)));
+    const [activity, setActivity] = useState('General');
     const [searchResults, setSearchResults] = useState<any[]>([]);
+
+    const activities = [
+        "General", "Marriage", "Travel", "Business", "Construction", "Education", "Medical"
+    ];
 
     // Default location (Bengaluru)
     const [location] = useState({
@@ -82,7 +87,8 @@ const Muhurata = () => {
                 end_date: endStr,
                 latitude: location.latitude,
                 longitude: location.longitude,
-                target_quality: ["Excellent", "Good"]
+                target_quality: ["Excellent", "Good"],
+                activity: activity
             });
             setSearchResults(result.results || []);
         } catch (err: any) {
@@ -207,6 +213,18 @@ const Muhurata = () => {
                                         onChange={(e) => setEndDate(new Date(e.target.value))}
                                         className="w-full px-4 py-2 bg-slate-950/50 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/50 font-bold text-slate-100 transition-all"
                                     />
+                                </div>
+                                <div className="space-y-2 flex-grow min-w-[150px]">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Activity</label>
+                                    <select
+                                        value={activity}
+                                        onChange={(e) => setActivity(e.target.value)}
+                                        className="w-full px-4 py-2 bg-slate-950/50 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/50 font-bold text-slate-100 transition-all appearance-none cursor-pointer"
+                                    >
+                                        {activities.map(act => (
+                                            <option key={act} value={act} className="bg-slate-900 text-white">{act}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <button
                                     onClick={searchMuhurata}

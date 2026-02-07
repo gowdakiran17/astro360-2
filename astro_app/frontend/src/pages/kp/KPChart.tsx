@@ -59,7 +59,7 @@ const KPChart: React.FC = () => {
     }, [fetchData]);
 
     if (isLoading) return <div className="h-96 flex items-center justify-center"><LoadingSpinner /></div>;
-    if (error) return <div className="p-8 text-center text-red-400 bg-red-900/20 rounded-xl border border-red-900/50 m-6">{error}</div>;
+    if (error) return <div className="p-8 text-center text-[#E25555] bg-[#E25555]/20 rounded-xl border border-[#E25555]/50 m-6">{error}</div>;
     if (!data) return null;
 
     // Transform data for the charts
@@ -109,10 +109,10 @@ const KPChart: React.FC = () => {
     };
 
     const renderChart = (chartData: any, title: string) => (
-        <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-colors" />
-            <h3 className="text-lg font-serif text-white mb-6 border-b border-white/10 pb-4 flex items-center gap-2 relative z-10">
-                <Star className="w-4 h-4 text-amber-400" />
+        <div className="bg-[#FFFFFF]/04 border border-[#FFFFFF]/08 rounded-2xl p-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#6D5DF6]/10 rounded-full blur-3xl group-hover:bg-[#6D5DF6]/20 transition-colors" />
+            <h3 className="text-lg font-serif text-[#EDEFF5] mb-6 border-b border-[#FFFFFF]/08 pb-4 flex items-center gap-2 relative z-10">
+                <Star className="w-4 h-4 text-[#F5A623]" />
                 {title}
             </h3>
             <div className="aspect-square w-full max-w-[400px] mx-auto relative z-10">
@@ -128,11 +128,11 @@ const KPChart: React.FC = () => {
     return (
         <div className="max-w-[1600px] mx-auto px-4 md:px-16 py-8 space-y-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/[0.03] p-8 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-amber-500 opacity-80" />
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#FFFFFF]/04 p-8 rounded-2xl border border-[#FFFFFF]/08 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#F5A623] via-[#F5A623]/80 to-[#F5A623]/50 opacity-80" />
                 <div className="relative z-10">
-                    <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">KP Birth Chart</h1>
-                    <p className="text-white/60">Complete analysis of planets and house cusps using the Krishnamurti Padhdhati system.</p>
+                    <h1 className="text-3xl font-bold text-[#EDEFF5] mb-2 tracking-tight">KP Birth Chart</h1>
+                    <p className="text-[#A9B0C2]/60">Complete analysis of planets and house cusps using the Krishnamurti Padhdhati system.</p>
                 </div>
             </div>
 
@@ -146,8 +146,8 @@ const KPChart: React.FC = () => {
             <div className="space-y-12">
                 {/* Planets */}
                 <section>
-                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <LayoutGrid className="w-5 h-5 text-indigo-400" />
+                    <h2 className="text-xl font-bold text-[#EDEFF5] mb-4 flex items-center gap-2">
+                        <LayoutGrid className="w-5 h-5 text-[#6D5DF6]" />
                         Planetary KP Details
                     </h2>
                     <KPPlanetTable planets={data.planets} />
@@ -155,8 +155,8 @@ const KPChart: React.FC = () => {
 
                 {/* House Cusps */}
                 <section>
-                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <Info className="w-5 h-5 text-emerald-400" />
+                    <h2 className="text-xl font-bold text-[#EDEFF5] mb-4 flex items-center gap-2">
+                        <Info className="w-5 h-5 text-[#2ED573]" />
                         House Cusp Details
                     </h2>
                     <KPHouseTable houses={data.house_cusps} />
@@ -184,8 +184,8 @@ const KPChart: React.FC = () => {
 
                 {/* Significators Tables */}
                 <section>
-                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <TableIcon className="w-5 h-5 text-amber-400" />
+                    <h2 className="text-xl font-bold text-[#EDEFF5] mb-4 flex items-center gap-2">
+                        <TableIcon className="w-5 h-5 text-[#F5A623]" />
                         KP Significators
                     </h2>
                     <KPSignificatorsTable significators={data.significators} />

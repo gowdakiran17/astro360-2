@@ -1,39 +1,39 @@
 /* Mobile-First Design System */
 :root {
-  /* Colors - Professional SaaS Palette */
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-light: #e0e7ff;
+  /* Colors - Cosmic Dark Palette */
+  --color-primary: #F5A623;
+  --color-primary-hover: #D98E15;
+  --color-primary-light: #FCEBC6;
   
-  --color-secondary: #8b5cf6;
-  --color-secondary-hover: #7c3aed;
-  --color-secondary-light: #ede9fe;
+  --color-secondary: #6D5DF6;
+  --color-secondary-hover: #5B4BC4;
+  --color-secondary-light: #E0DBFD;
   
-  --color-accent: #f59e0b;
-  --color-accent-hover: #d97706;
-  --color-accent-light: #fef3c7;
+  --color-accent: #F5A623;
+  --color-accent-hover: #D98E15;
+  --color-accent-light: #FCEBC6;
   
-  --color-success: #10b981;
-  --color-success-light: #d1fae5;
+  --color-success: #2ED573;
+  --color-success-light: #A3EBC0;
   
-  --color-warning: #f59e0b;
-  --color-warning-light: #fef3c7;
+  --color-warning: #E25555;
+  --color-warning-light: #F6BDBD;
   
-  --color-error: #ef4444;
-  --color-error-light: #fee2e2;
+  --color-error: #E25555;
+  --color-error-light: #F6BDBD;
   
   /* Neutral Colors */
-  --color-white: #ffffff;
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
+  --color-white: #EDEFF5;
+  --color-slate-50: #0B0F1A;
+  --color-slate-100: #11162A;
+  --color-slate-200: #1A2138;
+  --color-slate-300: #2D3748;
+  --color-slate-400: #6F768A;
+  --color-slate-500: #A9B0C2;
+  --color-slate-600: #CBD5E0;
+  --color-slate-700: #EDEFF5;
+  --color-slate-800: #F7FAFC;
+  --color-slate-900: #FFFFFF;
   
   /* Typography */
   --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
@@ -180,14 +180,17 @@ body {
 
 /* Card Styles */
 .card {
-  background: var(--color-white);
-  border: 1px solid var(--color-slate-200);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
+  backdrop-filter: blur(12px);
 }
 
 .card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
@@ -203,7 +206,7 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-lg);
-  font-weight: 500;
+  font-weight: 600;
   transition: all var(--transition-fast);
   cursor: pointer;
   border: none;
@@ -214,23 +217,23 @@ body {
 }
 
 .btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-white);
+  background-color: #F5A623;
+  color: #0B0F1A;
 }
 
 .btn-primary:hover {
-  background-color: var(--color-primary-hover);
+  background-color: #D98E15;
 }
 
 .btn-secondary {
-  background-color: var(--color-white);
-  color: var(--color-slate-700);
-  border: 1px solid var(--color-slate-300);
+  background-color: rgba(255,255,255,0.04);
+  color: #EDEFF5;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-slate-50);
-  border-color: var(--color-slate-400);
+  background-color: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
 }
 
 /* Responsive Utilities */
@@ -265,16 +268,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-slate-100);
+  background: #0B0F1A;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-slate-300);
+  background: #1A2138;
   border-radius: var(--radius);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-slate-400);
+  background: #2D3748;
 }
 
 /* Focus Styles */

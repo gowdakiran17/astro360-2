@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
-import { Lock, Mail, Sparkles, ChevronRight, Globe, Shield } from 'lucide-react';
+import { Lock, Mail, ChevronRight, Eye, EyeOff, Sparkles, Star } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 
-// Creative Assets
-import zodiacWheel from '../assets/astrology/zodiac_wheel.png';
-import celestialElements from '../assets/astrology/celestial_elements.png';
-
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -31,6 +28,7 @@ const Register = () => {
     try {
       await api.post('auth/register', { email, password });
       // After registration, redirect to login or automatically log them in
+      // For better UX, we can try to auto-login or just redirect
       navigate('/login');
     } catch (err: any) {
       if (err.response) {
@@ -56,220 +54,175 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#02040A]">
-      {/* --- PREMIUM CELESTIAL BACKGROUND --- */}
-      <div className="absolute inset-0 z-0">
-        {/* Deep Space Gradient */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#0B0E25_0%,#02040A_100%)]" />
-
-        {/* Subtle Rotating Zodiac Wheel */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] opacity-[0.02] pointer-events-none"
-          style={{
-            backgroundImage: `url(${zodiacWheel})`,
-            backgroundSize: 'contain',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            filter: 'blur(3px)'
-          }}
-        />
-
-        {/* Floating Creative Asset (Registration Special) */}
-        <motion.div
-          animate={{
-            y: [0, -30, 0],
-            rotate: [0, 10, 0],
-            scale: [1, 1.05, 1]
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -right-40 -top-20 w-[600px] h-[600px] opacity-[0.15] pointer-events-none blur-sm"
-          style={{
-            backgroundImage: `url(${celestialElements})`,
-            backgroundSize: 'contain',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }}
-        />
-
-        {/* Animated Nebulae */}
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-indigo-500/10 blur-[150px] rounded-full"
-        />
-        <motion.div
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-40 -right-40 w-[800px] h-[800px] bg-purple-500/10 blur-[150px] rounded-full"
-        />
-
-        {/* Twinkling Stars */}
-        <div className="absolute inset-0 overflow-hidden" style={{ opacity: 0.5 }}>
-          {Array.from({ length: 120 }).map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: Math.random() }}
-              animate={{ opacity: [0.1, 1, 0.1] }}
-              transition={{
-                duration: 3 + Math.random() * 5,
-                repeat: Infinity,
-                delay: Math.random() * 5
-              }}
-              className="absolute bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-              style={{
-                width: Math.random() * 1.5 + 'px',
-                height: Math.random() * 1.5 + 'px',
-                left: Math.random() * 100 + '%',
-                top: Math.random() * 100 + '%',
-              }}
-            />
-          ))}
+    <div className="min-h-screen flex items-center justify-center bg-[#0C0A09] relative overflow-hidden px-4 font-sans">
+      
+      {/* --- BACKGROUND ATMOSPHERE --- */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* Soft Warm Radial Glow */}
+        <div className="absolute top-[-20%] left-[50%] -translate-x-1/2 w-[800px] h-[800px] bg-[radial-gradient(circle,rgba(251,191,36,0.08)_0%,transparent_70%)] blur-3xl" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(220,38,38,0.05)_0%,transparent_70%)] blur-3xl" />
+        
+        {/* Subtle Star Dust / Grain */}
+        <div className="absolute inset-0 opacity-[0.07]" style={{ filter: 'url(#noise)' }} />
+        
+        {/* Abstract Constellation Hints */}
+        <div className="absolute top-20 left-10 opacity-20 animate-pulse" style={{ animationDuration: '5s' }}>
+          <Star className="w-2 h-2 text-amber-200" />
+        </div>
+        <div className="absolute bottom-40 right-20 opacity-10 animate-pulse" style={{ animationDuration: '7s' }}>
+          <Star className="w-3 h-3 text-amber-100" />
         </div>
       </div>
 
-      {/* --- REGISTRATION CONTENT --- */}
-      <motion.div
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className="relative z-10 w-full max-w-md px-6"
+      {/* --- MAIN CARD --- */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full max-w-[420px] bg-[#FAFAF9] rounded-3xl shadow-2xl shadow-black/50 relative z-10 overflow-hidden"
       >
-        {/* Brand Header */}
-        <div className="text-center mb-10 group">
-          <Link to="/login" className="inline-flex flex-col items-center">
-            <motion.div
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 1 }}
-              className="relative mb-4"
-            >
-              <div className="absolute inset-0 bg-amber-500/40 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-16 h-16 bg-gradient-to-tr from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center border border-white/20 relative z-10 shadow-2xl">
-                <Sparkles className="w-8 h-8 text-[#02040A]" />
+        <div className="p-8 md:p-10">
+          
+          {/* HEADER */}
+          <div className="text-center mb-8">
+            <div className="relative inline-flex items-center justify-center mb-6">
+              <div className="absolute inset-0 bg-amber-400/20 blur-xl rounded-full" />
+              <div className="relative w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20 -rotate-3">
+                <Sparkles className="w-7 h-7 text-white" />
               </div>
-            </motion.div>
-            <h1 className="flex flex-col items-center">
-              <span className="text-[14px] font-black tracking-[0.5em] text-amber-500 uppercase leading-none mb-2 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">Bhava</span>
-              <span className="text-5xl font-black tracking-tighter text-white uppercase leading-none drop-shadow-2xl">360</span>
-            </h1>
-            <p className="mt-4 text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Your Astrology Hub</p>
-          </Link>
-        </div>
-
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-lg">
-            <div>
-              <div className="mb-8">
-                <h2 className="text-xl font-bold text-white mb-1">Begin Your Journey</h2>
-                <p className="text-white/30 text-xs">Unlock personalized insights from the stars.</p>
-              </div>
-
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-200 text-sm"
-                >
-                  <div className="w-2 h-2 rounded-full bg-rose-500" />
-                  {error}
-                </motion.div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-amber-500/80 ml-1">Email Address</label>
-                  <div className="relative group/input">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                      <Mail className="h-5 w-5 text-slate-400 group-focus-within/input:text-blue-400 transition-colors" />
-                    </div>
-                    <input
-                      className="w-full h-14 bg-slate-900 border border-slate-800 rounded-2xl pl-12 pr-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/40 transition-all font-medium text-sm"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-amber-500/80 ml-1">Secure Password</label>
-                  <div className="relative group/input">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                      <Lock className="h-5 w-5 text-slate-400 group-focus-within/input:text-blue-400 transition-colors" />
-                    </div>
-                    <input
-                      className="w-full h-14 bg-slate-900 border border-slate-800 rounded-2xl pl-12 pr-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/40 transition-all font-medium text-sm"
-                      type="password"
-                      placeholder="Create a password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full h-14 bg-gradient-to-tr from-amber-500 to-orange-600 text-[#02040A] font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-[0_10px_30px_rgba(245,158,11,0.2)] hover:shadow-[0_15px_40px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-3 mt-8"
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      Create Account
-                      <ChevronRight className="w-4 h-4" />
-                    </>
-                  )}
-                </motion.button>
-              </form>
-
-              {isGoogleEnabled ? (
-                <>
-                  <div className="relative my-8">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/5"></div>
-                    </div>
-                    <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
-                      <span className="px-4 bg-transparent text-white/20">Or sign up with</span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center group/google">
-                    <div className="relative p-[1px] rounded-xl bg-gradient-to-tr from-white/10 to-transparent group-hover/google:from-amber-500/50 transition-all duration-500">
-                      <GoogleLogin
-                        onSuccess={handleGoogleSuccess}
-                        onError={() => setError('Google sign up failed.')}
-                        theme="filled_black"
-                        shape="pill"
-                        width="100%"
-                        text="signup_with"
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="mt-6 text-center text-[10px] font-black uppercase tracking-widest text-white/30">
-                  Google sign-up unavailable. Set VITE_GOOGLE_CLIENT_ID.
-                </div>
-              )}
-
-              <p className="mt-10 text-center text-[10px] font-black uppercase tracking-widest text-white/30">
-                Already registered? <Link to="/login" className="text-amber-500 hover:text-white transition-colors ml-1 underline underline-offset-4">Sign In Now</Link>
-              </p>
             </div>
-        </div>
+            
+            <h1 className="text-2xl font-bold text-stone-900 mb-2">Create Account</h1>
+            <p className="text-stone-500 text-sm font-medium leading-relaxed">
+              Start your astrological journey today
+            </p>
+          </div>
 
-        {/* Footer info */}
-        <div className="mt-8 flex justify-center gap-6 text-[9px] font-black uppercase tracking-[0.2em] text-white/20">
-          <a href="#" className="hover:text-amber-500 transition-colors flex items-center gap-1.5"><Globe className="w-3 h-3" /> Status</a>
-          <a href="#" className="hover:text-amber-500 transition-colors flex items-center gap-1.5"><Shield className="w-3 h-3" /> Privacy Policy</a>
+          {/* ERROR STATE */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mb-6 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-600 text-sm font-medium"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+              {error}
+            </motion.div>
+          )}
+
+          {/* FORM */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-stone-700 uppercase tracking-wide ml-1">Email Address</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-stone-400 group-focus-within:text-amber-500 transition-colors" />
+                </div>
+                <input
+                  className="w-full h-12 bg-white border border-stone-200 rounded-xl pl-11 pr-4 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-stone-700 uppercase tracking-wide ml-1">Password</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-stone-400 group-focus-within:text-amber-500 transition-colors" />
+                </div>
+                <input
+                  className="w-full h-12 bg-white border border-stone-200 rounded-xl pl-11 pr-12 text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 inset-y-0 pr-4 flex items-center text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={isSubmitting}
+              className="w-full h-12 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold tracking-wide rounded-xl shadow-lg shadow-red-600/20 transition-all flex items-center justify-center gap-2 text-sm mt-2"
+              type="submit"
+            >
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  Create Account <ChevronRight className="w-4 h-4" />
+                </>
+              )}
+            </motion.button>
+          </form>
+
+          {/* DIVIDER */}
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-stone-200"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-3 bg-[#FAFAF9] text-stone-400 text-xs font-medium uppercase">Or sign up with</span>
+            </div>
+          </div>
+
+          {/* SOCIAL LOGIN */}
+          <div className="space-y-3">
+            {isGoogleEnabled ? (
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError('Google sign up failed.')}
+                  theme="outline"
+                  shape="pill"
+                  width="100%"
+                  text="signup_with"
+                  size="large"
+                />
+              </div>
+            ) : (
+              <button disabled className="w-full h-11 border border-stone-200 bg-white text-stone-400 rounded-full flex items-center justify-center gap-2 text-sm font-medium cursor-not-allowed opacity-60">
+                <span className="w-4 h-4 rounded-full bg-stone-300" /> Google Sign Up Unavailable
+              </button>
+            )}
+          </div>
+
+          {/* FOOTER */}
+          <p className="mt-8 text-center text-stone-500 text-sm">
+            Already have an account?{' '}
+            <Link to="/login" className="text-amber-600 hover:text-amber-700 font-bold transition-colors">
+              Sign In
+            </Link>
+          </p>
+
         </div>
+        
+        {/* Bottom Decorative Line */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-red-500 to-amber-500" />
       </motion.div>
+
+      {/* SVG Filters for Texture */}
+      <svg className="hidden">
+        <filter id="noise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+        </filter>
+      </svg>
+
     </div>
   );
 };

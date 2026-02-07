@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 interface CreateChartModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onChartCreated?: () => void;
+  onChartCreated?: (chart?: any) => void;
 }
 
 const months = [
@@ -100,7 +100,7 @@ const CreateChartModal = ({ isOpen, onClose, onChartCreated }: CreateChartModalP
       };
 
       if (onChartCreated) {
-        onChartCreated();
+        onChartCreated(homePayload);
       }
 
       onClose();

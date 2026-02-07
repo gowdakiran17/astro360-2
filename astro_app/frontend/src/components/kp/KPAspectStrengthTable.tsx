@@ -28,41 +28,41 @@ const KPAspectStrengthTable: React.FC<KPAspectStrengthTableProps> = ({ data }) =
     });
 
     return (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl">
-            <div className="bg-amber-500/20 px-6 py-4 border-b border-white/10">
-                <h3 className="text-lg font-bold text-amber-200 text-center">
+        <div className="overflow-x-auto rounded-xl border border-[#FFFFFF]/08 bg-[#FFFFFF]/04 backdrop-blur-md shadow-2xl">
+            <div className="bg-[#F5A623]/20 px-6 py-4 border-b border-[#FFFFFF]/08">
+                <h3 className="text-lg font-bold text-[#F5A623] text-center">
                     Strength of planets on various aspects (KP Analysis)
                 </h3>
             </div>
-            <table className="w-full text-center text-sm text-slate-200">
-                <thead className="bg-white/10 text-xs font-bold uppercase text-white/70 tracking-wider">
+            <table className="w-full text-center text-sm text-[#A9B0C2]">
+                <thead className="bg-[#FFFFFF]/08 text-xs font-bold uppercase text-[#A9B0C2] tracking-wider">
                     <tr>
-                        <th className="px-4 py-4 text-left bg-[#523A1E] text-amber-100/90 border-r border-white/5">Planet</th>
-                        <th className="px-4 py-4 bg-[#52441E] text-amber-100/90 border-r border-white/5">Intelligence</th>
-                        <th className="px-4 py-4 bg-[#52441E] text-green-100/90 border-r border-white/5">Efficiency</th>
-                        <th className="px-4 py-4 bg-[#52441E] text-pink-100/90 border-r border-white/5">Love/Family</th>
-                        <th className="px-4 py-4 bg-[#52441E] text-red-100/90 border-r border-white/5">Health</th>
-                        <th className="px-4 py-4 bg-[#52441E] text-blue-100/90 border-r border-white/5">Social Life</th>
-                        <th className="px-4 py-4 bg-[#52441E] text-purple-100/90 border-r border-white/5">Career</th>
-                        <th className="px-4 py-4 bg-[#52441E] text-emerald-100/90">Finance</th>
+                        <th className="px-4 py-4 text-left bg-[#F5A623]/10 text-[#EDEFF5] border-r border-[#FFFFFF]/04">Planet</th>
+                        <th className="px-4 py-4 bg-[#F5A623]/10 text-[#EDEFF5] border-r border-[#FFFFFF]/04">Intelligence</th>
+                        <th className="px-4 py-4 bg-[#F5A623]/10 text-[#2ED573] border-r border-[#FFFFFF]/04">Efficiency</th>
+                        <th className="px-4 py-4 bg-[#F5A623]/10 text-[#6D5DF6] border-r border-[#FFFFFF]/04">Love/Family</th>
+                        <th className="px-4 py-4 bg-[#F5A623]/10 text-[#E25555] border-r border-[#FFFFFF]/04">Health</th>
+                        <th className="px-4 py-4 bg-[#F5A623]/10 text-[#6D5DF6] border-r border-[#FFFFFF]/04">Social Life</th>
+                        <th className="px-4 py-4 bg-[#F5A623]/10 text-[#6D5DF6] border-r border-[#FFFFFF]/04">Career</th>
+                        <th className="px-4 py-4 bg-[#F5A623]/10 text-[#2ED573]">Finance</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#FFFFFF]/04">
                     {planets.map((planet) => (
-                        <tr key={planet} className="hover:bg-white/5 transition-colors">
-                            <td className="px-4 py-3.5 font-bold text-white text-left border-r border-white/5 bg-white/5">{planet}</td>
+                        <tr key={planet} className="hover:bg-[#FFFFFF]/06 transition-colors">
+                            <td className="px-4 py-3.5 font-bold text-[#EDEFF5] text-left border-r border-[#FFFFFF]/04 bg-[#FFFFFF]/04">{planet}</td>
                             {aspects.map(aspect => (
-                                <td key={aspect} className="px-2 py-3.5 border-r border-white/5 font-mono">
+                                <td key={aspect} className="px-2 py-3.5 border-r border-[#FFFFFF]/04 font-mono">
                                     {data[planet]?.[aspect] ?? '-'}
                                 </td>
                             ))}
                         </tr>
                     ))}
                     {/* Total Score Row */}
-                    <tr className="bg-white/10 font-bold border-t-2 border-white/20">
-                        <td className="px-4 py-4 text-left text-amber-300">Total Score</td>
+                    <tr className="bg-[#FFFFFF]/08 font-bold border-t-2 border-[#FFFFFF]/10">
+                        <td className="px-4 py-4 text-left text-[#F5A623]">Total Score</td>
                         {aspects.map(aspect => (
-                            <td key={aspect} className={`px-2 py-4 font-mono ${columnTotals[aspect] > 0 ? 'text-green-400' : 'text-slate-300'}`}>
+                            <td key={aspect} className={`px-2 py-4 font-mono ${columnTotals[aspect] > 0 ? 'text-[#2ED573]' : 'text-[#A9B0C2]'}`}>
                                 {columnTotals[aspect]}
                             </td>
                         ))}

@@ -155,27 +155,25 @@ def get_nakshatra_idx_and_fraction(jd_ut: float) -> tuple:
 
 def validate_date(date_str: str) -> bool:
     """
-    Validates date string format DD/MM/YYYY.
+    Validates date string format DD/MM/YYYY or YYYY-MM-DD.
     """
+    # Try DD/MM/YYYY
     try:
         datetime.strptime(date_str, "%d/%m/%Y")
+        return True
+    except ValueError:
+        pass
+        
+    # Try YYYY-MM-DD
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
         return True
     except ValueError:
         return False
 
 def validate_time(time_str: str) -> bool:
-    """
-    Validates time string format HH:MM or HH:MM:SS (24-hour).
-    """
-    try:
-        datetime.strptime(time_str, "%H:%M")
-        return True
-    except ValueError:
-        try:
-            datetime.strptime(time_str, "%H:%M:%S")
-            return True
-        except ValueError:
-            return False
+    """Validates HH:MM or HH:MM:SS format."""
+    return bool(re.match(r"^\d{2}:\d{2}(:\d{2})?$", time_str))
 
 def validate_timezone(timezone_str: str) -> bool:
     """
@@ -284,7 +282,17 @@ def get_julian_day(date_str: str, time_str: str, timezone_str: str) -> float:
     Supports offset strings (+HH:MM) and named timezones (Asia/Kolkata).
     """
     try:
-        dt = datetime.strptime(f"{date_str} {time_str}", "%d/%m/%Y %H:%M")
+        try:
+            dt = datetime.strptime(f"{date_str} {time_str}", "%d/%m/%Y %H:%M")
+        except ValueError:
+            try:
+                dt = datetime.strptime(f"{date_str} {time_str}", "%d/%m/%Y %H:%M:%S")
+            except ValueError:
+                try:
+                    dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+                except ValueError:
+                    dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S")
+            
         tz_offset = parse_timezone(timezone_str, dt)
         
         # Convert local time to UTC
@@ -480,3 +488,14 @@ def calculate_maitri(planets_data: list) -> dict:
         "tatkaala": tatkaala,
         "panchadha": panchadha
     }
+
+def get_sign_index(sign_name: str) -> int:
+    """Returns the 0-based index of a zodiac sign."""
+    try:
+        return ZODIAC_SIGNS.index(sign_name)
+    except ValueError:
+        return 0
+
+def get_house_lord(sign_name: str) -> str:
+    """Returns the planet lord of a zodiac sign."""
+    return ZODIAC_LORDS.get(sign_name, "Unknown")

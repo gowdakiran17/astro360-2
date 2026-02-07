@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import CelestialNavbar from './CelestialNavbar';
+import BottomTabBar from './BottomTabBar';
+import FloatingProfileSwitcher from './FloatingProfileSwitcher';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -19,10 +21,10 @@ const MainLayout = ({ children, title, showHeader = true, disableContentPadding 
     }
   }, [title]);
 
-  const bgClass = 'bg-[#050816]';
+  const bgClass = 'bg-[#0B0F1A]';
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${bgClass} selection:bg-amber-500/30`}>
+    <div className={`min-h-screen transition-colors duration-300 ${bgClass} selection:bg-amber-500/30 text-[#EDEFF5]`}>
       <div className="flex flex-col min-h-screen transition-all duration-300 relative overflow-hidden">
         {/* Sky Background Overlays */}
         <div className="fixed inset-0 pointer-events-none opacity-40">
@@ -31,9 +33,15 @@ const MainLayout = ({ children, title, showHeader = true, disableContentPadding 
         </div>
 
         {/* --- PREMIUM CELESTIAL NAVBAR --- */}
-        {showHeader && <CelestialNavbar />}
+        {showHeader && (
+          <>
+            <CelestialNavbar />
+            <BottomTabBar />
+            <FloatingProfileSwitcher />
+          </>
+        )}
 
-        <main className={`flex-1 relative z-10 ${disableContentPadding ? '' : 'p-6 md:p-12'} text-white pb-32 pt-20 md:pt-32`} >
+        <main className={`flex-1 relative z-10 ${disableContentPadding ? '' : 'p-6 md:p-12'} text-white pb-24 md:pb-32 pt-16 md:pt-32`} >
           {children}
         </main>
       </div>

@@ -5,13 +5,15 @@ from datetime import datetime, timedelta
 from astro_app.backend.schemas import (
     BirthDetails, DashaRequest, DivisionalRequest, PeriodRequest,
     ShodashvargaRequest, AshtakvargaRequest, ShadbalaRequest, ShadowPlanetsRequest,
-    TransitRequest, AnalysisRequest, LifeTimelineRequest, PredictionRequest, LifePredictorRequest,
-    StrengthRequest, KPRequest, MatchRequest, MuhurataRequest, HoraryRequest, RectificationRequest
+    TransitRequest, AdvancedTransitRequest, AnalysisRequest, LifeTimelineRequest, PredictionRequest, LifePredictorRequest,
+    StrengthRequest, KPRequest, MatchRequest, MuhurataRequest, HoraryRequest, RectificationRequest,
+    SolarReturnRequest
 )
 from astro_app.backend.auth.router import get_current_user
 from astro_app.backend.models import User
 from astro_app.backend.monetization.access_control import verify_user_access, Feature
 from astro_app.backend.astrology.chart import calculate_chart
+from astro_app.backend.astrology.solar_return import calculate_solar_return
 from astro_app.backend.astrology.dasha import calculate_vimshottari_dasha
 from astro_app.backend.astrology.divisional import calculate_divisional_charts
 from astro_app.backend.astrology.period_analysis import get_full_period_analysis
@@ -20,18 +22,86 @@ from astro_app.backend.astrology.varga_service import get_all_shodashvargas
 from astro_app.backend.astrology.ashtakvarga import calculate_ashtakvarga
 from astro_app.backend.astrology.shadbala import calculate_shadbala
 from astro_app.backend.astrology.basics import get_basic_details
-from astro_app.backend.astrology.shadow_planets import calculate_shadow_planets, get_julian_day
+from astro_app.backend.astrology.shadow_planets import get_shadow_planets as calculate_shadow_planets_logic
 from astro_app.backend.astrology.muhurata import get_muhurata_data
-from astro_app.backend.astrology.utils import get_nakshatra_pada, parse_timezone
+from astro_app.backend.astrology.utils import get_nakshatra_pada, parse_timezone, get_julian_day
 from astro_app.backend.astrology.synthesis import get_combined_analysis
 from astro_app.backend.astrology.period_analysis.life_predictor import LifePredictorEngine
 from astro_app.backend.astrology.panchang import calculate_panchang
+from astro_app.backend.astrology.dosha import DoshaEngine
+from astro_app.backend.astrology.aspects import AspectEngine
+from astro_app.backend.astrology.avkahada import AvkahadaEngine
 import swisseph as swe
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+@router.post("/aspects")
+async def get_aspects(details: BirthDetails, current_user: User = Depends(get_current_user)):
+    """
+    Calculate Planetary Aspects (Western & Vedic).
+    """
+    verify_user_access(current_user, Feature.BASIC_CHART)
+    chart = calculate_chart(details.date, details.time, details.timezone, details.latitude, details.longitude)
+    
+    western = AspectEngine.calculate_western_aspects(chart["planets"])
+    vedic = AspectEngine.calculate_vedic_aspects(chart["planets"], chart["houses"])
+    
+    return {
+        "western_aspects": western,
+        "vedic_aspects": vedic
+    }
+
+@router.post("/avkahada")
+async def get_avkahada(details: BirthDetails, current_user: User = Depends(get_current_user)):
+    """
+    Calculate Avkahada Chakra details.
+    """
+    verify_user_access(current_user, Feature.BASIC_CHART)
+    chart = calculate_chart(details.date, details.time, details.timezone, details.latitude, details.longitude)
+    
+    # Find Moon
+    moon = next((p for p in chart["planets"] if p["name"] == "Moon"), None)
+    if not moon:
+        raise HTTPException(status_code=500, detail="Moon position could not be calculated")
+        
+    # Get Nakshatra Pada (Charan) - Usually 1-4 based on degree in Nakshatra
+    # Degree in Nakshatra (0-13.33)
+    # 0-3.33 = 1, 3.33-6.66 = 2, 6.66-10 = 3, 10-13.33 = 4
+    nak_deg = moon["longitude"] % (360/27)
+    pada = int(nak_deg / (360/27/4)) + 1
+    
+    avkahada = AvkahadaEngine.calculate_avkahada(moon["zodiac_sign"], moon["nakshatra"], pada)
+    
+    return avkahada
+
+@router.post("/dosha")
+async def check_doshas(details: BirthDetails, current_user: User = Depends(get_current_user)):
+    """
+    Check for Doshas (Manglik, Kaal Sarp, Pitra).
+    """
+    verify_user_access(current_user, Feature.BASIC_CHART)
+    
+    # Calculate Chart (use defaults)
+    chart = calculate_chart(
+        details.date, details.time, details.timezone,
+        details.latitude, details.longitude
+    )
+    
+    planets = chart["planets"]
+    ascendant = chart["ascendant"]
+    
+    manglik = DoshaEngine.check_manglik_dosha(planets, ascendant)
+    kaal_sarp = DoshaEngine.check_kaal_sarp_dosha(planets)
+    pitra = DoshaEngine.check_pitra_dosha(planets)
+    
+    return {
+        "manglik": manglik,
+        "kaal_sarp": kaal_sarp,
+        "pitra": pitra
+    }
 
 @router.post("/birth")
 async def get_birth_chart(details: BirthDetails, current_user: User = Depends(get_current_user)):
@@ -40,12 +110,41 @@ async def get_birth_chart(details: BirthDetails, current_user: User = Depends(ge
     """
     verify_user_access(current_user, Feature.BASIC_CHART)
     try:
+        # Extract Settings
+        settings = details.settings or {}
+        ayanamsa_str = settings.get("ayanamsa", "LAHIRI").upper()
+        house_system_str = settings.get("house_system", "P")
+        
+        # Map Ayanamsa
+        ayanamsa_map = {
+            "LAHIRI": swe.SIDM_LAHIRI,
+            "RAMAN": swe.SIDM_RAMAN,
+            "KP": swe.SIDM_KRISHNAMURTI,
+            "FAGAN_BRADLEY": swe.SIDM_FAGAN_BRADLEY,
+            "TROPICAL": swe.SIDM_LAHIRI # Fallback for now as Tropical requires deeper flag changes
+        }
+        ayanamsa_mode = ayanamsa_map.get(ayanamsa_str, swe.SIDM_LAHIRI)
+        
+        # Map House System
+        house_map = {
+            "PLACIDUS": "P",
+            "WHOLE_SIGN": "W",
+            "EQUAL": "A",
+            "PORPHYRY": "O",
+            "KOCH": "K",
+            "REGIOMONTANUS": "R",
+            "CAMPANUS": "C"
+        }
+        house_system = house_map.get(house_system_str.upper(), "P") if len(house_system_str) > 1 else house_system_str
+
         result = calculate_chart(
             details.date,
             details.time,
             details.timezone,
             details.latitude,
-            details.longitude
+            details.longitude,
+            ayanamsa_mode=ayanamsa_mode,
+            house_system=house_system
         )
         
         # Calculate Avasthas for 7 main planets
@@ -74,6 +173,9 @@ async def get_birth_chart(details: BirthDetails, current_user: User = Depends(ge
         is_day = 180 < diff_sun_asc < 360 
         
         result["special_points"] = calculate_special_points(asc_lon, sun_lon, moon_lon, rahu_lon, is_day)
+
+        # Note: Jaimini details are now calculated within calculate_chart, so we don't need to re-calculate here.
+        # If specific overrides are needed, do them here.
 
         # Add Enhanced Natal Metadata
         try:
@@ -153,7 +255,8 @@ async def get_birth_chart(details: BirthDetails, current_user: User = Depends(ge
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         logger.error(f"Error calculating birth chart: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        # Return actual error for debugging
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @router.post("/panchang")
 async def get_daily_panchang(details: BirthDetails, current_user: User = Depends(get_current_user)):
@@ -247,6 +350,23 @@ async def get_daily_panchang(details: BirthDetails, current_user: User = Depends
 
     except Exception as e:
         logger.error(f"Error calculating daily panchang: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/solar-return")
+async def get_solar_return(request: SolarReturnRequest, current_user: User = Depends(get_current_user)):
+    """
+    Calculates Solar Return (Varshaphal) Chart. Requires Premium Access.
+    """
+    verify_user_access(current_user, Feature.SOLAR_RETURN)
+    try:
+        # Prepare natal details
+        natal_details = request.birth_details.model_dump()
+        
+        # Calculate Solar Return
+        result = calculate_solar_return(natal_details, request.target_year)
+        return result
+    except Exception as e:
+        logger.error(f"Error calculating solar return: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/dasha")
@@ -583,21 +703,52 @@ async def get_shadbala_energy(request: ShadbalaRequest, current_user: User = Dep
     """
     verify_user_access(current_user, Feature.DIVISIONAL_CHARTS)
     try:
+        # Extract Settings
+        settings = request.birth_details.settings or {}
+        ayanamsa_str = settings.get("ayanamsa", "LAHIRI").upper()
+        house_system_str = settings.get("house_system", "P")
+        
+        # Map Ayanamsa
+        ayanamsa_map = {
+            "LAHIRI": swe.SIDM_LAHIRI,
+            "RAMAN": swe.SIDM_RAMAN,
+            "KP": swe.SIDM_KRISHNAMURTI,
+            "FAGAN_BRADLEY": swe.SIDM_FAGAN_BRADLEY,
+            "TROPICAL": swe.SIDM_LAHIRI # Fallback
+        }
+        ayanamsa_mode = ayanamsa_map.get(ayanamsa_str, swe.SIDM_LAHIRI)
+        
+        # Map House System
+        house_map = {
+            "PLACIDUS": "P",
+            "WHOLE_SIGN": "W",
+            "EQUAL": "A",
+            "PORPHYRY": "O",
+            "KOCH": "K",
+            "REGIOMONTANUS": "R",
+            "CAMPANUS": "C"
+        }
+        house_system = house_map.get(house_system_str.upper(), "P") if len(house_system_str) > 1 else house_system_str
+
         # 1. Calculate Birth Chart (D1)
         d1_result = calculate_chart(
             request.birth_details.date,
             request.birth_details.time,
             request.birth_details.timezone,
             request.birth_details.latitude,
-            request.birth_details.longitude
+            request.birth_details.longitude,
+            ayanamsa_mode=ayanamsa_mode,
+            house_system=house_system
         )
         
         # 2. Extract planets and ascendant
-        planets_d1 = [{"name": p["name"], "longitude": p["longitude"]} for p in d1_result["planets"]]
+        planets_d1 = [{"name": p["name"], "longitude": p["longitude"], "speed": p.get("speed", 0)} for p in d1_result["planets"]]
         ascendant_sign_idx = int(d1_result["ascendant"]["longitude"] / 30)
         
         # 3. Calculate Shadbala
-        shadbala_data = await calculate_shadbala(planets_d1, ascendant_sign_idx, request.birth_details.model_dump())
+        # Ensure birth_details is a dict
+        birth_details_dict = request.birth_details.model_dump()
+        shadbala_data = await calculate_shadbala(planets_d1, ascendant_sign_idx, birth_details_dict)
         
         # 4. Calculate Bhava Bala (House Strength)
         from astro_app.backend.astrology.strength import calculate_bhava_bala
@@ -609,7 +760,105 @@ async def get_shadbala_energy(request: ShadbalaRequest, current_user: User = Dep
         }
     except Exception as e:
         logger.error(f"Error calculating shadbala: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        # Return actual error details for debugging
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+@router.post("/nakshatra")
+async def get_nakshatra_analysis(details: BirthDetails, current_user: User = Depends(get_current_user)):
+    """
+    Calculates detailed Nakshatra Analysis including Deities, Symbols, Attributes, and Tara Bala.
+    """
+    verify_user_access(current_user, Feature.BASIC_CHART)
+    try:
+        from astro_app.backend.astrology.nakshatra_engine import (
+            get_nakshatra_info, get_navatara_chakra, get_detailed_analysis, calculate_tara_bala
+        )
+        from astro_app.backend.astrology.utils import get_nakshatra_details
+        
+        # 1. Calculate Birth Chart (D1) to find Moon
+        d1_result = calculate_chart(
+            details.date,
+            details.time,
+            details.timezone,
+            details.latitude,
+            details.longitude
+        )
+        
+        # 2. Find Moon
+        moon_data = next((p for p in d1_result["planets"] if p["name"] == "Moon"), None)
+        if not moon_data:
+            raise ValueError("Moon position not found in chart")
+            
+        birth_nakshatra = moon_data["nakshatra"]
+        # Need pada - usually chart result has it or we re-calc
+        # If chart result has 'nakshatra_pada' or we use longitude
+        birth_pada = get_nakshatra_details(moon_data["longitude"])["pada"]
+        
+        # 3. Get Detailed Analysis
+        analysis = get_detailed_analysis(birth_nakshatra, birth_pada)
+        
+        # 4. Get Navatara Chakra
+        navatara = get_navatara_chakra(birth_nakshatra)
+        
+        # 5. Calculate Current Transit Tara (Today's Moon)
+        # Calculate current chart for NOW
+        now = datetime.now()
+        current_chart = calculate_chart(
+            now.strftime("%d/%m/%Y"),
+            now.strftime("%H:%M"),
+            details.timezone, # Use user's timezone
+            details.latitude,
+            details.longitude
+        )
+        current_moon = next((p for p in current_chart["planets"] if p["name"] == "Moon"), None)
+        current_tara = {}
+        if current_moon:
+            current_nak = current_moon["nakshatra"]
+            current_tara = calculate_tara_bala(birth_nakshatra, current_nak)
+            current_tara["current_nakshatra"] = current_nak
+            
+        return {
+            "birth_star": birth_nakshatra,
+            "birth_pada": birth_pada,
+            "analysis": analysis,
+            "navatara": navatara,
+            "current_transit": current_tara
+        }
+        
+    except Exception as e:
+        logger.error(f"Error calculating nakshatra analysis: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+@router.post("/yogas")
+async def get_yoga_analysis(details: BirthDetails, current_user: User = Depends(get_current_user)):
+    """
+    Analyzes chart for major Yogas (Raja, Dhana, Gajakesari, Mahapurusha).
+    """
+    verify_user_access(current_user, Feature.BASIC_CHART)
+    try:
+        from astro_app.backend.astrology.yoga_engine import calculate_yogas
+        
+        # 1. Calculate Chart
+        d1_result = calculate_chart(
+            details.date,
+            details.time,
+            details.timezone,
+            details.latitude,
+            details.longitude
+        )
+        
+        # 2. Extract Data
+        planets_list = d1_result["planets"]
+        asc_data = d1_result["ascendant"]
+        
+        # 3. Calculate Yogas
+        yogas = calculate_yogas(planets_list, asc_data)
+        
+        return yogas
+        
+    except Exception as e:
+        logger.error(f"Error calculating yogas: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @router.post("/muhurata")
 async def get_muhurata(request: ShadbalaRequest, current_user: User = Depends(get_current_user)):
@@ -644,20 +893,27 @@ async def get_shadow_planets(request: ShadowPlanetsRequest, current_user: User =
     """
     verify_user_access(current_user, Feature.DIVISIONAL_CHARTS)
     try:
-        jd = get_julian_day(
-            request.birth_details.date,
-            request.birth_details.time,
-            request.birth_details.timezone
+        # We need Sun Longitude. Let's calculate chart.
+        chart = calculate_chart(
+             request.birth_details.date,
+             request.birth_details.time,
+             request.birth_details.timezone,
+             request.birth_details.latitude,
+             request.birth_details.longitude
         )
-        # Use robust parse_timezone
-        tz_offset = parse_timezone(request.birth_details.timezone)
+        sun_lon = next((p["longitude"] for p in chart["planets"] if p["name"] == "Sun"), 0.0)
         
-        shadow_planets = calculate_shadow_planets(
-            jd, 
-            request.birth_details.latitude, 
-            request.birth_details.longitude,
-            tz_offset
+        shadow_planets = calculate_shadow_planets_logic(
+             {
+                "date": request.birth_details.date,
+                "time": request.birth_details.time,
+                "timezone": request.birth_details.timezone,
+                "latitude": request.birth_details.latitude,
+                "longitude": request.birth_details.longitude
+            },
+            sun_lon
         )
+        
         return shadow_planets
     except Exception as e:
         logger.error(f"Error calculating shadow planets: {e}", exc_info=True)
@@ -708,6 +964,40 @@ async def get_transits(request: TransitRequest, current_user: User = Depends(get
     except Exception as e:
         logger.error(f"Error calculating transits: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@router.post("/transits/advanced")
+async def get_advanced_transits(request: AdvancedTransitRequest, current_user: User = Depends(get_current_user)):
+    """
+    Calculates detailed transit analysis (Kakshya, Vedha, Moorthi Nirnaya).
+    """
+    verify_user_access(current_user, Feature.DIVISIONAL_CHARTS)
+    try:
+        from astro_app.backend.astrology.transits import get_advanced_transit_analysis
+        
+        # 1. Calculate Natal Chart
+        natal_chart = calculate_chart(
+            request.birth_details.date,
+            request.birth_details.time,
+            request.birth_details.timezone,
+            request.birth_details.latitude,
+            request.birth_details.longitude
+        )
+        
+        # 2. Get Advanced Analysis
+        result = get_advanced_transit_analysis(
+            natal_chart,
+            request.transit_date,
+            request.transit_time,
+            request.transit_timezone,
+            request.transit_latitude,
+            request.transit_longitude
+        )
+        
+        return result
+    except Exception as e:
+        logger.error(f"Error calculating advanced transits: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 @router.post("/comprehensive-analysis")
 async def get_comprehensive_analysis(request: AnalysisRequest, current_user: User = Depends(get_current_user)):
@@ -793,7 +1083,7 @@ async def find_muhurata_moments(request: MuhurtaSearchRequest, current_user: Use
             request.end_date, 
             request.latitude, 
             request.longitude,
-            quality
+            activity=request.activity
         )
         return {"results": results}
     except Exception as e:

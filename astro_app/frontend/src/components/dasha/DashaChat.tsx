@@ -75,35 +75,35 @@ const DashaChat: React.FC<DashaChatProps> = ({ currentContext }) => {
   };
 
   return (
-    <div className="flex flex-col h-[500px] bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+    <div className="flex flex-col h-[500px] bg-[#11162A] rounded-2xl border border-[#FFFFFF]/08 shadow-xl overflow-hidden">
       {/* Header */}
-      <div className="bg-indigo-600 p-4 flex items-center justify-between">
+      <div className="bg-[#6D5DF6] p-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-indigo-500 rounded-lg">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="p-2 bg-[#6D5DF6]/80 rounded-lg">
+            <Sparkles className="w-5 h-5 text-[#EDEFF5]" />
           </div>
           <div>
-            <h3 className="text-white font-bold text-sm">Vedic AI Assistant</h3>
-            <p className="text-indigo-200 text-xs">Expert in Hora Shastra</p>
+            <h3 className="text-[#EDEFF5] font-bold text-sm">Vedic AI Assistant</h3>
+            <p className="text-[#EDEFF5]/70 text-xs">Expert in Hora Shastra</p>
           </div>
         </div>
-        <button onClick={() => setMessages([])} className="p-2 hover:bg-indigo-500 rounded-full text-indigo-200 transition-colors">
+        <button onClick={() => setMessages([])} className="p-2 hover:bg-[#6D5DF6]/80 rounded-full text-[#EDEFF5]/70 transition-colors">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#0B0F1A]">
         {messages.map((msg) => (
           <div
             key={msg.id}
             className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`flex max-w-[80%] ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} items-start gap-3`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.sender === 'user' ? 'bg-slate-200' : 'bg-indigo-100'}`}>
-                {msg.sender === 'user' ? <User className="w-4 h-4 text-slate-600" /> : <Bot className="w-4 h-4 text-indigo-600" />}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.sender === 'user' ? 'bg-[#FFFFFF]/10' : 'bg-[#6D5DF6]/20'}`}>
+                {msg.sender === 'user' ? <User className="w-4 h-4 text-[#A9B0C2]" /> : <Bot className="w-4 h-4 text-[#6D5DF6]" />}
               </div>
-              <div className={`p-3 rounded-2xl text-sm ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white text-slate-700 border border-slate-200 rounded-tl-none shadow-sm'}`}>
+              <div className={`p-3 rounded-2xl text-sm ${msg.sender === 'user' ? 'bg-[#6D5DF6] text-[#EDEFF5] rounded-tr-none' : 'bg-[#11162A] text-[#EDEFF5] border border-[#FFFFFF]/08 rounded-tl-none shadow-sm'}`}>
                 {msg.text}
               </div>
             </div>
@@ -111,11 +111,11 @@ const DashaChat: React.FC<DashaChatProps> = ({ currentContext }) => {
         ))}
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-none p-3 shadow-sm ml-11">
+            <div className="bg-[#11162A] border border-[#FFFFFF]/08 rounded-2xl rounded-tl-none p-3 shadow-sm ml-11">
               <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-75"></div>
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-150"></div>
+                <div className="w-2 h-2 bg-[#6F768A] rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-[#6F768A] rounded-full animate-bounce delay-75"></div>
+                <div className="w-2 h-2 bg-[#6F768A] rounded-full animate-bounce delay-150"></div>
               </div>
             </div>
           </div>
@@ -124,20 +124,20 @@ const DashaChat: React.FC<DashaChatProps> = ({ currentContext }) => {
       </div>
 
       {/* Input */}
-      <div className="p-4 bg-white border-t border-slate-100">
-        <div className="flex items-center space-x-2 bg-slate-50 rounded-xl border border-slate-200 px-4 py-2 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all">
+      <div className="p-4 bg-[#11162A] border-t border-[#FFFFFF]/08">
+        <div className="flex items-center space-x-2 bg-[#0B0F1A] rounded-xl border border-[#FFFFFF]/08 px-4 py-2 focus-within:ring-2 focus-within:ring-[#6D5DF6] focus-within:border-transparent transition-all">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask about your dasha..."
-            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-700 placeholder:text-slate-400"
+            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-[#EDEFF5] placeholder:text-[#6F768A]"
           />
           <button 
             onClick={handleSend}
             disabled={!input.trim()}
-            className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 rounded-lg text-white transition-colors"
+            className="p-2 bg-[#6D5DF6] hover:bg-[#5B4BC4] disabled:bg-[#FFFFFF]/10 rounded-lg text-[#EDEFF5] transition-colors"
           >
             <Send className="w-4 h-4" />
           </button>
