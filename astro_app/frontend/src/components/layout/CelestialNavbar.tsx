@@ -5,7 +5,7 @@ import {
     Home, Sparkles, Zap, User,
     Bell, LayoutGrid, LogOut, BrainCircuit,
     ShieldCheck, HelpCircle, ChevronRight,
-    Crown, Settings
+    Crown, Settings, Calendar
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useChartSettings } from '../../context/ChartContext';
@@ -22,6 +22,7 @@ interface NavItem {
 
 const ITEMS: NavItem[] = [
     { id: 'home', label: 'Home', icon: Home, path: '/home' },
+    { id: 'today', label: 'Today', icon: Calendar, path: '/daily/guidance' },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/dashboard/main' },
     { id: 'ai', label: 'AI Chat', icon: Sparkles, path: '/ai-astrologer', isCenter: true },
     { id: 'dasha', label: 'Dasha', icon: Zap, path: '/calculations/vimshottari' },

@@ -1,767 +1,297 @@
-from astro_app.backend.astrology.utils import normalize_degree, get_zodiac_sign, get_nakshatra
-from astro_app.backend.astrology.external_api import astrology_api_service
-from typing import Optional, Dict, Any
-import logging
 
-logger = logging.getLogger(__name__)
+from typing import List, Dict, Optional, Union
+import math
+from astro_app.backend.astrology.utils import (
+    normalize_degree, get_zodiac_sign, get_sign_index, 
+    ZODIAC_SIGNS, ZODIAC_LORDS
+)
 
-# --- Varga Deity Constants ---
+# Standard Divisional Charts
+VARGAS = {
+    "D1": 1, "D2": 2, "D3": 3, "D4": 4, "D7": 7, "D9": 9, "D10": 10,
+    "D12": 12, "D16": 16, "D20": 20, "D24": 24, "D27": 27, "D30": 30,
+    "D40": 40, "D45": 45, "D60": 60
+}
 
-D2_DEITIES = ["Deva", "Pitri"]
-D3_DEITIES = ["Narada", "Agastya", "Durvasa"]
-D7_DEITIES_ODD = ["Kshara", "Ksheera", "Dadhi", "Aajya", "Shakhu", "Ikshu", "Jala"] # Tastes
-D7_DEITIES_EVEN = D7_DEITIES_ODD[::-1] # Reverse for even
-D16_DEITIES_MOVABLE = ["Brahma", "Vishnu", "Shiva", "Sun"]
-D16_DEITIES_FIXED = D16_DEITIES_MOVABLE[::-1] # Reverse? No, usually distinct. Let's use Parashara standard.
-# Parashara D16:
-# Odd: Brahma, Vishnu, Shiva, Sun
-# Even: Sun, Shiva, Vishnu, Brahma
-D16_DEITIES_ODD = ["Brahma", "Vishnu", "Shiva", "Sun"]
-D16_DEITIES_EVEN = ["Sun", "Shiva", "Vishnu", "Brahma"]
+# Sign Categories
+MOVABLE = [0, 3, 6, 9] # Aries, Cancer, Libra, Capricorn
+FIXED = [1, 4, 7, 10]  # Taurus, Leo, Scorpio, Aquarius
+DUAL = [2, 5, 8, 11]   # Gemini, Virgo, Sagittarius, Pisces
 
-D20_DEITIES_ODD = [
-    "Kali", "Gauri", "Jaya", "Lakshmi", "Vijaya", "Vimala", "Sati", "Tara", 
-    "Jwalamukhi", "Sveta", "Lalita", "Bagalamukhi", "Pratyangira", "Shachi", 
-    "Roudri", "Bhavani", "Varada", "Jaya", "Tripura", "Sumukhi"
-]
-# Even: Daya, Megha, Chinnashirsha, etc. (Reverse of Odd? Or distinct?)
-# BPHS: "For even signs, the deities are reckoned from the end." -> Reverse of Odd.
-D20_DEITIES_EVEN = D20_DEITIES_ODD[::-1]
+FIRE = [0, 4, 8]
+EARTH = [1, 5, 9]
+AIR = [2, 6, 10]
+WATER = [3, 7, 11]
 
-D24_DEITIES_ODD = [
-    "Skanda", "Parashurama", "Agni", "Yama", "Varuna", "Indra", "Gandarva", "Poosha", 
-    "Karthikeya", "Vayu", "Siva", "Vishnu", "Narasimha", "Vamana", "Trivikrama", 
-    "Hayagriva", "Eka", "Durga", "Vayu", "Yama", "Agni", "Parashurama", "Skanda", "Siva"
-]
-D24_DEITIES_EVEN = D24_DEITIES_ODD[::-1] # Reverse for even signs
+def get_sign_category(sign_idx: int) -> str:
+    if sign_idx in MOVABLE: return "Movable"
+    if sign_idx in FIXED: return "Fixed"
+    return "Dual"
 
-D30_DEITIES_ODD = ["Agni", "Vayu", "Indra", "Kubera", "Varuna"] # 5, 5, 8, 7, 5 degrees
-D30_DEITIES_EVEN = ["Varuna", "Kubera", "Indra", "Vayu", "Agni"] # Reverse
+def get_element(sign_idx: int) -> str:
+    if sign_idx in FIRE: return "Fire"
+    if sign_idx in EARTH: return "Earth"
+    if sign_idx in AIR: return "Air"
+    return "Water"
 
-D60_DEITIES = [
-    "Ghora", "Rakshasa", "Deva", "Kubera", "Yaksha", "Kinnara", "Bhrashta", "Kulaghna", 
-    "Garala", "Vahni", "Maya", "Purishaka", "Apampathi", "Marutwan", "Kaala", "Sarpa", 
-    "Amrita", "Indu", "Mridu", "Komala", "Heramba", "Brahma", "Vishnu", "Maheshwara", 
-    "Deva", "Ardra", "Kalinasa", "Kshitisa", "Kamalakara", "Gulika", "Mrityu", "Kaala", 
-    "Davagni", "Ghora", "Yama", "Kantaka", "Sudha", "Amrita", "Poornachandra", "Vishadagdha", 
-    "Kulanasa", "Vamshakshaya", "Utpata", "Kaala", "Saumya", "Komal", "Sheetala", 
-    "Karaladamstra", "Chandramukhi", "Praveena", "Kaalpavaka", "Dhandayudha", "Nirmala", 
-    "Soumya", "Krura", "Atisheetala", "Amrita", "Payodhi", "Bhramana", "Chandrarekha"
-]
-
-def get_deity(chart: str, part_index: int, sign_index: int, degree: float = 0.0) -> str:
-    """Returns the presiding deity for a given varga part."""
-    is_odd = (sign_index + 1) % 2 != 0
+def calculate_varga_sign(longitude: float, varga_num: int) -> int:
+    """
+    Calculates the 0-based sign index for a given divisional chart (D-N).
+    """
+    norm_lon = normalize_degree(longitude)
+    sign_idx = int(norm_lon / 30)
+    deg_in_sign = norm_lon % 30
     
-    if chart == "D2":
-        # Part 0 (0-15), Part 1 (15-30)
-        # Odd: Sun(Deva), Moon(Pitri) -> 0: Deva, 1: Pitri
-        # Even: Moon(Pitri), Sun(Deva) -> 0: Pitri, 1: Deva
+    # Generic division index (0 to N-1)
+    part_idx = int(deg_in_sign / (30.0 / varga_num))
+    
+    if varga_num == 1:
+        return sign_idx
+        
+    elif varga_num == 2: # Hora
+        # Odd: 0-15 Sun (Leo=4), 15-30 Moon (Cancer=3)
+        # Even: 0-15 Moon (Cancer=3), 15-30 Sun (Leo=4)
+        is_odd = (sign_idx % 2 == 0) # 0=Aries (Odd)
+        is_first_half = (deg_in_sign < 15)
+        
         if is_odd:
-            return D2_DEITIES[part_index]
+            return 4 if is_first_half else 3
         else:
-            return D2_DEITIES[1 - part_index]
+            return 3 if is_first_half else 4
             
-    if chart == "D3":
-        # 0: Narada, 1: Agastya, 2: Durvasa (Cyclic usually? No, fixed per decan)
-        return D3_DEITIES[part_index]
-
-    if chart == "D7":
+    elif varga_num == 3: # Drekkana
+        # 1: Same, 2: 5th, 3: 9th
+        return (sign_idx + part_idx * 4) % 12
+        
+    elif varga_num == 4: # Chaturthamsa
+        # 1: Same, 2: 4th, 3: 7th, 4: 10th
+        offsets = [0, 3, 6, 9]
+        return (sign_idx + offsets[part_idx]) % 12
+        
+    elif varga_num == 7: # Saptamsa
+        # Odd: Same, Even: 7th
+        start_sign = sign_idx if (sign_idx % 2 == 0) else (sign_idx + 6)
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 9: # Navamsa
+        # Fire: Aries(0), Earth: Cap(9), Air: Lib(6), Water: Can(3)
+        element = get_element(sign_idx)
+        start_map = {"Fire": 0, "Earth": 9, "Air": 6, "Water": 3}
+        start_sign = start_map[element]
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 10: # Dasamsa
+        # Odd: Same, Even: 9th
+        start_sign = sign_idx if (sign_idx % 2 == 0) else (sign_idx + 8)
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 12: # Dwadasamsa
+        # From same sign
+        return (sign_idx + part_idx) % 12
+        
+    elif varga_num == 16: # Shodasamsa
+        # Movable: Aries, Fixed: Leo, Dual: Sag
+        cat = get_sign_category(sign_idx)
+        start_map = {"Movable": 0, "Fixed": 4, "Dual": 8}
+        start_sign = start_map[cat]
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 20: # Vimsamsa
+        # Movable: Aries, Fixed: Sag, Dual: Leo
+        cat = get_sign_category(sign_idx)
+        start_map = {"Movable": 0, "Fixed": 8, "Dual": 4}
+        start_sign = start_map[cat]
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 24: # Chaturvimsamsa
+        # Odd: Leo, Even: Cancer
+        start_sign = 4 if (sign_idx % 2 == 0) else 3
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 27: # Saptavimsamsa
+        # Fire: Aries, Earth: Cancer, Air: Libra, Water: Cap
+        element = get_element(sign_idx)
+        start_map = {"Fire": 0, "Earth": 3, "Air": 6, "Water": 9}
+        start_sign = start_map[element]
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 30: # Trimsamsa
+        # Complex degrees
+        # Odd Signs: 0-5 Mars(0), 5-10 Sat(10), 10-18 Jup(8), 18-25 Mer(2), 25-30 Ven(1)
+        # Even Signs: 0-5 Ven(1), 5-12 Mer(2), 12-20 Jup(8), 20-25 Sat(10), 25-30 Mars(0)
+        is_odd = (sign_idx % 2 == 0)
+        d = deg_in_sign
         if is_odd:
-            return D7_DEITIES_ODD[part_index]
+            if d < 5: return 0 # Aries
+            if d < 10: return 10 # Aquarius
+            if d < 18: return 8 # Sagittarius
+            if d < 25: return 2 # Gemini
+            return 6 # Libra (Venus) - Wait, usually Tau/Lib? 
+            # Parasara: Mars(Aries), Sat(Aquarius), Jup(Sag), Merc(Gemini), Venus(Libra)
+            # Standard for Odd: 5, 5, 8, 7, 5 degrees.
+            # Rulers: Mars, Sat, Jup, Merc, Ven. 
+            # Signs: Aries, Aquarius, Sagittarius, Gemini, Libra.
         else:
-            return D7_DEITIES_EVEN[part_index]
+            # Even: Ven(Tau), Mer(Vir), Jup(Pis), Sat(Cap), Mar(Sco)
+            # 0-5 Ven, 5-12 Mer, 12-20 Jup, 20-25 Sat, 25-30 Mars
+            if d < 5: return 1 # Taurus
+            if d < 12: return 5 # Virgo
+            if d < 20: return 11 # Pisces
+            if d < 25: return 9 # Capricorn
+            return 7 # Scorpio
             
-    if chart == "D16":
-        # Part index 0-15
-        idx = part_index % 4
-        if is_odd:
-            return D16_DEITIES_ODD[idx]
-        else:
-            return D16_DEITIES_EVEN[idx]
+    elif varga_num == 40: # Khavedamsa
+        # Odd: Aries, Even: Libra
+        start_sign = 0 if (sign_idx % 2 == 0) else 6
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 45: # Akshavedamsa
+        # Movable: Aries, Fixed: Leo, Dual: Sag
+        cat = get_sign_category(sign_idx)
+        start_map = {"Movable": 0, "Fixed": 4, "Dual": 8}
+        start_sign = start_map[cat]
+        return (start_sign + part_idx) % 12
+        
+    elif varga_num == 60: # Shashtyamsa
+        # From same sign? No.
+        # "Ignore sign, take degree * 2. Ignore integer part..." 
+        # Actually standard D60 is: 
+        # Current Sign + Part Index?
+        # Standard: Count from the sign itself.
+        return (sign_idx + part_idx) % 12
+        
+    return sign_idx # Fallback
 
-    if chart == "D20":
-        if is_odd:
-            return D20_DEITIES_ODD[part_index]
-        else:
-            return D20_DEITIES_EVEN[part_index]
+def get_deity(varga: str, part_idx: int, sign_idx: int) -> str:
+    """Returns the deity for the varga division."""
+    # Placeholder for deities
+    return "Deity"
 
-    if chart == "D24":
-        if is_odd:
-            return D24_DEITIES_ODD[part_index]
-        else:
-            return D24_DEITIES_EVEN[part_index]
+def calculate_d9_navamsa(longitude: float) -> Dict:
+    """
+    Calculates D9 Sign details for a specific longitude.
+    """
+    sign_idx = calculate_varga_sign(longitude, 9)
+    # Calculate longitude within the D9 sign (0-30)
+    # Formula: (Longitude * 9) % 360 -> then within sign? 
+    # Actually just (Longitude * 9) % 30 is the degree within the varga sign.
+    d9_deg = (longitude * 9) % 30
+    
+    return {
+        "sign": ZODIAC_SIGNS[sign_idx],
+        "zodiac_sign": ZODIAC_SIGNS[sign_idx], # Alias for varga_service compatibility
+        "sign_id": sign_idx,
+        "lord": ZODIAC_LORDS[ZODIAC_SIGNS[sign_idx]],
+        "longitude": d9_deg
+    }
+
+def calculate_d16_shodashamsa(longitude: float) -> Dict:
+    """
+    Calculates D16 Sign details for a specific longitude.
+    """
+    sign_idx = calculate_varga_sign(longitude, 16)
+    d16_deg = (longitude * 16) % 30
+    return {
+        "sign": ZODIAC_SIGNS[sign_idx],
+        "zodiac_sign": ZODIAC_SIGNS[sign_idx], # Alias for varga_service compatibility
+        "sign_id": sign_idx,
+        "lord": ZODIAC_LORDS[ZODIAC_SIGNS[sign_idx]],
+        "longitude": d16_deg
+    }
+
+async def calculate_divisional_charts(planets: List[Dict]) -> Dict[str, List[Dict]]:
+    """
+    Calculates all 16 Divisional Charts (Shodashvarga).
+    """
+    results = {}
+    
+    # Pre-calculate Ascendant info if present
+    asc_planet = next((p for p in planets if p["name"] == "Ascendant"), None)
+    
+    for v_name, v_num in VARGAS.items():
+        chart_planets = []
+        
+        # Calculate Ascendant for this Varga first
+        asc_sign_idx = 0
+        if asc_planet:
+            asc_sign_idx = calculate_varga_sign(asc_planet["longitude"], v_num)
+        
+        for p in planets:
+            p_lon = p["longitude"]
+            v_sign_idx = calculate_varga_sign(p_lon, v_num)
             
-    if chart == "D30":
-        # Non-linear parts. 
-        # Odd: 0-5(Mars), 5-10(Sat), 10-18(Jup), 18-25(Merc), 25-30(Ven)
-        # Deities: Agni(Mars), Vayu(Sat), Indra(Jup), Kubera(Merc), Varuna(Ven)
-        # We need to determine index based on degree, not just part count
-        # But calculate_d30 already does logic.
-        # Let's map sign lord to deity?
-        # Aries(Mars)->Agni, Aq(Sat)->Vayu, Sag(Jup)->Indra, Gem(Merc)->Kubera, Lib(Ven)->Varuna
-        
-        # We'll rely on the caller passing the correct derived sign to infer deity
-        pass 
-        
-    if chart == "D60":
-        return D60_DEITIES[part_index % 60]
-        
-    return ""
-
-def calculate_d9_navamsa(longitude: float) -> dict:
-    """
-    Calculates Navamsa (D9) position.
-    Formula: Each sign (30 deg) divided into 9 parts (3 deg 20 min).
-    The mapping depends on the element of the sign (Fire, Earth, Air, Water).
-    
-    Simplified Logic:
-    Navamsa = (Longitude * 9) % 360 ? No, that's continuous zodiac mapping.
-    Standard Parashara:
-    - Fiery signs (1,5,9): Start from Aries
-    - Earthy signs (2,6,10): Start from Capricorn
-    - Airy signs (3,7,11): Start from Libra
-    - Watery signs (4,8,12): Start from Cancer
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30) # 0 for Aries, 1 for Taurus...
-    degree_in_sign = normalized_lon % 30
-    
-    # 9 parts per sign
-    part_index = min(int(degree_in_sign / (30/9)), 8) # 0 to 8
-    
-    # Sign number (1-12)
-    sign_num = sign_index + 1
-    
-    # Determine starting sign index (0-11) for the sequence
-    # Fire (1,5,9) -> Start Aries (0)
-    # Earth (2,6,10) -> Start Capricorn (9)
-    # Air (3,7,11) -> Start Libra (6)
-    # Water (4,8,12) -> Start Cancer (3)
-    
-    remainder = sign_num % 4
-    if remainder == 1: # 1, 5, 9 (Fire)
-        start_sign_idx = 0
-    elif remainder == 2: # 2, 6, 10 (Earth)
-        start_sign_idx = 9
-    elif remainder == 3: # 3, 7, 11 (Air)
-        start_sign_idx = 6
-    else: # 0 -> 4, 8, 12 (Water)
-        start_sign_idx = 3
-        
-    d9_sign_idx = (start_sign_idx + part_index) % 12
-    d9_sign_name = get_zodiac_sign(d9_sign_idx * 30)
-    
-    # Calculate exact longitude in D9 chart? 
-    # Usually Divisional Charts are analyzed by Sign placement. 
-    # But if we want longitude: (Longitude * 9) % 360 is strictly continuous, 
-    # but the Parashara jump mapping means we place it in the new sign.
-    # The degree within the D9 sign:
-    # fraction of part = (degree_in_sign % (30/9)) / (30/9)
-    # d9_deg = fraction_part * 30
-    # absolute_d9_lon = d9_sign_idx * 30 + d9_deg
-    
-    part_span = 30.0 / 9.0
-    fraction = (degree_in_sign % part_span) / part_span
-    d9_deg = fraction * 30.0
-    absolute_d9_lon = (d9_sign_idx * 30) + d9_deg
-    
-    return {
-        "chart": "D9",
-        "longitude": absolute_d9_lon,
-        "zodiac_sign": d9_sign_name,
-        "nakshatra": get_nakshatra(absolute_d9_lon)
-    }
-
-def calculate_d16_shodashamsa(longitude: float) -> dict:
-    """
-    Calculates Shodashamsa (D16) position.
-    Used for vehicles, comforts.
-    
-    Scheme (Parashara):
-    - Movable Signs (1,4,7,10): Start from Aries (1)
-    - Fixed Signs (2,5,8,11): Start from Leo (5)
-    - Dual Signs (3,6,9,12): Start from Sagittarius (9)
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_index = min(int(degree_in_sign / (30/16)), 15) # 0 to 15
-    sign_num = sign_index + 1
-    
-    remainder = sign_num % 3
-    if remainder == 1: # 1, 4, 7, 10 (Movable)
-        start_sign_idx = 0 # Aries
-    elif remainder == 2: # 2, 5, 8, 11 (Fixed)
-        start_sign_idx = 4 # Leo
-    else: # 0 -> 3, 6, 9, 12 (Dual)
-        start_sign_idx = 8 # Sagittarius
-        
-    d16_sign_idx = (start_sign_idx + part_index) % 12
-    d16_sign_name = get_zodiac_sign(d16_sign_idx * 30)
-    
-    part_span = 30.0 / 16.0
-    fraction = (degree_in_sign % part_span) / part_span
-    d16_deg = fraction * 30.0
-    absolute_d16_lon = (d16_sign_idx * 30) + d16_deg
-    
-    return {
-        "chart": "D16",
-        "longitude": absolute_d16_lon,
-        "zodiac_sign": d16_sign_name,
-        "nakshatra": get_nakshatra(absolute_d16_lon),
-        "deity": get_deity("D16", part_index, sign_index)
-    }
-
-def calculate_d2_hora(longitude: float) -> dict:
-    """
-    Calculates Hora (D2) - Wealth/Family.
-    Parashara Method:
-    - Odd Signs: 1st half (0-15) = Sun (Leo), 2nd half (15-30) = Moon (Cancer)
-    - Even Signs: 1st half (0-15) = Moon (Cancer), 2nd half (15-30) = Sun (Leo)
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    is_odd = (sign_index + 1) % 2 != 0
-    
-    if is_odd:
-        if degree_in_sign < 15:
-            d2_sign_idx = 4 # Leo
-        else:
-            d2_sign_idx = 3 # Cancer
-    else:
-        if degree_in_sign < 15:
-            d2_sign_idx = 3 # Cancer
-        else:
-            d2_sign_idx = 4 # Leo
+            # Calculate House relative to Varga Ascendant
+            # House 1 = Asc Sign
+            house = (v_sign_idx - asc_sign_idx) % 12 + 1
             
-    d2_sign_name = get_zodiac_sign(d2_sign_idx * 30)
-    
-    # Calculate longitude
-    # Map 15 deg to 30 deg
-    fraction = (degree_in_sign % 15) / 15.0
-    d2_deg = fraction * 30.0
-    absolute_d2_lon = (d2_sign_idx * 30) + d2_deg
-    
-    # Determine Deity
-    # Odd: 0-15 Deva, 15-30 Pitri
-    # Even: 0-15 Pitri, 15-30 Deva
-    part_idx = 0 if degree_in_sign < 15 else 1
-    deity = get_deity("D2", part_idx, sign_index)
-    
-    return {
-        "chart": "D2",
-        "longitude": absolute_d2_lon,
-        "zodiac_sign": d2_sign_name,
-        "nakshatra": get_nakshatra(absolute_d2_lon),
-        "deity": deity
-    }
-
-def calculate_d3_drekkana(longitude: float) -> dict:
-    """
-    Calculates Drekkana (D3) - Siblings/Courage.
-    - 0-10: Sign itself (1)
-    - 10-20: 5th from sign (5)
-    - 20-30: 9th from sign (9)
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part = min(int(degree_in_sign / 10), 2) # 0, 1, 2
-    
-    if part == 0:
-        shift = 0
-    elif part == 1:
-        shift = 4 # +4 signs = 5th house
-    else:
-        shift = 8 # +8 signs = 9th house
-        
-    d3_sign_idx = (sign_index + shift) % 12
-    d3_sign_name = get_zodiac_sign(d3_sign_idx * 30)
-    
-    fraction = (degree_in_sign % 10) / 10.0
-    d3_deg = fraction * 30.0
-    absolute_d3_lon = (d3_sign_idx * 30) + d3_deg
-    
-    return {
-        "chart": "D3",
-        "longitude": absolute_d3_lon,
-        "zodiac_sign": d3_sign_name,
-        "nakshatra": get_nakshatra(absolute_d3_lon),
-        "deity": get_deity("D3", part, sign_index)
-    }
-
-def calculate_d4_chaturthamsha(longitude: float) -> dict:
-    """
-    Calculates Chaturthamsha (D4) - Property/Fortune.
-    - 0-7.5: Sign itself (1)
-    - 7.5-15: 4th from sign (4)
-    - 15-22.5: 7th from sign (7)
-    - 22.5-30: 10th from sign (10)
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part = min(int(degree_in_sign / 7.5), 3) # 0, 1, 2, 3
-    
-    shift = part * 3 # 0->0, 1->3, 2->6, 3->9
-    
-    d4_sign_idx = (sign_index + shift) % 12
-    d4_sign_name = get_zodiac_sign(d4_sign_idx * 30)
-    
-    fraction = (degree_in_sign % 7.5) / 7.5
-    d4_deg = fraction * 30.0
-    absolute_d4_lon = (d4_sign_idx * 30) + d4_deg
-    
-    return {
-        "chart": "D4",
-        "longitude": absolute_d4_lon,
-        "zodiac_sign": d4_sign_name,
-        "nakshatra": get_nakshatra(absolute_d4_lon)
-    }
-
-def calculate_d7_saptamsha(longitude: float) -> dict:
-    """
-    Calculates Saptamsha (D7) - Children/Progeny.
-    - Odd Signs: Start from Sign itself
-    - Even Signs: Start from 7th from Sign
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_span = 30.0 / 7.0
-    part = min(int(degree_in_sign / part_span), 6) # 0-6
-    
-    is_odd = (sign_index + 1) % 2 != 0
-    
-    if is_odd:
-        start_idx = sign_index
-    else:
-        start_idx = (sign_index + 6) % 12
-        
-    d7_sign_idx = (start_idx + part) % 12
-    d7_sign_name = get_zodiac_sign(d7_sign_idx * 30)
-    
-    fraction = (degree_in_sign % part_span) / part_span
-    d7_deg = fraction * 30.0
-    absolute_d7_lon = (d7_sign_idx * 30) + d7_deg
-    
-    return {
-        "chart": "D7",
-        "longitude": absolute_d7_lon,
-        "zodiac_sign": d7_sign_name,
-        "nakshatra": get_nakshatra(absolute_d7_lon),
-        "deity": get_deity("D7", part, sign_index)
-    }
-
-def calculate_d10_dashamsha(longitude: float) -> dict:
-    """
-    Calculates Dashamsha (D10) - Career/Profession.
-    - Odd Signs: Start from Sign itself
-    - Even Signs: Start from 9th from Sign
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_span = 30.0 / 10.0
-    part = min(int(degree_in_sign / part_span), 9) # 0-9
-    
-    is_odd = (sign_index + 1) % 2 != 0
-    
-    if is_odd:
-        start_idx = sign_index
-    else:
-        start_idx = (sign_index + 8) % 12
-        
-    d10_sign_idx = (start_idx + part) % 12
-    d10_sign_name = get_zodiac_sign(d10_sign_idx * 30)
-    
-    fraction = (degree_in_sign % part_span) / part_span
-    d10_deg = fraction * 30.0
-    absolute_d10_lon = (d10_sign_idx * 30) + d10_deg
-    
-    return {
-        "chart": "D10",
-        "longitude": absolute_d10_lon,
-        "zodiac_sign": d10_sign_name,
-        "nakshatra": get_nakshatra(absolute_d10_lon)
-    }
-
-def calculate_d12_dwadashamsha(longitude: float) -> dict:
-    """
-    Calculates Dwadashamsha (D12) - Parents/Ancestors.
-    - Starts from the Sign itself.
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_span = 30.0 / 12.0
-    part = min(int(degree_in_sign / part_span), 11) # 0-11
-    
-    d12_sign_idx = (sign_index + part) % 12
-    d12_sign_name = get_zodiac_sign(d12_sign_idx * 30)
-    
-    fraction = (degree_in_sign % part_span) / part_span
-    d12_deg = fraction * 30.0
-    absolute_d12_lon = (d12_sign_idx * 30) + d12_deg
-    
-    return {
-        "chart": "D12",
-        "longitude": absolute_d12_lon,
-        "zodiac_sign": d12_sign_name,
-        "nakshatra": get_nakshatra(absolute_d12_lon)
-    }
-
-def calculate_d20_vimshamsha(longitude: float) -> dict:
-    """
-    Calculates Vimshamsha (D20) - Spirituality/Upasana.
-    - Movable: Start Aries
-    - Fixed: Start Sagittarius
-    - Dual: Start Leo
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_span = 30.0 / 20.0
-    part = min(int(degree_in_sign / part_span), 19) # 0-19
-    sign_num = sign_index + 1
-    
-    rem = sign_num % 3
-    if rem == 1: # Movable
-        start_idx = 0 # Aries
-    elif rem == 2: # Fixed
-        start_idx = 8 # Sagittarius
-    else: # Dual
-        start_idx = 4 # Leo
-        
-    d20_sign_idx = (start_idx + part) % 12
-    d20_sign_name = get_zodiac_sign(d20_sign_idx * 30)
-    
-    fraction = (degree_in_sign % part_span) / part_span
-    d20_deg = fraction * 30.0
-    absolute_d20_lon = (d20_sign_idx * 30) + d20_deg
-    
-    return {
-        "chart": "D20",
-        "longitude": absolute_d20_lon,
-        "zodiac_sign": d20_sign_name,
-        "nakshatra": get_nakshatra(absolute_d20_lon)
-    }
-
-def calculate_d24_chaturvimshamsha(longitude: float) -> dict:
-    """
-    Calculates Chaturvimshamsha (D24) - Knowledge/Education.
-    - Odd: Start Leo
-    - Even: Start Cancer
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_span = 30.0 / 24.0
-    part = min(int(degree_in_sign / part_span), 23) # 0-23
-    is_odd = (sign_index + 1) % 2 != 0
-    
-    if is_odd:
-        start_idx = 4 # Leo
-    else:
-        start_idx = 3 # Cancer
-        
-    d24_sign_idx = (start_idx + part) % 12
-    d24_sign_name = get_zodiac_sign(d24_sign_idx * 30)
-    
-    fraction = (degree_in_sign % part_span) / part_span
-    d24_deg = fraction * 30.0
-    absolute_d24_lon = (d24_sign_idx * 30) + d24_deg
-    
-    return {
-        "chart": "D24",
-        "longitude": absolute_d24_lon,
-        "zodiac_sign": d24_sign_name,
-        "nakshatra": get_nakshatra(absolute_d24_lon),
-        "deity": get_deity("D24", part_index, sign_index)
-    }
-
-def calculate_d27_saptavimsamsa(longitude: float) -> dict:
-    """
-    Calculates Saptavimsamsa (D27) - Strengths/Weaknesses/Stamina.
-    - Fiery Signs: Start from Aries
-    - Earthy Signs: Start from Cancer
-    - Airy Signs: Start from Libra
-    - Watery Signs: Start from Capricorn
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_span = 30.0 / 27.0
-    part = min(int(degree_in_sign / part_span), 26) # 0-26
-    sign_num = sign_index + 1
-    
-    rem = sign_num % 4
-    if rem == 1: # 1, 5, 9 (Fire)
-        start_idx = 0 # Aries
-    elif rem == 2: # 2, 6, 10 (Earth)
-        start_idx = 3 # Cancer
-    elif rem == 3: # 3, 7, 11 (Air)
-        start_idx = 6 # Libra
-    else: # 0 -> 4, 8, 12 (Water)
-        start_idx = 9 # Capricorn
-        
-    d27_sign_idx = (start_idx + part) % 12
-    d27_sign_name = get_zodiac_sign(d27_sign_idx * 30)
-    
-    fraction = (degree_in_sign % part_span) / part_span
-    d27_deg = fraction * 30.0
-    absolute_d27_lon = (d27_sign_idx * 30) + d27_deg
-    
-    return {
-        "chart": "D27",
-        "longitude": absolute_d27_lon,
-        "zodiac_sign": d27_sign_name,
-        "nakshatra": get_nakshatra(absolute_d27_lon)
-    }
-
-def calculate_d30_trimshamsha(longitude: float) -> dict:
-    """
-    Calculates Trimshamsha (D30) - Misfortune/Evils.
-    Odd Signs:
-    0-5: Mars (Aries)
-    5-10: Saturn (Aquarius)
-    10-18: Jupiter (Sagittarius)
-    18-25: Mercury (Gemini)
-    25-30: Venus (Libra)
-    
-    Even Signs:
-    0-5: Venus (Taurus)
-    5-12: Mercury (Virgo)
-    12-20: Jupiter (Pisces)
-    20-25: Saturn (Capricorn)
-    25-30: Mars (Scorpio)
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    deg = normalized_lon % 30
-    is_odd = (sign_index + 1) % 2 != 0
-    
-    d30_sign_idx = 0
-    
-    if is_odd:
-        if deg < 5: d30_sign_idx = 0 # Aries
-        elif deg < 10: d30_sign_idx = 10 # Aquarius
-        elif deg < 18: d30_sign_idx = 8 # Sagittarius
-        elif deg < 25: d30_sign_idx = 2 # Gemini
-        else: d30_sign_idx = 6 # Libra
-    else:
-        if deg < 5: d30_sign_idx = 1 # Taurus
-        elif deg < 12: d30_sign_idx = 5 # Virgo
-        elif deg < 20: d30_sign_idx = 11 # Pisces
-        elif deg < 25: d30_sign_idx = 9 # Capricorn
-        else: d30_sign_idx = 7 # Scorpio
-        
-    d30_sign_name = get_zodiac_sign(d30_sign_idx * 30)
-    
-    # Approx longitude (center of sign)
-    absolute_d30_lon = (d30_sign_idx * 30) + 15.0
-    
-    # Determine Deity
-    # Odd: Agni(Mars), Vayu(Sat), Indra(Jup), Kubera(Merc), Varuna(Ven)
-    # Even: Varuna(Ven), Kubera(Merc), Indra(Jup), Vayu(Sat), Agni(Mars)
-    # Mapping based on the *result* sign, because D30 signs are mapped to these planets
-    
-    # Sign to Deity Map (Odd Schema)
-    # Aries/Scorpio (Mars) -> Agni
-    # Aqu/Cap (Saturn) -> Vayu
-    # Sag/Pisces (Jup) -> Indra
-    # Gem/Virgo (Merc) -> Kubera
-    # Lib/Taurus (Ven) -> Varuna
-    
-    deity = ""
-    # Check D30 Sign Lord
-    from astro_app.backend.astrology.utils import get_house_lord
-    lord = get_house_lord(d30_sign_name)
-    
-    if lord == "Mars": deity = "Agni"
-    elif lord == "Saturn": deity = "Vayu"
-    elif lord == "Jupiter": deity = "Indra"
-    elif lord == "Mercury": deity = "Kubera"
-    elif lord == "Venus": deity = "Varuna"
-    
-    return {
-        "chart": "D30",
-        "longitude": absolute_d30_lon,
-        "zodiac_sign": d30_sign_name,
-        "nakshatra": get_nakshatra(absolute_d30_lon),
-        "deity": deity
-    }
-
-def calculate_d40_khavedamsha(longitude: float) -> dict:
-    """
-    Calculates Khavedamsha (D40) - Auspicious/Inauspicious.
-    - Odd: Start Aries
-    - Even: Start Libra
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_span = 30.0 / 40.0
-    part = min(int(degree_in_sign / part_span), 39)
-    is_odd = (sign_index + 1) % 2 != 0
-    
-    if is_odd:
-        start_idx = 0 # Aries
-    else:
-        start_idx = 6 # Libra
-        
-    d40_sign_idx = (start_idx + part) % 12
-    d40_sign_name = get_zodiac_sign(d40_sign_idx * 30)
-    
-    fraction = (degree_in_sign % part_span) / part_span
-    d40_deg = fraction * 30.0
-    absolute_d40_lon = (d40_sign_idx * 30) + d40_deg
-    
-    return {
-        "chart": "D40",
-        "longitude": absolute_d40_lon,
-        "zodiac_sign": d40_sign_name,
-        "nakshatra": get_nakshatra(absolute_d40_lon)
-    }
-
-def calculate_d45_akshavedamsha(longitude: float) -> dict:
-    """
-    Calculates Akshavedamsha (D45) - General strength/integrity.
-    - Movable: Start Aries
-    - Fixed: Start Leo
-    - Dual: Start Sagittarius
-    """
-    normalized_lon = normalize_degree(longitude)
-    sign_index = int(normalized_lon / 30)
-    degree_in_sign = normalized_lon % 30
-    
-    part_span = 30.0 / 45.0
-    part = min(int(degree_in_sign / part_span), 44)
-    sign_num = sign_index + 1
-    
-    rem = sign_num % 3
-    if rem == 1: # Movable
-        start_idx = 0 # Aries
-    elif rem == 2: # Fixed
-        start_idx = 4 # Leo
-    else: # Dual
-        start_idx = 8 # Sagittarius
-        
-    d45_sign_idx = (start_idx + part) % 12
-    d45_sign_name = get_zodiac_sign(d45_sign_idx * 30)
-    
-    fraction = (degree_in_sign % part_span) / part_span
-    d45_deg = fraction * 30.0
-    absolute_d45_lon = (d45_sign_idx * 30) + d45_deg
-    
-    return {
-        "chart": "D45",
-        "longitude": absolute_d45_lon,
-        "zodiac_sign": d45_sign_name,
-        "nakshatra": get_nakshatra(absolute_d45_lon)
-    }
-
-def calculate_d60_shashtiamsha(longitude: float) -> dict:
-    """
-    Calculates Shashtiamsha (D60) - Past Karma/All Details.
-    Standard Parashara Method: "Ignore the sign, multiply degrees by 2, remainder is the sign."
-    Formula: (Absolute Longitude * 2) % 360 -> Sign
-    Or more simply: (Longitude * 2) -> Map to Zodiac.
-    
-    Example: 
-    Sun 10 deg Aries. 10 * 2 = 20. 20th Sign = Scorpio.
-    Sun 10 deg Taurus. (30+10)*2 = 80. 80th Sign = Cancer? 
-    Wait: (30+10)*2 = 80. 80 / 30 = 2.66. 
-    80 deg absolute.
-    80 % 12 signs? No.
-    
-    Correct Method (JHora/Parashara):
-    D60 Sign = (Integer(Longitude * 2)) % 12 + 1 ?
-    Let's check parts.
-    Each part is 0.5 degrees.
-    Total parts = Longitude / 0.5 = Longitude * 2.
-    Part Index (0-based) = int(Longitude * 2).
-    Sign Index = Part Index % 12.
-    """
-    normalized_lon = normalize_degree(longitude)
-    
-    # Each part is 0.5 degrees
-    # We ignore the sign placement logic of "Start from X" and just use the continuous zodiac.
-    # This is equivalent to "Ignore Sign" method.
-    
-    part_index = int(normalized_lon * 2) # 0.5 deg parts
-    d60_sign_idx = part_index % 12
-    
-    d60_sign_name = get_zodiac_sign(d60_sign_idx * 30)
-    
-    # Calculate longitude within the D60 sign
-    # degree * 2 % 30 ? No.
-    # The D60 longitude expands the 0.5 deg arc to 30 deg.
-    # remainder = normalized_lon % 0.5
-    # d60_deg = (remainder / 0.5) * 30.0
-    
-    remainder = normalized_lon % 0.5
-    d60_deg = (remainder / 0.5) * 30.0
-    absolute_d60_lon = (d60_sign_idx * 30) + d60_deg
-    
-    return {
-        "chart": "D60",
-        "longitude": absolute_d60_lon,
-        "zodiac_sign": d60_sign_name,
-        "nakshatra": get_nakshatra(absolute_d60_lon),
-        "deity": get_deity("D60", part_index, 0) # sign_index doesn't matter for D60 deity
-    }
-
-async def calculate_divisional_charts(planets_d1: list, birth_details: Optional[Dict[str, Any]] = None) -> dict:
-    """
-    Calculates Divisional Charts (D1-D60) for a list of planets.
-    Now fully local, but keeps structure for potential API fallback if needed in future.
-    """
-    
-    # Initialize all chart lists
-    charts = {
-        "D2": [], "D3": [], "D4": [], "D7": [], "D9": [], "D10": [],
-        "D12": [], "D16": [], "D20": [], "D24": [], "D27": [], "D30": [], "D40": [],
-        "D45": [], "D60": []
-    }
-    
-    for p in planets_d1:
-        name = p.get("name")
-        lon = p.get("longitude")
-        
-        # Calculate all
-        calcs = {
-            "D2": calculate_d2_hora(lon),
-            "D3": calculate_d3_drekkana(lon),
-            "D4": calculate_d4_chaturthamsha(lon),
-            "D7": calculate_d7_saptamsha(lon),
-            "D9": calculate_d9_navamsa(lon),
-            "D10": calculate_d10_dashamsha(lon),
-            "D12": calculate_d12_dwadashamsha(lon),
-            "D16": calculate_d16_shodashamsa(lon),
-            "D20": calculate_d20_vimshamsha(lon),
-            "D24": calculate_d24_chaturvimshamsha(lon),
-            "D27": calculate_d27_saptavimsamsa(lon),
-            "D30": calculate_d30_trimshamsha(lon),
-            "D40": calculate_d40_khavedamsha(lon),
-            "D45": calculate_d45_akshavedamsha(lon),
-            "D60": calculate_d60_shashtiamsha(lon)
-        }
-        
-        for chart_name, res in calcs.items():
-            res["name"] = name
-            charts[chart_name].append(res)
+            # For longitude in Varga:
+            # Usually we project it into 0-30 degrees of that sign?
+            # Or just keep it as sign placement.
+            # Let's keep it simple: Sign placement.
             
-    return charts
+            chart_planets.append({
+                "name": p["name"],
+                "sign": ZODIAC_SIGNS[v_sign_idx],
+                "house": house,
+                "lord": ZODIAC_LORDS[ZODIAC_SIGNS[v_sign_idx]],
+                # Deities etc can be added
+            })
+            
+        results[v_name] = chart_planets
+        
+    return results
+
+def calculate_rasi_tulya_amsa(d1_planets: List[Dict], dn_planets: List[Dict], dn_name: str = "D9") -> List[Dict]:
+    """
+    Calculates Rasi Tulya Amsha (Planets of D-N placed in D-1 signs)
+    or Amsha Tulya Rashi (Planets of D-1 placed in D-N signs).
+    
+    Standard Request: "Superimpose D9 on D1".
+    This means: Take D9 planet positions (Signs) and plot them in D1 chart (which has D1 Ascendant).
+    The "House" is determined by D1 Ascendant.
+    The "Sign" is determined by D9 position.
+    
+    Args:
+        d1_planets: List of D1 planets (Must include Ascendant).
+        dn_planets: List of D-N planets.
+        dn_name: Name of the divisional chart (e.g. "D9").
+    """
+    # 1. Find D1 Ascendant Sign Index
+    d1_asc = next((p for p in d1_planets if p["name"] == "Ascendant"), None)
+    if not d1_asc:
+        return []
+        
+    # If d1_planets have 'longitude', calculate sign index
+    d1_asc_sign_idx = int(d1_asc["longitude"] / 30)
+    
+    superimposed = []
+    
+    for p in dn_planets:
+        name = p["name"]
+        dn_sign = p.get("sign") # D-N Sign Name
+        if not dn_sign: continue
+        
+        dn_sign_idx = get_sign_index(dn_sign)
+        
+        # Calculate House in D1 (relative to D1 Asc)
+        # House = (Sign Index - Asc Index) + 1
+        house_num = (dn_sign_idx - d1_asc_sign_idx) % 12 + 1
+        
+        superimposed.append({
+            "planet": name,
+            "source_chart": dn_name,
+            "sign": dn_sign,
+            "house_in_d1": house_num,
+            "is_vargottama": False 
+        })
+        
+    # Check Vargottama (if D1 planets provided match names)
+    for sp in superimposed:
+        d1_p = next((p for p in d1_planets if p["name"] == sp["planet"]), None)
+        if d1_p:
+            d1_sign_idx = int(d1_p["longitude"] / 30)
+            dn_sign_idx = get_sign_index(sp["sign"])
+            if d1_sign_idx == dn_sign_idx:
+                sp["is_vargottama"] = True
+                
+    return superimposed

@@ -7,7 +7,7 @@ from astro_app.backend.schemas import (
     ShodashvargaRequest, AshtakvargaRequest, ShadbalaRequest, ShadowPlanetsRequest,
     TransitRequest, AdvancedTransitRequest, AnalysisRequest, LifeTimelineRequest, PredictionRequest, LifePredictorRequest,
     StrengthRequest, KPRequest, MatchRequest, MuhurataRequest, HoraryRequest, RectificationRequest,
-    SolarReturnRequest
+    SolarReturnRequest, IngressRequest, MuhurtaSearchRequest
 )
 from astro_app.backend.auth.router import get_current_user
 from astro_app.backend.models import User
@@ -257,6 +257,119 @@ async def get_birth_chart(details: BirthDetails, current_user: User = Depends(ge
         logger.error(f"Error calculating birth chart: {e}", exc_info=True)
         # Return actual error for debugging
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+# --- NEW ENDPOINTS ---
+
+@router.post("/dasha/mudda")
+async def get_mudda_dasha(request: SolarReturnRequest, current_user: User = Depends(get_current_user)):
+    """
+    Calculates Mudda Dasha for Annual Chart (Varshphal).
+    """
+    verify_user_access(current_user, Feature.SOLAR_RETURN)
+    try:
+        from astro_app.backend.astrology.annual_dasha import calculate_mudda_dasha
+        from astro_app.backend.astrology.solar_return import calculate_solar_return
+        
+        # 1. Calculate Solar Return Chart to get Moon Longitude
+        natal_details = request.birth_details.model_dump()
+        sr_chart = calculate_solar_return(natal_details, request.target_year)
+        
+        # Find Moon
+        moon_lon = 0.0
+        for p in sr_chart["planets"]:
+            if p["name"] == "Moon":
+                moon_lon = p["longitude"]
+                break
+                
+        # 2. Calculate Dasha
+        # Start date is the Solar Return Date
+        sr_date_str = sr_chart["solar_return_date"] # "YYYY-MM-DD HH:MM"
+        # We need just YYYY-MM-DD
+        start_date = sr_date_str.split(" ")[0]
+        
+        dasha_list = calculate_mudda_dasha(moon_lon, start_date)
+        
+        return {
+            "year": request.target_year,
+            "mudda_dasha": dasha_list
+        }
+    except Exception as e:
+        logger.error(f"Error calculating Mudda Dasha: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/tools/nakshatra-pravesha")
+async def get_nakshatra_pravesha(request: IngressRequest, current_user: User = Depends(get_current_user)):
+    """
+    Calculates Nakshatra Entry (Pravesha) for a planet.
+    """
+    verify_user_access(current_user, Feature.BASIC_CHART)
+    try:
+        from astro_app.backend.astrology.nakshatra_engine import calculate_nakshatra_pravesha
+        from astro_app.backend.astrology.utils import get_julian_day
+        
+        # Calculate current JD
+        # current_date is YYYY-MM-DD? IngressRequest usually has it.
+        # Let's assume request.current_date is "YYYY-MM-DD"
+        # Time default to 00:00
+        jd = get_julian_day(
+            datetime.strptime(request.current_date, "%Y-%m-%d").strftime("%d/%m/%Y"),
+            "00:00",
+            request.timezone
+        )
+        
+        entries = calculate_nakshatra_pravesha(request.planet, jd, request.window_days)
+        return {"entries": entries}
+    except Exception as e:
+        logger.error(f"Error calculating Nakshatra Pravesha: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/tools/super-impose")
+async def get_super_impose_chart(request: DivisionalRequest, current_user: User = Depends(get_current_user)):
+    """
+    Calculates Super Impose Chart (Rasi Tulya Amsha).
+    Usually D9 on D1.
+    """
+    verify_user_access(current_user, Feature.DIVISIONAL_CHARTS)
+    try:
+        from astro_app.backend.astrology.divisional import calculate_divisional_charts, calculate_rasi_tulya_amsa
+        
+        # 1. Calculate D1
+        d1_result = calculate_chart(
+            request.birth_details.date,
+            request.birth_details.time,
+            request.birth_details.timezone,
+            request.birth_details.latitude,
+            request.birth_details.longitude
+        )
+        
+        d1_planets = [{"name": p["name"], "longitude": p["longitude"], "zodiac_sign": p["sign"]} for p in d1_result["planets"]]
+        # Add Asc
+        d1_planets.append({
+            "name": "Ascendant", 
+            "longitude": d1_result["ascendant"]["longitude"],
+            "zodiac_sign": d1_result["ascendant"]["sign"] # chart result has 'sign'
+        })
+        
+        # 2. Calculate D-N (e.g. D9)
+        # We need to use get_all_shodashvargas or specific calc
+        # Let's use the service function to get D9
+        planets_input = [{"name": p["name"], "longitude": p["longitude"]} for p in d1_result["planets"]]
+        # Ascendant needs to be in input for varga calc usually?
+        planets_input.append({"name": "Ascendant", "longitude": d1_result["ascendant"]["longitude"]})
+        
+        vargas = await calculate_divisional_charts(planets_input)
+        d9_data = vargas.get("D9", [])
+        
+        # 3. Super Impose
+        superimposed = calculate_rasi_tulya_amsa(d1_planets, d9_data, "D9")
+        
+        return {
+            "d1_ascendant": d1_result["ascendant"],
+            "superimposed_planets": superimposed
+        }
+    except Exception as e:
+        logger.error(f"Error calculating Super Impose: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/panchang")
 async def get_daily_panchang(details: BirthDetails, current_user: User = Depends(get_current_user)):
@@ -771,7 +884,8 @@ async def get_nakshatra_analysis(details: BirthDetails, current_user: User = Dep
     verify_user_access(current_user, Feature.BASIC_CHART)
     try:
         from astro_app.backend.astrology.nakshatra_engine import (
-            get_nakshatra_info, get_navatara_chakra, get_detailed_analysis, calculate_tara_bala
+            get_nakshatra_info, get_navatara_chakra, get_detailed_analysis, 
+            calculate_tara_bala, calculate_unequal_nakshatra, calculate_latta
         )
         from astro_app.backend.astrology.utils import get_nakshatra_details
         
@@ -792,7 +906,7 @@ async def get_nakshatra_analysis(details: BirthDetails, current_user: User = Dep
         birth_nakshatra = moon_data["nakshatra"]
         # Need pada - usually chart result has it or we re-calc
         # If chart result has 'nakshatra_pada' or we use longitude
-        birth_pada = get_nakshatra_details(moon_data["longitude"])["pada"]
+        birth_pada = get_nakshatra_pada(moon_data["longitude"])
         
         # 3. Get Detailed Analysis
         analysis = get_detailed_analysis(birth_nakshatra, birth_pada)
@@ -817,12 +931,30 @@ async def get_nakshatra_analysis(details: BirthDetails, current_user: User = Dep
             current_tara = calculate_tara_bala(birth_nakshatra, current_nak)
             current_tara["current_nakshatra"] = current_nak
             
+        # 6. Unequal Nakshatra (Abhijit)
+        unequal_info = calculate_unequal_nakshatra(moon_data["longitude"])
+        
+        # 7. Latta (Kick) - Use current transit planets vs birth star?
+        # Usually Latta is checked for specific time (Transit).
+        # Here we return the Latta of CURRENT transit planets on the Birth Star?
+        # Or Latta of Natal Planets?
+        # Usually used in Muhurta/Transit.
+        # Let's return Latta of Current Transit Planets hitting the Birth Star or any natal point.
+        # But `calculate_latta` returns kicks FROM planets TO stars.
+        # So we pass current transit planets.
+        
+        transit_kicks = calculate_latta(current_chart["planets"])
+        # Filter kicks that hit the user's birth star (Janma Nakshatra)
+        my_kicks = [k for k in transit_kicks if k["kicked_nakshatra"] == birth_nakshatra]
+            
         return {
             "birth_star": birth_nakshatra,
             "birth_pada": birth_pada,
             "analysis": analysis,
             "navatara": navatara,
-            "current_transit": current_tara
+            "current_transit": current_tara,
+            "unequal_nakshatra": unequal_info,
+            "latta_kicks": my_kicks
         }
         
     except Exception as e:
@@ -1063,8 +1195,7 @@ async def get_sade_sati(details: BirthDetails, current_user: User = Depends(get_
         logger.error(f"Error calculating Sade Sati: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
-# Import new schemas
-from astro_app.backend.schemas import MuhurtaSearchRequest, IngressRequest
+
 
 @router.post("/muhurata/find")
 async def find_muhurata_moments(request: MuhurtaSearchRequest, current_user: User = Depends(get_current_user)):

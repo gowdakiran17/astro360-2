@@ -44,6 +44,17 @@ interface NakshatraData {
         meaning: string;
         quality: string;
     };
+    unequal_nakshatra?: {
+        name: string;
+        is_unequal: boolean;
+        lord?: string;
+    };
+    latta_kicks?: Array<{
+        kicker: string;
+        direction: string;
+        offset: number;
+        kicked_nakshatra: string;
+    }>;
 }
 
 const NakshatraExplorer = () => {
@@ -178,6 +189,58 @@ const NakshatraExplorer = () => {
                                     <AttributeCard label="Direction" value={data.analysis.basic.direction} icon={<Compass />} />
                                     <AttributeCard label="Lucky Letters" value={data.analysis.basic.lucky_letters} icon={<Info />} />
                                     <AttributeCard label="Purushartha" value={data.analysis.pada_analysis.focus} icon={<Star />} />
+                                </div>
+
+                                {/* Special Analysis: Latta & Abhijit */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Abhijit Status */}
+                                    {data.unequal_nakshatra && (
+                                        <div className="bg-[#11162A]/60 backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-2xl p-6">
+                                            <h3 className="text-[#EDEFF5] font-bold text-lg mb-4 flex items-center gap-2">
+                                                <Compass className="w-5 h-5 text-[#6D5DF6]" />
+                                                28-Star System
+                                            </h3>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[#A9B0C2] text-sm">Star Name</span>
+                                                <span className="text-[#EDEFF5] font-bold">{data.unequal_nakshatra.name}</span>
+                                            </div>
+                                            {data.unequal_nakshatra.is_unequal && (
+                                                <div className="mt-4 p-3 bg-[#6D5DF6]/10 border border-[#6D5DF6]/20 rounded-lg">
+                                                    <p className="text-[#6D5DF6] text-xs font-bold uppercase mb-1">Special Note</p>
+                                                    <p className="text-[#EDEFF5] text-sm">
+                                                        You are born under {data.unequal_nakshatra.name}, a special intercalary star considered highly auspicious for victory.
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Latta Kicks */}
+                                    <div className="bg-[#11162A]/60 backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-2xl p-6">
+                                        <h3 className="text-[#EDEFF5] font-bold text-lg mb-4 flex items-center gap-2">
+                                            <Zap className="w-5 h-5 text-[#E25555]" />
+                                            Latta (Kick) Aspects
+                                        </h3>
+                                        {data.latta_kicks && data.latta_kicks.length > 0 ? (
+                                            <div className="space-y-3">
+                                                <p className="text-xs text-[#E25555] font-bold uppercase tracking-wider mb-2">
+                                                    Current Planetary Kicks
+                                                </p>
+                                                {data.latta_kicks.map((kick, i) => (
+                                                    <div key={i} className="flex justify-between items-center p-2 bg-[#E25555]/5 rounded border border-[#E25555]/10">
+                                                        <span className="text-[#EDEFF5] text-sm font-medium">{kick.kicker}</span>
+                                                        <span className="text-[#A9B0C2] text-xs">{kick.direction} Kick</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-4 text-center">
+                                                <Shield className="w-8 h-8 text-[#2ED573] mb-2 opacity-50" />
+                                                <p className="text-[#2ED573] font-medium text-sm">No Negative Kicks</p>
+                                                <p className="text-[#A9B0C2] text-xs mt-1">Your birth star is currently free from Latta aspects.</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* 3. Navatara Chakra (Compatibility) */}

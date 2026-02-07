@@ -227,13 +227,13 @@ const NORMAL_MODULES = [
         description: "Ask about career, marriage, money, health."
     },
     { 
-        to: "/dashboard/main", 
+        to: "/daily/guidance", 
         title: "Today's Guidance", 
         icon: Sun, 
         span: "col-span-2 lg:col-span-2", 
         variant: "primary",
         layout: "horizontal",
-        description: "Daily planetary influence summary."
+        description: "Your daily ritual: Tarot, Vibe & Transits."
     },
     { 
         to: "/dashboard/main?tab=visual", // Assuming tab param works or just links to dashboard

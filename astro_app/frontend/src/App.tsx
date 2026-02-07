@@ -62,6 +62,14 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const MatchMaking = lazy(() => import('./pages/MatchMaking'));
 const PeriodAnalysisPage = lazy(() => import('./pages/PeriodAnalysisPage'));
 const PersonalVastu = lazy(() => import('./pages/PersonalVastu')); // New Feature
+const EclipseHub = lazy(() => import('./pages/EclipseHub'));
+const ReportCenter = lazy(() => import('./pages/ReportCenter'));
+const LifeEvents = lazy(() => import('./pages/LifeEvents'));
+const MudraPlanets = lazy(() => import('./pages/MudraPlanets'));
+const NaraChakra = lazy(() => import('./pages/NaraChakra'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const TodaysGuidance = lazy(() => import('./pages/TodaysGuidance'));
 
 // KP Astrology Pages
 const KPDashboard = lazy(() => import('./pages/kp/KPDashboard'));
@@ -119,6 +127,12 @@ function App() {
                 <Route path="/home" element={
                   <ProtectedRoute>
                     <Hub />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/daily/guidance" element={
+                  <ProtectedRoute>
+                    <TodaysGuidance />
                   </ProtectedRoute>
                 } />
 
@@ -235,7 +249,12 @@ function App() {
                   </ProtectedRoute>
                 } />
 
-                {/* Tools Routes */}
+                <Route path="/cosmic/eclipses" element={
+                  <ProtectedRoute>
+                    <EclipseHub />
+                  </ProtectedRoute>
+                } />
+
                 <Route path="/tools">
                   <Route path="vastu" element={<ProtectedRoute><VastuCompass /></ProtectedRoute>} />
                   <Route path="gems" element={<ProtectedRoute><Gemstones /></ProtectedRoute>} />
@@ -257,10 +276,13 @@ function App() {
                       <LifePredictorPage />
                     </MainLayout>
                   } />
+                  <Route path="mudra" element={<ProtectedRoute><MudraPlanets /></ProtectedRoute>} />
+                  <Route path="nara-chakra" element={<ProtectedRoute><NaraChakra /></ProtectedRoute>} />
                 </Route>
 
                 {/* Reports */}
                 <Route path="/reports/premium" element={<ProtectedRoute><ReportDashboard /></ProtectedRoute>} />
+                <Route path="/reports/center" element={<ProtectedRoute><ReportCenter /></ProtectedRoute>} />
 
                 {/* Advanced Calculations Routes */}
                 <Route path="/calculations/shodashvarga" element={<ProtectedRoute><Shodashvarga /></ProtectedRoute>} />
@@ -293,6 +315,9 @@ function App() {
                 <Route path="/zodiac/profile" element={<ZodiacProfile />} />
                 <Route path="/horoscope/daily" element={<DailyHoroscope />} />
                 <Route path="/account/profile" element={<UserProfile />} />
+                <Route path="/account/events" element={<ProtectedRoute><LifeEvents /></ProtectedRoute>} />
+                <Route path="/pricing" element={<ProtectedRoute><PricingPage /></ProtectedRoute>} />
+                <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
 
                 {/* KP Astrology Routes */}
                 <Route path="/kp/dashboard" element={

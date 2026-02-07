@@ -89,3 +89,19 @@ class ChatMessage(Base):
     
     # Relationship to user
     owner = relationship("User", backref="messages")
+
+
+class GuidanceOutputHistory(Base):
+    __tablename__ = "guidance_output_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    date_key = Column(String, index=True)  # YYYY-MM-DD
+    life_area = Column(String, index=True)
+    signature = Column(String)
+    confidence_score = Column(Float, default=0.0)
+    activated = Column(Boolean, default=False)
+    kp_confirmed = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", backref="guidance_history")

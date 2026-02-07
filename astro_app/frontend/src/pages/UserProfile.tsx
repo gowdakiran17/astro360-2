@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import { 
   User, Settings, CreditCard, Bell, 
@@ -35,9 +36,9 @@ const UserProfile = () => {
                   <a href="#" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl font-medium text-sm transition-colors">
                     <Settings className="w-4 h-4" /> Preferences
                   </a>
-                  <a href="#" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl font-medium text-sm transition-colors">
+                  <Link to="/pricing" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl font-medium text-sm transition-colors">
                     <CreditCard className="w-4 h-4" /> Subscription
-                  </a>
+                  </Link>
                   <a href="#" className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl font-medium text-sm transition-colors">
                     <Bell className="w-4 h-4" /> Notifications
                   </a>

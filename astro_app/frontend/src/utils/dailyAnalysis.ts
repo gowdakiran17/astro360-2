@@ -40,6 +40,12 @@ export interface DailyReport {
     number: number;
     direction: string;
   };
+  vibe: {
+    score: number; // 1-100
+    theme: 'Cosmic Chaos' | 'Flow State' | 'High Energy' | 'Deep Reflection' | 'Cautious Optimism';
+    colorCode: string; // Tailwind class or hex
+    summary: string;
+  };
 }
 
 // Helper to get house number from Ascendant
@@ -68,7 +74,13 @@ export const generateDailyReport = (
       personalPrediction: "Analyzing planetary alignments...",
       planetaryInfluences: [],
       recommendations: [],
-      luckyFactors: { color: "White", number: 1, direction: "East" }
+      luckyFactors: { color: "White", number: 1, direction: "East" },
+      vibe: {
+        score: 50,
+        theme: 'Cautious Optimism',
+        colorCode: 'bg-slate-500',
+        summary: 'Analyzing cosmic data...'
+      }
     };
   }
 
@@ -184,6 +196,43 @@ export const generateDailyReport = (
       'Wednesday': 'Green', 'Thursday': 'Yellow', 'Friday': 'Pink', 'Saturday': 'Blue'
   };
   
+  // 6. Vibe Analysis
+  let vibeScore = 70;
+  let vibeTheme: DailyReport['vibe']['theme'] = 'Flow State';
+  let vibeColor = 'bg-indigo-500';
+  let vibeSummary = "The cosmic energy is balanced.";
+
+  if (natalMoon && transitMoon) {
+    const moonHouse = getHouse(transitMoon.zodiac_sign, natalMoon.zodiac_sign);
+    
+    if (moonHouse === 8) {
+        vibeScore = 40;
+        vibeTheme = 'Cosmic Chaos';
+        vibeColor = 'bg-rose-500';
+        vibeSummary = "Energies are turbulent. Lie low.";
+    } else if (moonHouse === 12) {
+        vibeScore = 60;
+        vibeTheme = 'Deep Reflection';
+        vibeColor = 'bg-violet-500';
+        vibeSummary = "Introspective energy dominates.";
+    } else if ([1, 5, 9].includes(moonHouse)) {
+        vibeScore = 90;
+        vibeTheme = 'Flow State';
+        vibeColor = 'bg-emerald-500';
+        vibeSummary = "Everything flows effortlessly today.";
+    } else if ([3, 6, 11].includes(moonHouse)) {
+        vibeScore = 95;
+        vibeTheme = 'High Energy';
+        vibeColor = 'bg-amber-500';
+        vibeSummary = "Go-getter energy! Crush your goals.";
+    } else {
+        vibeScore = 75;
+        vibeTheme = 'Cautious Optimism';
+        vibeColor = 'bg-blue-500';
+        vibeSummary = "Steady progress is favored.";
+    }
+  }
+
   return {
     personalPrediction: prediction,
     planetaryInfluences: influences,
@@ -192,6 +241,12 @@ export const generateDailyReport = (
         color: colors[dayOfWeek] || 'White',
         number: Math.floor(Math.random() * 9) + 1, // Simplified
         direction: 'East'
+    },
+    vibe: {
+        score: vibeScore,
+        theme: vibeTheme,
+        colorCode: vibeColor,
+        summary: vibeSummary
     }
   };
 };

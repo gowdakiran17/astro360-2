@@ -3,10 +3,10 @@ import { Home, LayoutDashboard, Sparkles, Calendar } from 'lucide-react';
 
 const BottomTabBar = () => {
   const navItems = [
-    { to: '/hub', icon: Home, label: 'Home' },
+    { to: '/home', icon: Home, label: 'Home' },
     { to: '/dashboard/main', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/ai-astrologer', icon: Sparkles, label: 'Veda AI' },
-    { to: '/horoscope/daily', icon: Calendar, label: 'Daily' },
+    { to: '/daily/guidance', icon: Calendar, label: 'Today' },
   ];
 
   return (

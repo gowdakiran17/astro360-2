@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from jose import JWTError, jwt
 import logging
+from typing import Optional
 
 from astro_app.backend.database import get_db
 from astro_app.backend.models import User
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
 
 # Pydantic Models
 class Token(BaseModel):
@@ -59,6 +61,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optional), db: Session = Depends(get_db)):
+    if not token:
+        return None
+    return await get_current_user(token=token, db=db)
 
 @router.post("/register", response_model=UserResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):

@@ -10,6 +10,10 @@ import os
 from astro_app.backend.geo.service import search_location
 from astro_app.backend.astrology.chart import calculate_chart
 from datetime import datetime
+from sqlalchemy.orm import Session
+from astro_app.backend.database import get_db
+from astro_app.backend.auth.router import get_current_user_optional
+from astro_app.backend.models import User, GuidanceOutputHistory
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +28,11 @@ except Exception as e:
     logger.warning(f"Failed to initialize GeminiService: {e}")
     gemini_service = None
 
-kimi_service = KimiService() # Initialize KimiService unconditionally for fallback capability
+try:
+    kimi_service = KimiService()
+except Exception as e:
+    logger.warning(f"Failed to initialize KimiService: {e}")
+    kimi_service = None
 mock_ai_service = MockAIService()
 
 class AIChatRequest(BaseModel):
@@ -710,32 +718,66 @@ async def get_comprehensive_chart_reading(request: ComprehensiveReadingRequest):
 class DailyHoroscopeRequest(BaseModel):
     chart_data: Dict[str, Any]
     dasha_data: Optional[Dict[str, Any]] = None
-    current_date: Optional[str] = None  # ISO format datetime
-
+    current_date: Optional[str] = None # ISO Format preferred
+    period: str = "daily" # "daily" or "weekly"
 
 @router.post("/daily-horoscopes")
-async def get_daily_horoscopes(request: DailyHoroscopeRequest):
+async def get_daily_horoscopes(request: DailyHoroscopeRequest, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_current_user_optional)):
     """
     Generate personalized daily horoscopes for 5 life areas.
     Combines Dasha, Transits, Nakshatra, and AI synthesis.
+    Supports 'daily' or 'weekly' period.
     """
     try:
         from astro_app.backend.services.daily_horoscope_engine import DailyHoroscopeEngine
         from astro_app.backend.astrology.chart import calculate_chart
+        from astro_app.backend.astrology.shadbala import calculate_shadbala
+        from astro_app.backend.astrology.kp.kp_core import calculate_house_cusps_kp, calculate_kp_planet_details
+        from astro_app.backend.astrology.kp.kp_significators import calculate_significators
+        recent_signatures_by_area: Dict[str, List[str]] = {}
+        if current_user:
+            recent_rows = (
+                db.query(GuidanceOutputHistory)
+                .filter(GuidanceOutputHistory.user_id == current_user.id)
+                .order_by(GuidanceOutputHistory.created_at.desc())
+                .limit(50)
+                .all()
+            )
+            for r in recent_rows:
+                if r.life_area not in recent_signatures_by_area:
+                    recent_signatures_by_area[r.life_area] = []
+                if len(recent_signatures_by_area[r.life_area]) < 3:
+                    recent_signatures_by_area[r.life_area].append(r.signature)
         
         # Parse current date or use now
         if request.current_date:
-            # Handle 'Z' timezone indicator (replace with '+00:00')
             date_str = request.current_date.replace('Z', '+00:00')
-            current_time = datetime.fromisoformat(date_str)
+            try:
+                current_time = datetime.fromisoformat(date_str)
+            except ValueError:
+                # Try parsing standard formats if ISO fails
+                try:
+                    current_time = datetime.strptime(request.current_date, "%Y-%m-%d")
+                except:
+                    current_time = datetime.now()
         else:
             current_time = datetime.now()
         
         # Get birth chart data
-        date_str = request.chart_data.get("date", "")
-        time_str = request.chart_data.get("time", "")
+        raw_date_str = str(request.chart_data.get("date", "")).strip()
+        raw_time_str = str(request.chart_data.get("time", "")).strip()
         timezone_str = request.chart_data.get("timezone", "+05:30")
         location = request.chart_data.get("location", "")
+        date_str = raw_date_str
+        time_str = raw_time_str
+        try:
+            if "/" in raw_date_str:
+                parsed = datetime.strptime(raw_date_str, "%d/%m/%Y")
+            else:
+                parsed = datetime.strptime(raw_date_str[:10], "%Y-%m-%d")
+            date_str = parsed.strftime("%d/%m/%Y")
+        except Exception:
+            pass
         
         # Get coordinates
         latitude = request.chart_data.get("latitude")
@@ -761,6 +803,34 @@ async def get_daily_horoscopes(request: DailyHoroscopeRequest):
         
         # Add name to chart
         birth_chart["name"] = request.chart_data.get("name", "User")
+
+        planets_d1 = [
+            {"name": p.get("name"), "longitude": p.get("longitude"), "speed": p.get("speed", 0.0)}
+            for p in (birth_chart.get("planets") or [])
+            if p.get("name") and p.get("longitude") is not None
+        ]
+        ascendant_sign_idx = int((float(birth_chart.get("ascendant", {}).get("longitude") or 0.0)) / 30)
+        birth_details_dict = {
+            "date": date_str,
+            "time": time_str,
+            "timezone": timezone_str,
+            "latitude": float(latitude),
+            "longitude": float(longitude),
+        }
+        shadbala = await calculate_shadbala(planets_d1, ascendant_sign_idx, birth_details_dict)
+        natal_strengths = {p.get("name"): p.get("percentage") for p in (shadbala.get("planets") or [])}
+
+        asc_lon = float(birth_chart.get("ascendant", {}).get("longitude") or 0.0)
+        nirayana_cusps = birth_chart.get("house_cusps") or []
+        kp_house_cusps = calculate_house_cusps_kp(asc_lon, nirayana_cusps)
+        kp_planets = []
+        for p in birth_chart.get("planets", []):
+            name = p.get("name")
+            lon = p.get("longitude")
+            if name in {"Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"} and lon is not None:
+                kp_planets.append(calculate_kp_planet_details(name, float(lon)))
+        kp_significators = calculate_significators(kp_planets, kp_house_cusps, asc_lon)
+        kp_context = {"house_cusps": kp_house_cusps, "significators": kp_significators}
         
         # Get Dasha data
         dasha_data = request.dasha_data
@@ -775,6 +845,8 @@ async def get_daily_horoscopes(request: DailyHoroscopeRequest):
                     float(latitude), float(longitude),
                     moon_longitude=moon_data.get("longitude")
                 )
+        if not dasha_data:
+            dasha_data = {}
         
         # Calculate real-time transits for the current moment
         current_date_str = current_time.strftime("%d/%m/%Y")
@@ -808,8 +880,36 @@ async def get_daily_horoscopes(request: DailyHoroscopeRequest):
             current_moon_longitude=current_moon_longitude,
             current_time=current_time,
             latitude=float(latitude),
-            longitude=float(longitude)
+            longitude=float(longitude),
+            period=request.period,
+            natal_strengths=natal_strengths,
+            kp_context=kp_context,
+            recent_signatures_by_area=recent_signatures_by_area
         )
+
+        if current_user:
+            date_key = current_time.strftime("%Y-%m-%d")
+            for card in result.horoscopes:
+                signature = (card.evidence or {}).get("signature")
+                if not signature:
+                    continue
+                db.query(GuidanceOutputHistory).filter(
+                    GuidanceOutputHistory.user_id == current_user.id,
+                    GuidanceOutputHistory.date_key == date_key,
+                    GuidanceOutputHistory.life_area == card.life_area
+                ).delete()
+                db.add(
+                    GuidanceOutputHistory(
+                        user_id=current_user.id,
+                        date_key=date_key,
+                        life_area=card.life_area,
+                        signature=signature,
+                        confidence_score=(card.confidence.score if card.confidence else 0.0),
+                        activated=(card.activation.activated if card.activation else False),
+                        kp_confirmed=(card.kp_confirmation.confirmed if card.kp_confirmation else False)
+                    )
+                )
+            db.commit()
         
         return {"status": "success", "data": result.dict()}
         

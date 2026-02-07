@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Variability Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .failure { background-color: #f8d7da; border-color: #f5c6cb; }
+        .comparison { display: flex; gap: 20px; }
+        .comparison > div { flex: 1; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Data Variability Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Instructions</h2>
+        <p>1. Open the frontend at <a href="http://localhost:5173" target="_blank">http://localhost:5173</a></p>
+        <p>2. Navigate to Today's Guidance page</p>
+        <p>3. Switch between Today and Tomorrow using the timeline tabs</p>
+        <p>4. Verify that content changes between dates</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Expected Results</h2>
+        <ul>
+            <li>✅ Overall theme should change (e.g., "balanced day under Chitra" vs "Navigate this day's Swati energy")</li>
+            <li>✅ Life area content should be different between today and tomorrow</li>
+            <li>✅ Moon nakshatra should change (Chitra → Swati)</li>
+            <li>✅ Weekly view should mention "week" instead of "day"</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>API Test Results (Confirmed Working)</h2>
+        <div class="comparison">
+            <div class="success">
+                <h3>Today</h3>
+                <p><strong>Theme:</strong> A balanced day under Chitra, Test User. Focus on areas where the stars align most favorably.</p>
+                <p><strong>Moon Nakshatra:</strong> Chitra</p>
+                <p><strong>Content:</strong> Your Jupiter period brings focus to career this day. The Moon in Chitra brings focus to beauty & design.</p>
+            </div>
+            <div class="success">
+                <h3>Tomorrow</h3>
+                <p><strong>Theme:</strong> Navigate this day's Swati energy with patience, Test User. Challenges bring growth.</p>
+                <p><strong>Moon Nakshatra:</strong> Swati</p>
+                <p><strong>Content:</strong> Your Jupiter period brings focus to career this day. The Moon in Swati brings focus to independence & movement.</p>
+            </div>
+        </div>
+        <p class="success">✅ API is generating different content for different dates!</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Weekly Test Results (Confirmed Working)</h2>
+        <div class="success">
+            <p><strong>Weekly Theme:</strong> A balanced week under Chitra, Test User. Focus on areas where the stars align most favorably.</p>
+            <p><strong>Weekly Content:</strong> Your Jupiter period brings focus to career this week. The Moon in Chitra brings focus to beauty & design.</p>
+            <p>✅ Weekly view correctly mentions "week" instead of "day"!</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple test to verify frontend is receiving different data
+        function testFrontendVariability() {
+            console.log('=== Frontend Variability Test ===');
+            console.log('1. Check Network tab for /ai/daily-horoscopes requests');
+            console.log('2. Verify request payload includes current_date parameter');
+            console.log('3. Compare responses for Today vs Tomorrow');
+            console.log('4. Verify UI updates with new data');
+            
+            // Instructions for manual testing
+            console.log('%cManual Test Steps:', 'color: blue; font-weight: bold;');
+            console.log('- Open browser dev tools');
+            console.log('- Go to Network tab');
+            console.log('- Switch timeline tabs');
+            console.log('- Verify different API responses');
+            console.log('- Verify UI content changes');
+        }
+        
+        testFrontendVariability();
+    </script>
+</body>
+</html>

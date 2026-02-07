@@ -1,6 +1,33 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime
+
+class ConfidenceGate(BaseModel):
+    score: float  # 0-100
+    band: str  # "CLEAR" | "SUGGESTIVE" | "OBSERVATIONAL"
+    notes: List[str] = []
+
+
+class ActivationTrace(BaseModel):
+    activated: bool
+    reasons: List[str] = []
+    triggers: Dict[str, Any] = {}
+
+
+class KPConfirmation(BaseModel):
+    confirmed: bool
+    potential: str  # "YES" | "NO"
+    reason: str
+    favorable_houses: List[int] = []
+
+
+class LogicTrace(BaseModel):
+    natal: Dict[str, Any] = {}
+    functional_planets: Dict[str, Any] = {}
+    dasha: Dict[str, Any] = {}
+    transits: Dict[str, Any] = {}
+    repetition: Dict[str, Any] = {}
+
 
 class DashaContext(BaseModel):
     """Current Dasha period context for a life area"""
@@ -57,6 +84,10 @@ class HoroscopeCard(BaseModel):
     optimal_action: OptimalAction
     
     ai_confidence: float  # 0-100
+    activation: Optional[ActivationTrace] = None
+    kp_confirmation: Optional[KPConfirmation] = None
+    confidence: Optional[ConfidenceGate] = None
+    evidence: Dict[str, Any] = {}
 
 class DailyHoroscopeResponse(BaseModel):
     """Complete daily horoscope response with all 5 life areas"""
@@ -75,3 +106,8 @@ class DailyHoroscopeResponse(BaseModel):
     moon_sign: str
     generated_at: datetime
     ai_provider: str  # "Gemini" or "Kimi"
+    neutral_day: bool = False
+    neutral_reason: Optional[str] = None
+    confidence: Optional[ConfidenceGate] = None
+    logic_trace: Optional[LogicTrace] = None
+    evidence_map: Dict[str, Any] = {}
