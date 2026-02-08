@@ -24,11 +24,18 @@ class GeminiService:
         """
         try:
             full_prompt = f"{system_prompt}\n\nCONTEXT:\n{context_data}\n\nUSER QUESTION: {user_query}"
+            logger.info(f"Sending prompt to Gemini (Length: {len(full_prompt)})")
             
             response = self.model.generate_content(full_prompt)
+            logger.info(f"Gemini Raw Response: {response}")
+            
+            if not response.text:
+                logger.error("Gemini returned empty text (Potential safety block)")
+                return "Analysis blocked by safety filters. Please rephrase."
+                
             return response.text
         except Exception as e:
-            logger.error(f"Gemini API Error: {str(e)}")
+            logger.error(f"Gemini API Error details: {str(e)}")
             return "I apologize, but I am having trouble connecting to the stars right now. Please try again later."
 
     @staticmethod

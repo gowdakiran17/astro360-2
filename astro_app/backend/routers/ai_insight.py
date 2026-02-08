@@ -851,8 +851,8 @@ async def get_daily_horoscopes(request: DailyHoroscopeRequest, db: Session = Dep
         # Calculate real-time transits for the current moment
         current_date_str = current_time.strftime("%d/%m/%Y")
         current_time_str = current_time.strftime("%H:%M")
-        # Use a default or system timezone for transits if not specific
-        transit_tz = "+00:00" # UTC for universal transits
+        # Use user's timezone for accurate transit calculations
+        transit_tz = timezone_str
         
         real_transits_chart = calculate_chart(
             current_date_str,
@@ -871,6 +871,21 @@ async def get_daily_horoscopes(request: DailyHoroscopeRequest, db: Session = Dep
         
         # Initialize horoscope engine
         engine = DailyHoroscopeEngine(ai_provider=AI_PROVIDER)
+        
+        # Check if weekly aggregation is requested
+        if request.period == "weekly":
+            # Generate weekly horoscope aggregation
+            result = engine.generate_weekly_horoscopes(
+                birth_chart=birth_chart,
+                dasha_data=dasha_data,
+                base_date=current_time,
+                latitude=float(latitude),
+                longitude=float(longitude),
+                timezone_str=timezone_str,
+                natal_strengths=natal_strengths,
+                kp_context=kp_context
+            )
+            return {"status": "success", "data": result.dict(), "is_weekly": True}
         
         # Generate daily horoscopes
         result = engine.generate_daily_horoscopes(

@@ -84,7 +84,7 @@ const KPThreeLayerScript = lazy(() => import('./pages/kp/KPThreeLayerScript'));
 const KPAccurateTiming = lazy(() => import('./pages/kp/KPAccurateTiming'));
 const NakshatraNadiDashboard = lazy(() => import('./pages/kp/NakshatraNadiDashboard'));
 
-const VedaAI = lazy(() => import('./pages/VedaAI'));
+const AIChat = lazy(() => import('./pages/AIChat'));
 
 // Loading Fallback
 const PageLoader = () => (
@@ -149,21 +149,27 @@ function App() {
                 } />
 
                 <Route path="/ai-astrologer" element={
-                  <MainLayout title="VedaAI Chat" breadcrumbs={['Dashboard', 'VedaAI']} showHeader={true} disableContentPadding={true}>
-                    <VedaAI />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <AIChat />
+                  </ProtectedRoute>
                 } />
 
                 <Route path="/ai-guru" element={
                   <MainLayout title="AI Guru Teacher" breadcrumbs={['Dashboard', 'Learning Gateway']} showHeader={true} disableContentPadding={true}>
-                    <VedaAI />
+                    <AIChat />
                   </MainLayout>
                 } />
 
                 <Route path="/ai-horary" element={
                   <MainLayout title="Horary Prasna" breadcrumbs={['Dashboard', 'Event Prediction']} showHeader={true} disableContentPadding={true}>
-                    <VedaAI />
+                    <AIChat />
                   </MainLayout>
+                } />
+
+                <Route path="/vedic-consultation" element={
+                  <ProtectedRoute>
+                    <AIChat />
+                  </ProtectedRoute>
                 } />
 
                 <Route path="/my-charts" element={

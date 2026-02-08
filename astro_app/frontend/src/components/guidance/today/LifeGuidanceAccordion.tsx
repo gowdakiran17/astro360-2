@@ -7,7 +7,8 @@ import {
   Heart,
   MessageCircle,
   Sparkles,
-  Timer
+  Timer,
+  TrendingUp
 } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -19,33 +20,50 @@ export interface LifeGuidanceAccordionProps {
   onOpenAreaChange?: (area: GuidanceArea | undefined) => void;
 }
 
-const colorForStatus = (status: GuidanceStatus) => {
-  switch (status) {
-    case 'favorable':
-      return { rail: 'bg-emerald-400', text: 'text-emerald-200', glow: 'shadow-[0_0_24px_rgba(52,211,153,0.15)]' };
-    case 'excellent':
-        return { rail: 'bg-green-400', text: 'text-green-200', glow: 'shadow-[0_0_24px_rgba(52,211,153,0.15)]' };
-    case 'caution':
-      return { rail: 'bg-rose-400', text: 'text-rose-200', glow: 'shadow-[0_0_24px_rgba(251,113,133,0.12)]' };
-    case 'sensitive':
-        return { rail: 'bg-purple-400', text: 'text-purple-200', glow: 'shadow-[0_0_24px_rgba(168,85,247,0.15)]' };
-    default:
-      return { rail: 'bg-amber-300', text: 'text-amber-200', glow: 'shadow-[0_0_24px_rgba(252,211,77,0.10)]' };
+const colorForStatus = (_status: GuidanceStatus, score: number) => {
+  if (score >= 80) {
+    return {
+      rail: 'bg-gradient-to-b from-emerald-400 to-emerald-500',
+      text: 'text-emerald-400',
+      glow: 'shadow-[0_0_30px_rgba(52,211,153,0.25)]',
+      bg: 'bg-gradient-to-r from-emerald-500/15 to-teal-500/10',
+      border: 'border-emerald-500/25'
+    };
   }
+  if (score >= 60) {
+    return {
+      rail: 'bg-gradient-to-b from-amber-400 to-orange-500',
+      text: 'text-amber-400',
+      glow: 'shadow-[0_0_30px_rgba(251,191,36,0.20)]',
+      bg: 'bg-gradient-to-r from-amber-500/15 to-yellow-500/10',
+      border: 'border-amber-500/25'
+    };
+  }
+  if (score >= 40) {
+    return {
+      rail: 'bg-gradient-to-b from-blue-400 to-indigo-500',
+      text: 'text-blue-400',
+      glow: 'shadow-[0_0_30px_rgba(96,165,250,0.20)]',
+      bg: 'bg-gradient-to-r from-blue-500/15 to-indigo-500/10',
+      border: 'border-blue-500/25'
+    };
+  }
+  return {
+    rail: 'bg-gradient-to-b from-rose-400 to-pink-500',
+    text: 'text-rose-400',
+    glow: 'shadow-[0_0_30px_rgba(251,113,133,0.20)]',
+    bg: 'bg-gradient-to-r from-rose-500/15 to-pink-500/10',
+    border: 'border-rose-500/25'
+  };
 };
 
 const iconForArea = (area: GuidanceArea) => {
   switch (area) {
-    case 'CAREER_WORK':
-      return Briefcase;
-    case 'WEALTH_MONEY':
-      return Coins;
-    case 'RELATIONSHIPS':
-      return Heart;
-    case 'HEALTH_ENERGY':
-      return Activity;
-    case 'DECISIONS_COMMUNICATION':
-      return MessageCircle;
+    case 'CAREER_WORK': return Briefcase;
+    case 'WEALTH_MONEY': return Coins;
+    case 'RELATIONSHIPS': return Heart;
+    case 'HEALTH_ENERGY': return Activity;
+    case 'DECISIONS_COMMUNICATION': return MessageCircle;
   }
 };
 
@@ -59,146 +77,192 @@ const LifeGuidanceAccordion = ({ rows, openArea, onOpenAreaChange }: LifeGuidanc
   }, [rows]);
 
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/5 overflow-hidden">
-      <div className="px-6 pt-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">Today’s Life Guidance</div>
-            <div className="mt-1 text-lg font-black tracking-tight text-white">What to focus on, gently</div>
-          </div>
-          <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/30">
-            <Sparkles className="w-3.5 h-3.5 text-[#F5A623]" />
-            Tap to expand
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative rounded-[2rem] overflow-hidden"
+    >
+      {/* Background with gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-800/50 to-slate-900/80" />
+      <div className="absolute inset-0 backdrop-blur-sm" />
+      <div className="absolute inset-0 rounded-[2rem] border border-white/10" />
+
+      {/* Decorative orbs */}
+      <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/10 rounded-full blur-[60px]" />
+      <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-[50px]" />
+
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="px-6 pt-6 pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">Life Guidance</div>
+                <div className="text-lg font-black tracking-tight text-white">Today's Focus Areas</div>
+              </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 text-[10px] font-bold uppercase tracking-wide text-white/30">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              Tap to expand
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-4">
-        {ordered.map((row) => {
-          const isOpen = openArea === row.area;
-          const Icon: any = iconForArea(row.area);
-          const c = colorForStatus(row.status);
+        {/* Accordion Items */}
+        <div className="pb-2">
+          {ordered.map((row, i) => {
+            const isOpen = openArea === row.area;
+            const Icon: any = iconForArea(row.area);
+            const c = colorForStatus(row.status, row.score);
 
-          return (
-            <div key={row.area} className="border-t border-white/10">
-              <button
-                onClick={() => onOpenAreaChange?.(isOpen ? undefined : row.area)}
-                className="w-full px-6 py-5 text-left flex items-start gap-4 hover:bg-white/[0.03] transition-colors"
+            return (
+              <motion.div
+                key={row.area}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="mx-3 mb-2"
               >
-                <div className={`w-1.5 rounded-full ${c.rail} ${c.glow}`} style={{ height: 44 }} />
+                <button
+                  onClick={() => onOpenAreaChange?.(isOpen ? undefined : row.area)}
+                  className={`w-full rounded-2xl ${c.bg} ${c.border} border px-4 py-4 text-left transition-all hover:scale-[1.01] active:scale-[0.99]`}
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Score Rail */}
+                    <div className={`w-1.5 h-12 rounded-full ${c.rail} ${c.glow}`} />
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-10 h-10 rounded-xl border border-white/10 bg-black/20 flex items-center justify-center ${c.text}`}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-extrabold text-white/90">{row.label}</span>
-                          <span className={`text-[10px] font-black uppercase tracking-[0.16em] ${c.text}`}>{row.status}</span>
-                        </div>
-                        <div className="mt-1 text-xs font-semibold text-white/55 truncate">{row.oneLineFocus}</div>
-                      </div>
+                    {/* Icon */}
+                    <div className={`w-11 h-11 rounded-xl bg-black/30 flex items-center justify-center ${c.text} shadow-lg`}>
+                      <Icon className="w-5 h-5" />
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="text-right">
-                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">Score</div>
-                        <div className="text-base font-black text-white">{row.score}</div>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-bold text-white">{row.label}</span>
+                        <span className={`text-[10px] font-black uppercase tracking-wide ${c.text}`}>{row.status}</span>
                       </div>
-                      <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
-                        <ChevronDown className="w-5 h-5 text-white/35" />
+                      <div className="text-xs font-medium text-white/50 truncate">{row.oneLineFocus}</div>
+                    </div>
+
+                    {/* Score & Chevron */}
+                    <div className="flex items-center gap-3">
+                      <div className="text-center">
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.2 + i * 0.05, type: 'spring' }}
+                          className={`text-2xl font-black ${c.text}`}
+                        >
+                          {row.score}
+                        </motion.span>
+                      </div>
+                      <motion.div
+                        animate={{ rotate: isOpen ? 180 : 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"
+                      >
+                        <ChevronDown className="w-4 h-4 text-white/40" />
                       </motion.div>
                     </div>
                   </div>
-                </div>
-              </button>
+                </button>
 
-              <AnimatePresence initial={false}>
-                {isOpen ? (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-6 pb-6 pt-1 space-y-4">
-                      <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Overall tone</div>
-                        <div className="mt-1 text-sm font-bold text-white/85">{row.expanded.tone}</div>
-                      </div>
+                {/* Expanded Content */}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pt-3 pb-2 px-2 space-y-3">
+                        {/* Tone */}
+                        <div className="rounded-xl bg-black/20 border border-white/5 p-4">
+                          <div className="text-[10px] font-black uppercase tracking-wide text-white/40 mb-1">Overall Tone</div>
+                          <div className="text-sm font-semibold text-white/85">{row.expanded.tone}</div>
+                        </div>
 
-                      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 space-y-2">
-                        {row.expanded.guidanceLines.slice(0, 3).map((l: string, idx: number) => (
-                          <div key={`${idx}-${l}`} className="text-sm text-white/70 leading-relaxed">
-                            {l}
+                        {/* Guidance Lines */}
+                        <div className="rounded-xl bg-white/5 border border-white/5 p-4 space-y-2">
+                          {row.expanded.guidanceLines.slice(0, 3).map((l: string, idx: number) => (
+                            <p key={`${idx}-${l}`} className="text-sm text-white/70 leading-relaxed">{l}</p>
+                          ))}
+                        </div>
+
+                        {/* Best Window */}
+                        {row.expanded.bestWindow && (
+                          <div className="rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm font-bold text-indigo-300">
+                              <Timer className="w-4 h-4" />
+                              Best Time
+                            </div>
+                            <div className="text-base font-black text-white">
+                              {row.expanded.bestWindow.startTime}
+                              {row.expanded.bestWindow.endTime ? ` – ${row.expanded.bestWindow.endTime}` : ''}
+                            </div>
                           </div>
-                        ))}
-                      </div>
+                        )}
 
-                      {row.expanded.bestWindow ? (
-                        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-xs font-bold text-white/60">
-                            <Timer className="w-4 h-4 text-[#6D5DF6]" />
-                            Best time window
+                        {/* Good/Avoid Grid */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3">
+                            <div className="text-[10px] font-black uppercase tracking-wide text-emerald-300 mb-2">✓ Good For</div>
+                            <ul className="space-y-1">
+                              {row.expanded.goodFor.slice(0, 2).map((g: string, idx: number) => (
+                                <li key={`${idx}-${g}`} className="text-xs text-emerald-100/80 flex items-start gap-2">
+                                  <span className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                                  {g}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                          <div className="text-sm font-black text-white">
-                            {row.expanded.bestWindow.startTime}
-                            {row.expanded.bestWindow.endTime ? ` – ${row.expanded.bestWindow.endTime}` : ''}
+                          <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3">
+                            <div className="text-[10px] font-black uppercase tracking-wide text-rose-300 mb-2">✗ Avoid</div>
+                            <ul className="space-y-1">
+                              {row.expanded.avoid.slice(0, 2).map((a: string, idx: number) => (
+                                <li key={`${idx}-${a}`} className="text-xs text-rose-100/80 flex items-start gap-2">
+                                  <span className="w-1 h-1 rounded-full bg-rose-400 mt-1.5 shrink-0" />
+                                  {a}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         </div>
-                      ) : null}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/5 px-4 py-3">
-                          <div className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-200/70">Good for today</div>
-                          <ul className="mt-2 space-y-2 text-sm text-emerald-100/80">
-                            {row.expanded.goodFor.slice(0, 2).map((g: string, idx: number) => (
-                              <li key={`${idx}-${g}`} className="flex items-start gap-2">
-                                <span className="mt-[6px] w-1.5 h-1.5 rounded-full bg-emerald-300 shrink-0" />
-                                <span>{g}</span>
-                              </li>
-                            ))}
-                          </ul>
+                        {/* Focus Advice */}
+                        <div className="rounded-xl bg-white/5 border border-white/5 p-4">
+                          <div className="text-[10px] font-black uppercase tracking-wide text-white/40 mb-1">Focus Advice</div>
+                          <div className="text-sm font-medium text-white/80">{row.expanded.focusAdvice}</div>
                         </div>
-                        <div className="rounded-2xl border border-rose-400/15 bg-rose-400/5 px-4 py-3">
-                          <div className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-200/70">Avoid today</div>
-                          <ul className="mt-2 space-y-2 text-sm text-rose-100/80">
-                            {row.expanded.avoid.slice(0, 2).map((a: string, idx: number) => (
-                              <li key={`${idx}-${a}`} className="flex items-start gap-2">
-                                <span className="mt-[6px] w-1.5 h-1.5 rounded-full bg-rose-300 shrink-0" />
-                                <span>{a}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
 
-                      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Focus advice</div>
-                        <div className="mt-1 text-sm font-semibold text-white/80">{row.expanded.focusAdvice}</div>
+                        {/* AI Button */}
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => navigate(`/ai-astrologer?topic=${row.expanded.askAiTopic}&mode=today`)}
+                          className="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-purple-500/20"
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <Sparkles className="w-4 h-4" />
+                            Ask AI for Details
+                          </span>
+                        </motion.button>
                       </div>
-
-                      <button
-                        onClick={() => navigate(`/ai-astrologer?topic=${row.expanded.askAiTopic}&mode=today`)}
-                        className="w-full h-12 rounded-2xl border border-[#6D5DF6]/25 bg-[#6D5DF6]/15 hover:bg-[#6D5DF6]/20 text-white font-black uppercase tracking-[0.14em] text-xs transition-all"
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <Sparkles className="w-4 h-4" />
-                          Ask AI about this today
-                        </span>
-                      </button>
-                    </div>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            </div>
-          );
-        })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

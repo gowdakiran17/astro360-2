@@ -111,3 +111,42 @@ class DailyHoroscopeResponse(BaseModel):
     confidence: Optional[ConfidenceGate] = None
     logic_trace: Optional[LogicTrace] = None
     evidence_map: Dict[str, Any] = {}
+
+
+class WeeklyDaySummary(BaseModel):
+    """Summary for one day in the week view"""
+    date: str  # "2026-02-07"
+    weekday: str  # "Saturday"
+    overall_score: float  # 0-100 average favorability
+    best_area: str  # Life area with highest score
+    worst_area: str  # Life area with lowest score
+    theme: str  # Brief theme for the day
+    area_scores: Dict[str, float]  # {"CAREER": 75, "WEALTH": 60, ...}
+
+
+class WeeklyHoroscopeResponse(BaseModel):
+    """Weekly horoscope aggregation"""
+    week_start: str  # "2026-02-07"
+    week_end: str  # "2026-02-13"
+    
+    # Aggregated scores per life area (averaged over 7 days)
+    area_averages: Dict[str, float]  # {"CAREER": 72.5, "WEALTH": 68.3, ...}
+    overall_week_score: float  # 0-100
+    
+    # Best/worst days
+    best_day: str  # "Tuesday"
+    best_day_date: str  # "2026-02-11"
+    worst_day: str  # "Friday"
+    worst_day_date: str  # "2026-02-14"
+    
+    # Day-by-day breakdown
+    daily_summaries: List[WeeklyDaySummary]
+    
+    # Weekly theme
+    weekly_theme: str  # AI-generated overall weekly theme
+    weekly_focus: str  # Primary focus for the week
+    
+    # Metadata
+    birth_name: str
+    generated_at: datetime
+

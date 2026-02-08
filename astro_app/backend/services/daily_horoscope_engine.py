@@ -1043,3 +1043,128 @@ Synthesize these into 3-4 sentences."""
         effect_msg = f" Expect {transit.effect.lower()}."
         
         return base + nakshatra_msg + effect_msg
+
+    def generate_weekly_horoscopes(
+        self,
+        birth_chart: Dict,
+        dasha_data: Dict,
+        base_date: datetime,
+        latitude: float,
+        longitude: float,
+        timezone_str: str,
+        natal_strengths: Optional[Dict[str, float]] = None,
+        kp_context: Optional[Dict[str, Any]] = None
+    ):
+        """Generate weekly horoscope aggregation for 7 days from base_date"""
+        from astro_app.backend.astrology.chart import calculate_chart
+        from astro_app.backend.horoscope_models import WeeklyDaySummary, WeeklyHoroscopeResponse
+        from datetime import timedelta
+        
+        user_name = birth_chart.get("name", "User")
+        daily_summaries = []
+        area_totals: Dict[str, float] = {area: 0.0 for area in LIFE_AREAS.keys()}
+        day_overall_scores = []
+        
+        # Generate predictions for each of the 7 days
+        for day_offset in range(7):
+            current_date = base_date + timedelta(days=day_offset)
+            
+            # Calculate transits for this day
+            current_date_str = current_date.strftime("%d/%m/%Y")
+            current_time_str = "12:00"  # Noon for daily average
+            
+            try:
+                transit_chart = calculate_chart(
+                    current_date_str,
+                    current_time_str,
+                    timezone_str,
+                    float(latitude),
+                    float(longitude)
+                )
+                
+                current_transits = {}
+                for planet in transit_chart.get("planets", []):
+                    current_transits[planet["name"]] = planet["longitude"]
+                
+                current_moon_longitude = current_transits.get("Moon", 0.0)
+                
+                # Generate daily horoscopes for this day
+                daily_result = self.generate_daily_horoscopes(
+                    birth_chart=birth_chart,
+                    dasha_data=dasha_data,
+                    current_transits=current_transits,
+                    current_moon_longitude=current_moon_longitude,
+                    current_time=current_date,
+                    latitude=latitude,
+                    longitude=longitude,
+                    period="daily",
+                    natal_strengths=natal_strengths,
+                    kp_context=kp_context
+                )
+                
+                # Calculate daily scores
+                area_scores = {}
+                for card in daily_result.horoscopes:
+                    area_scores[card.life_area] = card.favorability
+                    area_totals[card.life_area] += card.favorability
+                
+                overall_score = sum(area_scores.values()) / len(area_scores) if area_scores else 50.0
+                day_overall_scores.append((current_date, overall_score))
+                
+                # Find best/worst areas for this day
+                best_area = max(area_scores, key=area_scores.get) if area_scores else "CAREER"
+                worst_area = min(area_scores, key=area_scores.get) if area_scores else "CAREER"
+                
+                daily_summaries.append(WeeklyDaySummary(
+                    date=current_date.strftime("%Y-%m-%d"),
+                    weekday=current_date.strftime("%A"),
+                    overall_score=round(overall_score, 1),
+                    best_area=best_area,
+                    worst_area=worst_area,
+                    theme=daily_result.overall_theme[:100] if daily_result.overall_theme else "Steady energy",
+                    area_scores=area_scores
+                ))
+                
+            except Exception as e:
+                logger.error(f"Error calculating day {day_offset}: {e}")
+                # Add fallback day
+                daily_summaries.append(WeeklyDaySummary(
+                    date=current_date.strftime("%Y-%m-%d"),
+                    weekday=current_date.strftime("%A"),
+                    overall_score=50.0,
+                    best_area="CAREER",
+                    worst_area="WEALTH",
+                    theme="Steady progress",
+                    area_scores={area: 50.0 for area in LIFE_AREAS.keys()}
+                ))
+                day_overall_scores.append((current_date, 50.0))
+        
+        # Calculate weekly averages
+        area_averages = {area: round(total / 7, 1) for area, total in area_totals.items()}
+        overall_week_score = round(sum(area_averages.values()) / len(area_averages), 1)
+        
+        # Find best and worst days
+        sorted_days = sorted(day_overall_scores, key=lambda x: x[1], reverse=True)
+        best_day_date, best_day_score = sorted_days[0]
+        worst_day_date, worst_day_score = sorted_days[-1]
+        
+        # Generate weekly theme
+        top_area = max(area_averages, key=area_averages.get)
+        weekly_theme = f"This week emphasizes {top_area.lower().replace('_', ' ')} with an average energy of {overall_week_score:.0f}%. Your strongest day is {best_day_date.strftime('%A')}."
+        
+        return WeeklyHoroscopeResponse(
+            week_start=base_date.strftime("%Y-%m-%d"),
+            week_end=(base_date + timedelta(days=6)).strftime("%Y-%m-%d"),
+            area_averages=area_averages,
+            overall_week_score=overall_week_score,
+            best_day=best_day_date.strftime("%A"),
+            best_day_date=best_day_date.strftime("%Y-%m-%d"),
+            worst_day=worst_day_date.strftime("%A"),
+            worst_day_date=worst_day_date.strftime("%Y-%m-%d"),
+            daily_summaries=daily_summaries,
+            weekly_theme=weekly_theme,
+            weekly_focus=top_area,
+            birth_name=user_name,
+            generated_at=datetime.now()
+        )
+

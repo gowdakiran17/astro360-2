@@ -86,8 +86,12 @@ for route in app.routes:
     if hasattr(route, "path"):
         logger.info(f"Route: {route.path} [{','.join(route.methods)}]")
 
-from astro_app.backend.routers.chat_history import router as chat_history_router
-app.include_router(chat_history_router, prefix="/api", tags=["chat_history"])
+from astro_app.backend.routers import ai_chat_v2
+app.include_router(ai_chat_v2.router, prefix="/api")
+
+
+
+
 
 # Compatibility alias to match original main.py if needed, 
 # main.py had @app.post("/chart/compatibility") AND @app.post("/match/ashtakoot")
